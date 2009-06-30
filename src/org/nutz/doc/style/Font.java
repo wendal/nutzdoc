@@ -19,6 +19,11 @@ public class Font {
 	private int style;
 	private TYPE type;
 
+	public Font addStyle(int style) {
+		this.style |= style;
+		return this;
+	}
+
 	public Font setStyle(int style) {
 		this.style = style;
 		return this;

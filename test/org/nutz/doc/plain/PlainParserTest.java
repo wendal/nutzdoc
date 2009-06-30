@@ -32,21 +32,20 @@ public class PlainParserTest {
 
 	@Test
 	public void test_inline_styles() {
-		String s = "A{-_*^,E}C";
+		String s = "A{~_*^,E}C";
 		Line root = root(s);
 		Line line = root.child(0);
-		assertEquals("AEC",line.getText());
+		assertEquals("AEC", line.getText());
 		Inline[] eles = line.eles();
-		assertEquals(3,eles.length);
-		assertEquals("A",eles[0].getText());
+		assertEquals(3, eles.length);
+		assertEquals("A", eles[0].getText());
 		assertFalse(eles[0].hasStyle());
 		assertTrue(eles[1].hasStyle());
 		assertTrue(eles[1].getStyle().getFont().isBold());
 		assertTrue(eles[1].getStyle().getFont().isStrike());
 		assertTrue(eles[1].getStyle().getFont().isItalic());
-		assertFalse(eles[1].getStyle().getFont().isSub());
-		assertTrue(eles[1].getStyle().getFont().isSup());
+		assertTrue(eles[1].getStyle().getFont().isSub());
+		assertFalse(eles[1].getStyle().getFont().isSup());
 		assertFalse(eles[2].hasStyle());
 	}
 }
-
