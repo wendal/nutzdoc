@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.nutz.doc.Code;
 import org.nutz.doc.Line;
 import org.nutz.doc.Doc;
 import org.nutz.doc.DocParser;
@@ -41,7 +42,7 @@ public class PlainParser implements DocParser {
 		Line b = doc.root();
 		try {
 			while (null != (line = br.readLine())) {
-				LinekWrapper bw = parseLine(line);
+				LinekWrapper bw = parseLine(br, line);
 				// find the parent to append
 				while (b.hasParent() && b.deep() > bw.deep)
 					b = b.parent();
@@ -73,19 +74,26 @@ public class PlainParser implements DocParser {
 		}
 	}
 
-	private LinekWrapper parseLine(String line) {
+	private LinekWrapper parseLine(BufferedReader reader, String line) {
 		LinekWrapper lw = new LinekWrapper();
 		char[] cs = line.toCharArray();
 		for (; lw.deep < cs.length; lw.deep++)
 			if (cs[lw.deep] != '\t')
 				break;
-		lw.line = parseInlines(new String(cs, lw.deep, cs.length - lw.deep));
+		lw.line = parseInlines(reader, lw.deep, new String(cs, lw.deep, cs.length - lw.deep));
 		return lw;
 	}
 
 	private static Pattern INCLUDE = Pattern.compile("^@[>]?include:", Pattern.CASE_INSENSITIVE);
+	private static Pattern CODESTART = Pattern.compile("^([{]{3})(<[a-zA-Z]+>)");
+	private static Pattern CODEEND = Pattern.compile("[}]{3}$");
+	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)([1-9])",
+			Pattern.CASE_INSENSITIVE);
 
-	private Line parseInlines(String s) {
+	private Line parseInlines(BufferedReader reader, int deep, String s) {
+		/*
+		 * The line is for include something
+		 */
 		Matcher matcher = INCLUDE.matcher(s);
 		if (matcher.find()) {
 			String rs = Strings.trim(s.substring(matcher.end()));
@@ -95,18 +103,62 @@ public class PlainParser implements DocParser {
 						.getAbsolutePath());
 			}
 			if (s.startsWith("@>")) {
-				return Doc.including(re,this);
+				return Doc.including(re, this);
 			} else {
 				try {
-					Reader reader = Streams.fileInr(re.getFile());
-					Doc doc = this.parse(reader);
-					reader.close();
+					Reader docReader = Streams.fileInr(re.getFile());
+					Doc doc = this.parse(docReader);
+					docReader.close();
 					return new RootLine(doc.root());
 				} catch (IOException e) {
 					throw Lang.wrapThrow(e);
 				}
 			}
 		}
+		/*
+		 * The line is for code zzh: the real code should not appear in same
+		 * line of the CODESTART
+		 */
+		matcher = CODESTART.matcher(Strings.trim(s));
+		if (matcher.find()) {
+			StringBuilder sb = new StringBuilder();
+			Code.TYPE type = null;
+			// Get the code type
+			if (matcher.groupCount() == 2) {
+				String tstr = matcher.group(2);
+				tstr = tstr.substring(1, tstr.length() - 1);
+				type = Code.TYPE.valueOf(tstr);
+			}
+			// read line
+			// and the CODEEND should not appear in the same line of real code.
+			String line;
+			try {
+				while (null != (line = reader.readLine())) {
+					if (CODEEND.matcher(line).find())
+						break;
+					int pos;
+					for (pos = 0; pos < deep; pos++)
+						if (line.charAt(pos) != '\t')
+							break;
+					sb.append(line.substring(pos)).append('\n');
+				}
+				if (sb.length() > 0)
+					sb.deleteCharAt(sb.length() - 1);
+			} catch (IOException e) {
+				throw Lang.wrapThrow(e);
+			}
+			return Doc.code(sb.toString(), type);
+		}
+		/*
+		 * The line is a index table
+		 */
+		matcher = INDEXTABLE.matcher(s);
+		if(matcher.find()){
+			return Doc.indexTable(Integer.valueOf(matcher.group(2)));
+		}
+		/*
+		 * The line is contains a group of text
+		 */
 		List<Inline> inlines = new ArrayList<Inline>();
 		LinkedCharArray lca = new LinkedCharArray();
 		StringBuilder sb = new StringBuilder();

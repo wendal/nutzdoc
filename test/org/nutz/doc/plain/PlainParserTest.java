@@ -2,14 +2,19 @@ package org.nutz.doc.plain;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.junit.Test;
+import org.nutz.doc.Code;
 import org.nutz.doc.Including;
+import org.nutz.doc.IndexTable;
 import org.nutz.doc.Inline;
 import org.nutz.doc.Line;
 import org.nutz.doc.DocParser;
 import org.nutz.doc.Doc;
 import org.nutz.doc.Media;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 
 public class PlainParserTest {
 
@@ -163,17 +168,17 @@ public class PlainParserTest {
 		assertTrue(inc.getRefer().isLocal());
 		assertEquals("doc.txt", inc.getRefer().getFile().getName());
 	}
-	
+
 	@Test
-	public void test_simple_include_same_level(){
+	public void test_simple_include_same_level() {
 		String s = "doc1";
 		s += "\n@include: org/nutz/doc/plain/doc.txt";
 		s += "\ndoc2";
-		
+
 		Line root = root(s);
 		assertEquals("doc1", root.child(0).getText());
 		assertEquals("doc2", root.child(2).getText());
-		
+
 		Line line = root.child(1);
 		assertEquals("A: ", line.inline(0).toString());
 		assertEquals("http://www.google.com", line.inline(1).getText());
@@ -190,5 +195,38 @@ public class PlainParserTest {
 		Media media = (Media) line.inline(1);
 		assertEquals("nutz.png", media.src().getFile().getName());
 		assertEquals("http://nutz.googlecode.com", media.getHref().toString());
+	}
+
+	@Test
+	public void test_parse_code() throws IOException {
+		Line root = root(Lang.readAll(Streams.fileInr("org/nutz/doc/plain/code.txt")));
+		Line line1 = root.child(0);
+		Code code1 = (Code) root.child(1);
+		Line line2 = root.child(2);
+		Code code2 = (Code) line2.child(0);
+		Line line3 = root.child(3);
+		assertEquals("This is the example java code:", line1.toString());
+		assertEquals(Code.TYPE.JAVA, code1.getType());
+		assertEquals("public class Abc{\n\tprivate int num;\n\t\t// tt\n}", code1.toString());
+		assertEquals("Child:", line2.getText());
+		assertEquals("DROP TABLE t_abc;\n\t\t/*t*/", code2.toString());
+		assertEquals("-The end-", line3.toString());
+	}
+
+	@Test
+	public void test_index_table() {
+		Line root = root("#index:4\n\t\tABC\n\tF\nL1\n\tL1.1\n\t\tL1.1.1\nL2\n\tL2.1\n\t\tL2.1.1");
+		IndexTable it = (IndexTable) root.child(0);
+		assertEquals(4, it.getLevel());
+		assertEquals("ABC", root.child(1).getText());
+		assertEquals("F", root.child(1).child(0).getText());
+		Line index = root.getDoc().getIndex(2);
+		assertEquals("ABC",index.child(0).getText());
+		assertEquals("F",index.child(0).child(0).getText());
+		assertEquals("L1",index.child(1).getText());
+		assertEquals("L1.1",index.child(1).child(0).getText());
+		assertEquals("L2",index.child(2).getText());
+		assertEquals("L2.1",index.child(2).child(0).getText());
+		
 	}
 }

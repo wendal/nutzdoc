@@ -12,6 +12,15 @@ public class Line extends Ele implements Text {
 	private List<Line> children;
 	private Line parent;
 	private int deep;
+	private Doc doc;
+
+	public Doc getDoc() {
+		return doc;
+	}
+
+	void setDoc(Doc document) {
+		this.doc = document;
+	}
 
 	protected Line() {
 		super();
@@ -21,6 +30,13 @@ public class Line extends Ele implements Text {
 
 	public int deep() {
 		return deep;
+	}
+
+	Line setDeep(int deep) {
+		this.deep = deep;
+		for (Line l : children)
+			l.setDeep(deep + 1);
+		return this;
 	}
 
 	public Line parent() {
@@ -35,16 +51,18 @@ public class Line extends Ele implements Text {
 		this.parent = parent;
 	}
 
-	public void addChild(Line block) {
-		block.parent(this);
-		block.deep = this.deep + 1;
-		children.add(block);
+	public void addChild(Line l) {
+		l.parent(this);
+		l.setDoc(doc);
+		l.setDeep(this.deep + 1);
+		children.add(l);
 	}
 
-	public void addChild(int index, Line block) {
-		block.parent(this);
-		block.deep = this.deep + 1;
-		children.add(index, block);
+	public void addChild(int index, Line l) {
+		l.parent(this);
+		l.setDoc(doc);
+		l.setDeep(this.deep + 1);
+		children.add(index, l);
 	}
 
 	public void clearChildren() {
@@ -139,9 +157,8 @@ public class Line extends Ele implements Text {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Strings.dup('\t', deep()-1));
-		for (Text t : eles)
-			sb.append(t).append(' ');
+		sb.append(Strings.dup('\t', deep() - 1));
+		sb.append(getText());
 		for (Line b : children)
 			sb.append("\n").append(b);
 		return sb.toString();

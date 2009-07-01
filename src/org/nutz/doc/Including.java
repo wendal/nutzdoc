@@ -6,7 +6,7 @@ import java.io.Reader;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
-public class Including extends Line {
+public class Including extends FinalLine {
 
 	private DocParser parser;
 
