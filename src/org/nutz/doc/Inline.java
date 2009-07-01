@@ -11,18 +11,22 @@ public class Inline extends Ele implements Text {
 
 	private String text;
 
-	private Href href;
+	private Refer href;
 
 	public boolean isAnchor() {
 		return null != href;
 	}
 
-	public Href getHref() {
+	public Refer getHref() {
 		return href;
 	}
 
-	public void setHref(Href href) {
+	public void href(Refer href) {
 		this.href = href;
+	}
+
+	public void href(String str) {
+		this.href = Doc.refer(str);
 	}
 
 	private Line block;

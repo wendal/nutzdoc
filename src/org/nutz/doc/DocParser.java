@@ -4,6 +4,6 @@ import java.io.Reader;
 
 public interface DocParser {
 	
-	Document parse(Reader reader);
+	Doc parse(Reader reader);
 	
 }

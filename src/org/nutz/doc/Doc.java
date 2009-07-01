@@ -30,7 +30,37 @@ public class Doc {
 		return line(inline(text));
 	}
 
-	public Href href(String str) {
-		return new Href(str);
+	public static Including including(String s) {
+		return including(s);
 	}
+
+	public static Including including(Refer refer,DocParser parser) {
+		Including inc = new Including();
+		inc.setRefer(refer);
+		inc.setParser(parser);
+		return inc;
+	}
+
+	public static Refer refer(String str) {
+		return new Refer(str);
+	}
+
+	public static Media media(String src) {
+		Media m = new Media();
+		m.src(src);
+		return m;
+	}
+
+	/*-----------------------------------------------------------------*/
+
+	public Doc() {
+		root = new Line();
+	}
+
+	private Line root;
+
+	public Line root() {
+		return root;
+	}
+
 }

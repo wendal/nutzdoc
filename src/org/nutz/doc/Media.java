@@ -2,34 +2,22 @@ package org.nutz.doc;
 
 public class Media extends Inline {
 
-	private String src;
+	private Refer src;
 
-	private int width;
-
-	private int height;
-
-	public String getSrc() {
+	public Refer src() {
 		return src;
 	}
 
-	public void setSrc(String src) {
+	public String getSrc() {
+		return src.toString();
+	}
+
+	public void src(String src) {
+		this.src = Doc.refer(src);
+	}
+
+	public void src(Refer src) {
 		this.src = src;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
 	}
 
 }

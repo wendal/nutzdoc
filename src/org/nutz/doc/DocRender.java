@@ -4,6 +4,6 @@ import java.io.Writer;
 
 public interface DocRender {
 
-	void render(Writer writer,Document doc);
+	void render(Writer writer,Doc doc);
 	
 }

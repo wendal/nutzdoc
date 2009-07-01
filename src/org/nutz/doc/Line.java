@@ -13,7 +13,7 @@ public class Line extends Ele implements Text {
 	private Line parent;
 	private int deep;
 
-	Line() {
+	protected Line() {
 		super();
 		eles = Doc.list(Inline.class);
 		children = Doc.list(Line.class);
@@ -117,11 +117,11 @@ public class Line extends Ele implements Text {
 		return eles.iterator();
 	}
 
-	public Inline[] eles() {
+	public Inline[] inlines() {
 		return eles.toArray(new Inline[eles.size()]);
 	}
 
-	public Inline ele(int index) {
+	public Inline inline(int index) {
 		return eles.get(index);
 	}
 
@@ -139,10 +139,11 @@ public class Line extends Ele implements Text {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		sb.append(Strings.dup('\t', deep()-1));
 		for (Text t : eles)
-			sb.append(Strings.dup('\t', deep()-1)).append(t).append("\n");
+			sb.append(t).append(' ');
 		for (Line b : children)
-			sb.append(b);
+			sb.append("\n").append(b);
 		return sb.toString();
 	}
 }

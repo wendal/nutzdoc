@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,16 +12,19 @@ import java.util.regex.Pattern;
 import org.nutz.doc.Line;
 import org.nutz.doc.Doc;
 import org.nutz.doc.DocParser;
-import org.nutz.doc.Document;
 import org.nutz.doc.Inline;
+import org.nutz.doc.Media;
+import org.nutz.doc.Refer;
 import org.nutz.doc.style.Font;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
+import org.nutz.lang.Strings;
 import org.nutz.lang.util.LinkedCharArray;
 
 public class PlainParser implements DocParser {
 
 	@Override
-	public Document parse(Reader reader) {
+	public Doc parse(Reader reader) {
 		/*
 		 * Prepare the reader
 		 */
@@ -32,7 +36,7 @@ public class PlainParser implements DocParser {
 		/*
 		 * Parepare document
 		 */
-		Document doc = new Document();
+		Doc doc = new Doc();
 		String line;
 		Line b = doc.root();
 		try {
@@ -41,8 +45,14 @@ public class PlainParser implements DocParser {
 				// find the parent to append
 				while (b.hasParent() && b.deep() > bw.deep)
 					b = b.parent();
-				b.addChild(bw.line);
-				b = bw.line;
+				if (bw.line instanceof RootLine) {
+					for (Iterator<Line> it = ((RootLine) bw.line).root.children(); it.hasNext();) {
+						b.addChild(it.next());
+					}
+				} else {
+					b.addChild(bw.line);
+					b = bw.line;
+				}
 			}
 		} catch (IOException e) {
 			throw Lang.wrapThrow(e);
@@ -55,18 +65,48 @@ public class PlainParser implements DocParser {
 		int deep;
 	}
 
+	private static class RootLine extends Line {
+		private Line root;
+
+		RootLine(Line root) {
+			this.root = root;
+		}
+	}
+
 	private LinekWrapper parseLine(String line) {
 		LinekWrapper lw = new LinekWrapper();
 		char[] cs = line.toCharArray();
 		for (; lw.deep < cs.length; lw.deep++)
 			if (cs[lw.deep] != '\t')
 				break;
-		lw.line = Doc.line(parseInlines(new String(cs, lw.deep, cs.length
-				- lw.deep)));
+		lw.line = parseInlines(new String(cs, lw.deep, cs.length - lw.deep));
 		return lw;
 	}
 
-	private List<Inline> parseInlines(String s) {
+	private static Pattern INCLUDE = Pattern.compile("^@[>]?include:", Pattern.CASE_INSENSITIVE);
+
+	private Line parseInlines(String s) {
+		Matcher matcher = INCLUDE.matcher(s);
+		if (matcher.find()) {
+			String rs = Strings.trim(s.substring(matcher.end()));
+			Refer re = Doc.refer(rs);
+			if (null == re.getFile() || !re.getFile().exists()) {
+				throw Lang.makeThrow("Fail to find doc file '%s'!!!", re.getFile()
+						.getAbsolutePath());
+			}
+			if (s.startsWith("@>")) {
+				return Doc.including(re,this);
+			} else {
+				try {
+					Reader reader = Streams.fileInr(re.getFile());
+					Doc doc = this.parse(reader);
+					reader.close();
+					return new RootLine(doc.root());
+				} catch (IOException e) {
+					throw Lang.wrapThrow(e);
+				}
+			}
+		}
 		List<Inline> inlines = new ArrayList<Inline>();
 		LinkedCharArray lca = new LinkedCharArray();
 		StringBuilder sb = new StringBuilder();
@@ -77,9 +117,8 @@ public class PlainParser implements DocParser {
 				if (lca.last() == '{') {
 					sb.append(lca.clear());
 				} else {
-					if (lca.size() > 0) {
+					if (lca.size() > 0)
 						sb.append(lca.clear());
-					}
 					if (sb.length() > 0) {
 						inlines.add(toInline(sb.toString()));
 						sb = new StringBuilder();
@@ -96,6 +135,33 @@ public class PlainParser implements DocParser {
 					lca.push(c);
 				}
 				break;
+			case '[':
+				if (lca.first() == '{') {
+					lca.push(c);
+				} else if (lca.last() == '[') {
+					sb.append(lca.clear());
+				} else {
+					if (lca.size() > 0)
+						sb.append(lca.clear());
+					if (sb.length() > 0) {
+						inlines.add(toInline(sb.toString()));
+						sb = new StringBuilder();
+					}
+					lca.push(c);
+				}
+				break;
+			case ']':
+				if (lca.first() == '{') {
+					lca.push(c);
+				} else if (lca.first() == '[') {
+					lca.push(c);
+					sb.append(lca.clear());
+					inlines.add(toInline(sb.toString()));
+					sb = new StringBuilder();
+				} else {
+					lca.push(c);
+				}
+				break;
 			default:
 				lca.push(c);
 			}
@@ -104,7 +170,7 @@ public class PlainParser implements DocParser {
 			sb.append(lca.clear());
 		if (sb.length() > 0)
 			inlines.add(toInline(sb.toString()));
-		return inlines;
+		return Doc.line(inlines);
 	}
 
 	private static Pattern QUOTE = Pattern.compile("^([{])(.*)([}])$");
@@ -117,7 +183,7 @@ public class PlainParser implements DocParser {
 			m = MARK.matcher(s);
 			if (m.find()) {
 				String mark = m.group();
-				Inline inline = Doc.inline(s.substring(mark.length()));
+				Inline inline = parseInline(s.substring(mark.length()));
 				for (char c : mark.toCharArray()) {
 					switch (c) {
 					case '~':
@@ -140,13 +206,56 @@ public class PlainParser implements DocParser {
 				return inline;
 			}
 		}
+		return parseInline(s);
+	}
+
+	private static Pattern LINKS = Pattern.compile("^([\\[])(.*)([\\]])$");
+
+	private Inline parseInline(String s) {
+		Matcher m = LINKS.matcher(s);
+		if (m.find()) {
+			s = m.group(2);
+			String[] ss = Strings.splitIgnoreBlank(s, "[ ]");
+			if (ss.length == 1) {
+				Media media = parseMedia(ss[0]);
+				if (null != media)
+					return media;
+				Inline inline = Doc.inline(ss[0]);
+				inline.href(ss[0]);
+				return inline;
+			} else {
+				String txt = ss[1];
+				Media media = parseMedia(txt);
+				if (null != media) {
+					media.href(ss[0]);
+					return media;
+				}
+				Inline inline = Doc.inline(txt);
+				inline.href(ss[0]);
+				return inline;
+			}
+		}
 		return Doc.inline(s);
 	}
 
-	public static void main(String[] args) {
-		Matcher m = MARK.matcher("*_~SBCCC");
-		m.find();
-		System.out.println(m.group());
+	private static Pattern MEDIAS = Pattern.compile(
+			"^([/\\\\]|[a-zA-Z]:[/\\\\])?([a-zA-Z0-9_/\\\\])*([.](png|gif|jpeg|jpg))$",
+			Pattern.CASE_INSENSITIVE);
+
+	private Media parseMedia(String s) {
+		if (MEDIAS.matcher(s).find()) {
+			Media m = Doc.media(s);
+			m.setText(s);
+			return m;
+		}
+		return null;
 	}
 
+	public static void main(String[] args) {
+		String s = "@>include:dkd;dldkaf aabc";
+		Matcher matcher = INCLUDE.matcher(s);
+		matcher.find();
+		String refer = Strings.trim(s.substring(matcher.end()));
+		System.out.printf("{%s}", refer);
+	}
 }
