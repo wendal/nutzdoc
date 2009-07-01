@@ -13,6 +13,10 @@ public class Inline extends Ele implements Text {
 
 	private Href href;
 
+	public boolean isAnchor() {
+		return null != href;
+	}
+
 	public Href getHref() {
 		return href;
 	}
@@ -53,7 +57,5 @@ public class Inline extends Ele implements Text {
 	public String toString() {
 		return getText();
 	}
-	
-	
 
 }

@@ -48,4 +48,8 @@ public class PlainParserTest {
 		assertFalse(eles[1].getStyle().getFont().isSup());
 		assertFalse(eles[2].hasStyle());
 	}
+	
+	public void test_inline_anchor(){
+		String s = "A[http://www.google.com]";
+	}
 }

@@ -1,8 +1,6 @@
 package org.nutz.doc;
 
-import org.nutz.lang.Lang;
-
-public class Media extends Line {
+public class Media extends Inline {
 
 	private String src;
 
@@ -32,16 +30,6 @@ public class Media extends Line {
 
 	public void setHeight(int height) {
 		this.height = height;
-	}
-
-	@Override
-	public void addChild(Line block) {
-		throw Lang.makeThrow("Media can not contains children");
-	}
-
-	@Override
-	public void addChild(int index, Line block) {
-		throw Lang.makeThrow("Media can not contains children");
 	}
 
 }
