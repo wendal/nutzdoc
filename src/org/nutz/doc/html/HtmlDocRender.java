@@ -1,6 +1,10 @@
 package org.nutz.doc.html;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.List;
 
@@ -14,9 +18,17 @@ import static org.nutz.doc.html.Tag.*;
 public class HtmlDocRender implements DocRender {
 
 	@Override
-	public void render(Writer writer, Doc doc) {
-		new InnerRender(writer, doc).render();
+	public void render(OutputStream ops, Doc doc) {
+		try {
+			Writer w = new BufferedWriter(new OutputStreamWriter(ops, "UTF-8"));
+			new InnerRender(w, doc).render();
+		} catch (UnsupportedEncodingException e) {
+			throw Lang.wrapThrow(e);
+		}
 	}
+
+	private static final String[] OLTYPES = { "1", "a", "i" };
+	private static final String[] ULTYPES = { "square", "disc", "circle" };
 
 	private static class InnerRender {
 		private Writer writer;
@@ -29,7 +41,7 @@ public class HtmlDocRender implements DocRender {
 
 		void render() {
 			Tag html = tag("html");
-			if (Strings.isBlank(doc.getTitle()))
+			if (!Strings.isBlank(doc.getTitle()))
 				html.add(tag("title").add(text(doc.getTitle())));
 			Tag body = tag("body");
 			html.add(body);
@@ -49,29 +61,23 @@ public class HtmlDocRender implements DocRender {
 			} else if (p.isOrderedList()) {
 				Tag tag = tag("ol");
 				for (Line l : p.lines()) {
-					Tag li = tag("li");
-					tag.add(li.add(renderLine(l)));
+					renderListItem(tag, l);
 				}
 				parent.add(tag);
 			} else if (p.isUnorderedList()) {
 				Tag tag = tag("ul");
 				for (Line l : p.lines()) {
-					Tag li = tag("li");
-					tag.add(li.add(renderLine(l)));
+					renderListItem(tag, l);
 				}
 				parent.add(tag);
 			} else if (p.isCode()) {
 				parent.add(tag("pre").add(text(p.line(0).getText())));
 			} else if (p.isHeading()) {
 				for (Line h : p.lines()) {
-					Tag hn = tag("h" + h.deep());
-					hn.add(tag("a").attr("name", h.UID()));
-					hn.add(text(h.getText()));
-					parent.add(hn);
-					Tag pTag = tag("p");
-					for (Line l : h.children())
-						pTag.add(renderLine(l));
-					parent.add(pTag);
+					renderHeading(parent, h);
+					Paragraph[] pps = h.getParagraphs();
+					for (Paragraph pp : pps)
+						renderParagraph(parent, pp);
 				}
 			} else {
 				Tag tag = tag("p");
@@ -81,10 +87,32 @@ public class HtmlDocRender implements DocRender {
 			}
 		}
 
+		private void renderListItem(Tag tag, Line l) {
+			int liDeep = l.parent().countMyTypes();
+			String[] ss = tag.name().equalsIgnoreCase("UL") ? ULTYPES : OLTYPES;
+			tag.attr("type", ss[liDeep % ss.length]);
+			Tag li = tag("li");
+			tag.add(li.add(renderLine(l)));
+			if (l.size() > 0) {
+				Paragraph[] ps = l.getParagraphs();
+				for (Paragraph p : ps)
+					renderParagraph(li, p);
+			}
+		}
+
+		private void renderHeading(Tag parent, Line h) {
+			Tag hn = tag("h" + h.deep());
+			if (h.getDoc().contains(IndexTable.class))
+				hn.add(tag("a").attr("name", h.UID()));
+			hn.add(text(h.getText()));
+			parent.add(hn);
+		}
+
 		Tag[] renderLine(Line line) {
 			List<Tag> tags = Doc.LIST(Tag.class);
-			for (Inline inline : line.inlines())
+			for (Inline inline : line.inlines()) {
 				tags.add(renderInline(inline));
+			}
 			return tags.toArray(new Tag[tags.size()]);
 		}
 
@@ -131,7 +159,7 @@ public class HtmlDocRender implements DocRender {
 			Tag tag = tag("div");
 			if (index.deep() > 0)
 				tag.attr("style", "margin-left:14pt");
-			tag.add(text(index.getText()));
+			tag.add(tag("a").attr("href", "#" + index.UID()).add(text(index.getText())));
 			for (Line sub : index.children())
 				tag.add(renderIndex(sub));
 			return tag;

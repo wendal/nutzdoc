@@ -14,6 +14,7 @@ import org.nutz.doc.DocParser;
 import org.nutz.doc.Doc;
 import org.nutz.doc.ListItem;
 import org.nutz.doc.Media;
+import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Paragraph;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -27,7 +28,7 @@ public class PlainParserTest {
 
 	private static Line root(String s) {
 		DocParser parser = new PlainParser();
-		Doc doc = parser.parse(Lang.inr(s));
+		Doc doc = parser.parse(Lang.ins(s));
 		Line root = doc.root();
 		return root;
 	}
@@ -222,14 +223,13 @@ public class PlainParserTest {
 
 	@Test
 	public void test_index_table() {
-		Line root = root("#index:4\n\t\tABC\n\tF\nL1\n\tL1.1\n\t\tL1.1.1\nL2\n\tL2.1\n\t\tL2.1.1");
+		Line root = root4file("indexTable_1.txt");
 		IndexTable it = (IndexTable) root.child(0);
 		assertEquals(4, it.getLevel());
 		assertEquals("\tABC", root.child(1).getText());
 		assertEquals("F", root.child(1).child(0).getText());
 		Line index = root.getDoc().getIndex(2);
 		assertEquals("\tABC", index.child(0).getText());
-		assertEquals("F", index.child(0).child(0).getText());
 		assertEquals("L1", index.child(1).getText());
 		assertEquals("L1.1", index.child(1).child(0).getText());
 		assertEquals("L2", index.child(2).getText());
@@ -241,6 +241,8 @@ public class PlainParserTest {
 	public void test_eval_paragraphs() {
 		Line root = root("A\nB\nC\n\nD\n\tD1\nE\n\nF");
 		Paragraph[] ps = root.getParagraphs();
+		assertEquals(3, ps.length);
+
 		assertEquals(3, ps[0].size());
 		assertEquals("A", ps[0].line(0).getText());
 		assertEquals("B", ps[0].line(1).getText());
@@ -269,7 +271,7 @@ public class PlainParserTest {
 		assertEquals(1, ps.length);
 		assertTrue(ps[0].isUnorderedList());
 
-		ListItem li = (ListItem) ps[0].line(0);
+		ListItem li = ps[0].li(0);
 		assertEquals("a", li.getText());
 		ps2 = li.getParagraphs();
 		assertEquals(1, ps2.length);
@@ -277,7 +279,7 @@ public class PlainParserTest {
 		assertEquals("a1", ps2[0].line(0).getText());
 		assertEquals("a2", ps2[0].line(1).getText());
 
-		li = (ListItem) ps[0].line(1);
+		li = ps[0].li(1);
 		assertEquals("b", li.getText());
 		ps2 = li.getParagraphs();
 		assertEquals(1, ps2.length);
@@ -285,27 +287,44 @@ public class PlainParserTest {
 		assertEquals("b1", ps2[0].line(0).getText());
 		assertEquals("b2", ps2[0].line(1).getText());
 
-		li = (ListItem) ps[0].line(2);
+		li = ps[0].li(2);
 		assertEquals("c", li.getText());
 		ps2 = li.getParagraphs();
-		assertEquals(1, ps2.length);
-		assertFalse(ps2[0].isUnorderedList());
-		assertFalse(ps2[0].isOrderedList());
+		assertEquals(2, ps2.length);
+		assertTrue(ps2[0].isUnorderedList());
+		assertTrue(ps2[1].isOrderedList());
 		assertEquals("c1", ps2[0].line(0).getText());
-		assertEquals("c2", ps2[0].line(1).getText());
+		assertEquals("c2", ps2[1].line(0).getText());
 
-		li = (ListItem) ps[0].line(3);
+		li = ps[0].li(3);
 		assertEquals("d", li.getText());
 		ps2 = li.getParagraphs();
-		assertEquals(1, ps2.length);
-		assertFalse(ps2[0].isUnorderedList());
-		assertFalse(ps2[0].isOrderedList());
+		assertEquals(2, ps2.length);
+		assertTrue(ps2[1].isOrderedList());
 		assertEquals("\td1", ps2[0].line(0).getText());
-		assertEquals("d2", ps2[0].line(1).getText());
+		assertEquals("d2", ps2[1].line(0).getText());
 
 		Line line2 = root.child(1);
-		assertEquals(2, line2.size());
-		assertTrue(line2.child(0).isBlank());
-		assertTrue(line2.child(1).isBlank());
+		assertEquals(0, line2.size());
+
+		assertTrue(root.child(2).isBlank());
+		assertTrue(root.child(3).isBlank());
+
+		assertEquals("-End-", root.child(4).getText());
+	}
+
+	@Test
+	public void test_nesting_list() {
+		Line root = root("# A\n\t# B");
+		assertEquals("A", root.child(0).getText());
+		assertTrue((root.child(0) instanceof OrderedListItem));
+
+		assertEquals("B", root.child(0).child(0).getText());
+		assertTrue((root.child(0).child(0) instanceof OrderedListItem));
+		
+		Paragraph[] ps = root.child(0).getParagraphs();
+		assertEquals(1,ps.length);
+		assertTrue(ps[0].isOrderedList());
+		assertEquals("B",ps[0].li(0).getText());
 	}
 }

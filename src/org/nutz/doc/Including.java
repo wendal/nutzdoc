@@ -1,7 +1,7 @@
 package org.nutz.doc;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -27,9 +27,9 @@ public class Including extends FinalLine {
 	public Doc getDoc() {
 		Doc doc;
 		try {
-			Reader r = Streams.fileInr(refer.getFile());
-			doc = parser.parse(r);
-			r.close();
+			InputStream ins = Streams.fileIn(refer.getFile());
+			doc = parser.parse(ins);
+			ins.close();
 		} catch (IOException e) {
 			throw Lang.wrapThrow(e);
 		}

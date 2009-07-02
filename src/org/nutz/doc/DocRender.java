@@ -1,9 +1,9 @@
 package org.nutz.doc;
 
-import java.io.Writer;
+import java.io.OutputStream;
 
 public interface DocRender {
 
-	void render(Writer writer,Doc doc);
-	
+	void render(OutputStream ops, Doc doc);
+
 }

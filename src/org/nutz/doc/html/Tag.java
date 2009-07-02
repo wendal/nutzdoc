@@ -31,10 +31,7 @@ class Tag {
 		System.out.println(tag);
 	}
 
-	private static final Pattern BLOCK = Pattern.compile("^(head|div|p|ul|ol|blockquote|pre)$",
-			Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern ONLINE_BLOCK = Pattern.compile("^(title|h[1-9]|li|hr)$",
+	private static final Pattern BLOCK = Pattern.compile("^(head|div|p|ul|ol|blockquote|pre|title|h[1-9]|li|hr)$",
 			Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern INLINE = Pattern.compile(
@@ -66,10 +63,6 @@ class Tag {
 		return BLOCK.matcher(name).find();
 	}
 
-	public boolean isOnlineBlock() {
-		return ONLINE_BLOCK.matcher(name).find();
-	}
-
 	public boolean isInline() {
 		return INLINE.matcher(name).find();
 	}
@@ -88,7 +81,7 @@ class Tag {
 
 	public boolean isChildAllInline() {
 		for (Tag tag : children)
-			if (tag.isBlock() || tag.isOnlineBlock())
+			if (tag.isBlock())
 				return false;
 		return true;
 	}
@@ -135,7 +128,7 @@ class Tag {
 		StringBuilder sb = new StringBuilder();
 		if (isNoChild()) {
 			return format("<%s%s/>", name, attributes2String());
-		} else if (isInline() || isOnlineBlock()) {
+		} else if (isInline()) {
 			sb.append(format("<%s", name)).append(attributes2String()).append('>');
 			for (Tag tag : children)
 				sb.append(tag);
@@ -144,7 +137,7 @@ class Tag {
 			sb.append(format("<%s", name));
 			sb.append(attributes2String()).append('>');
 			for (Tag tag : children) {
-				if (tag.isBlock() || tag.isOnlineBlock() || tag.isBody())
+				if (tag.isBlock() || tag.isBody())
 					sb.append('\n');
 				sb.append(tag);
 			}

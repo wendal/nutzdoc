@@ -188,6 +188,13 @@ public class Line extends Ele implements Text {
 			stack = Doc.LIST(Line.class);
 		}
 
+		@SuppressWarnings("unchecked")
+		<T extends Line> Class<T> getLastLineType() {
+			if (stack.size() == 0)
+				return null;
+			return (Class<T>) stack.get(stack.size() - 1).getClass();
+		}
+
 		void push(Line line) {
 			if (line instanceof Code || line instanceof Including || line instanceof IndexTable) {
 				if (stack.size() > 0) {
@@ -197,12 +204,17 @@ public class Line extends Ele implements Text {
 				ps.add(new Paragraph(line));
 				return;
 			}
-			if (line.isBlank())
+			if (line.isBlank()) {
 				if (stack.size() > 0) {
 					ps.add(new Paragraph(stack));
 					stack = Doc.LIST(Line.class);
-					return;
 				}
+				return;
+			}
+			if (stack.size() > 0 && line.getClass() != getLastLineType()) {
+				ps.add(new Paragraph(stack));
+				stack = Doc.LIST(Line.class);
+			}
 			stack.add(line);
 		}
 
@@ -224,6 +236,27 @@ public class Line extends Ele implements Text {
 	}
 
 	public boolean isHeading() {
+		if (this instanceof ListItem)
+			return false;
 		return children.size() > 0;
+	}
+
+	public <T extends Line> boolean contains(Class<T> type) {
+		if (type.isInstance(this))
+			return true;
+		for (Line sub : children)
+			if (sub.contains(type))
+				return true;
+		return false;
+	}
+
+	public <T extends Line> int countAncestor(Class<T> type) {
+		if (!hasParent())
+			return 0;
+		return parent().countAncestor(type) + (this.getClass().isAssignableFrom(type) ? 1 : 0);
+	}
+
+	public int countMyTypes() {
+		return countAncestor(this.getClass());
 	}
 }

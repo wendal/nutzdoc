@@ -18,7 +18,7 @@ public class TranslateDoc {
 		Doc doc = parser.parse(reader);
 		reader.close();
 		DocRender render = new HtmlDocRender();
-		File f = new File("e:/tmp/trans.html");
+		File f = new File("/home/zozoh/tmp/trans.html");
 		if(!f.exists())
 			Files.createNewFile(f);
 		Writer writer = Streams.fileOutw(f);

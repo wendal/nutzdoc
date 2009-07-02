@@ -125,9 +125,10 @@ public class Doc {
 	}
 
 	private static Line getIndex(Line line, int level) {
-		if (line instanceof FinalLine)
+		if (line instanceof FinalLine || !line.isHeading())
 			return null;
 		Line root = Doc.line(line.getText());
+		root.id = line.id;
 		if (level > 0) {
 			for (Iterator<Line> it = line.childIterator(); it.hasNext();) {
 				Line indxtab = getIndex(it.next(), level - 1);
@@ -136,5 +137,9 @@ public class Doc {
 			}
 		}
 		return root;
+	}
+
+	public <T extends Line> boolean contains(Class<T> type) {
+		return root.contains(type);
 	}
 }

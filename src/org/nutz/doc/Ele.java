@@ -6,7 +6,7 @@ public abstract class Ele {
 
 	private static int ID = 0;
 
-	private int id;
+	int id;
 
 	protected Ele() {
 		id = ++ID;

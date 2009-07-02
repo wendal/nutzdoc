@@ -2,7 +2,9 @@ package org.nutz.doc.plain;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.Code;
+import org.nutz.doc.Including;
 import org.nutz.doc.Line;
 import org.nutz.doc.Doc;
 import org.nutz.doc.DocParser;
@@ -27,15 +30,16 @@ import org.nutz.lang.util.LinkedCharArray;
 public class PlainParser implements DocParser {
 
 	@Override
-	public Doc parse(Reader reader) {
+	public Doc parse(InputStream ins) {
 		/*
 		 * Prepare the reader
 		 */
-		BufferedReader br = null;
-		if (reader instanceof BufferedReader)
-			br = (BufferedReader) reader;
-		else
-			br = new BufferedReader(reader);
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new InputStreamReader(ins, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			throw Lang.wrapThrow(e1);
+		}
 		/*
 		 * Parepare document
 		 */
@@ -45,6 +49,15 @@ public class PlainParser implements DocParser {
 		try {
 			while (null != (line = br.readLine())) {
 				LinekWrapper bw = parseLine(br, line);
+				if (!(bw.line instanceof RootLine))
+					if (!(bw.line instanceof Including))
+						if (bw.line.isBlank()) {
+							if (b.hasParent() || (b.hasParent() && b.isBlank()))
+								b = b.parent();
+							b.addChild(bw.line);
+							b = bw.line;
+							continue;
+						}
 				// find the parent to append
 				while (b.hasParent() && b.deep() > bw.deep) {
 					b = b.parent();
@@ -114,9 +127,9 @@ public class PlainParser implements DocParser {
 				return Doc.including(re, this);
 			} else {
 				try {
-					Reader docReader = Streams.fileInr(re.getFile());
-					Doc doc = this.parse(docReader);
-					docReader.close();
+					InputStream ins = Streams.fileIn(re.getFile());
+					Doc doc = this.parse(ins);
+					ins.close();
 					return new RootLine(doc.root());
 				} catch (IOException e) {
 					throw Lang.wrapThrow(e);
