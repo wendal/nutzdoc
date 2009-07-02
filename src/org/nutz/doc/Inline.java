@@ -5,7 +5,7 @@ import org.nutz.lang.Strings;
 
 public class Inline extends Ele implements Text {
 
-	Inline() {
+	protected Inline() {
 		super();
 	}
 

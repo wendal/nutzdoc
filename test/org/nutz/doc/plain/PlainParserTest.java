@@ -12,11 +12,18 @@ import org.nutz.doc.Inline;
 import org.nutz.doc.Line;
 import org.nutz.doc.DocParser;
 import org.nutz.doc.Doc;
+import org.nutz.doc.ListItem;
 import org.nutz.doc.Media;
+import org.nutz.doc.Paragraph;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
 public class PlainParserTest {
+
+	private static Line root4file(String name) {
+		String path = PlainParserTest.class.getPackage().getName().replace('.', '/') + "/" + name;
+		return root(Lang.readAll(Streams.fileInr(path)));
+	}
 
 	private static Line root(String s) {
 		DocParser parser = new PlainParser();
@@ -199,7 +206,7 @@ public class PlainParserTest {
 
 	@Test
 	public void test_parse_code() throws IOException {
-		Line root = root(Lang.readAll(Streams.fileInr("org/nutz/doc/plain/code.txt")));
+		Line root = root4file("code.txt");
 		Line line1 = root.child(0);
 		Code code1 = (Code) root.child(1);
 		Line line2 = root.child(2);
@@ -207,9 +214,9 @@ public class PlainParserTest {
 		Line line3 = root.child(3);
 		assertEquals("This is the example java code:", line1.toString());
 		assertEquals(Code.TYPE.JAVA, code1.getType());
-		assertEquals("public class Abc{\n\tprivate int num;\n\t\t// tt\n}", code1.toString());
+		assertEquals("public class Abc{\n\tprivate int num;\n\t\t// tt\n}", code1.getText());
 		assertEquals("Child:", line2.getText());
-		assertEquals("DROP TABLE t_abc;\n\t\t/*t*/", code2.toString());
+		assertEquals("DROP TABLE t_abc;\n\t\t/*t*/", code2.getText());
 		assertEquals("-The end-", line3.toString());
 	}
 
@@ -218,15 +225,87 @@ public class PlainParserTest {
 		Line root = root("#index:4\n\t\tABC\n\tF\nL1\n\tL1.1\n\t\tL1.1.1\nL2\n\tL2.1\n\t\tL2.1.1");
 		IndexTable it = (IndexTable) root.child(0);
 		assertEquals(4, it.getLevel());
-		assertEquals("ABC", root.child(1).getText());
+		assertEquals("\tABC", root.child(1).getText());
 		assertEquals("F", root.child(1).child(0).getText());
 		Line index = root.getDoc().getIndex(2);
-		assertEquals("ABC",index.child(0).getText());
-		assertEquals("F",index.child(0).child(0).getText());
-		assertEquals("L1",index.child(1).getText());
-		assertEquals("L1.1",index.child(1).child(0).getText());
-		assertEquals("L2",index.child(2).getText());
-		assertEquals("L2.1",index.child(2).child(0).getText());
-		
+		assertEquals("\tABC", index.child(0).getText());
+		assertEquals("F", index.child(0).child(0).getText());
+		assertEquals("L1", index.child(1).getText());
+		assertEquals("L1.1", index.child(1).child(0).getText());
+		assertEquals("L2", index.child(2).getText());
+		assertEquals("L2.1", index.child(2).child(0).getText());
+
+	}
+
+	@Test
+	public void test_eval_paragraphs() {
+		Line root = root("A\nB\nC\n\nD\n\tD1\nE\n\nF");
+		Paragraph[] ps = root.getParagraphs();
+		assertEquals(3, ps[0].size());
+		assertEquals("A", ps[0].line(0).getText());
+		assertEquals("B", ps[0].line(1).getText());
+		assertEquals("C", ps[0].line(2).getText());
+
+		assertEquals(2, ps[1].size());
+		assertEquals("D", ps[1].line(0).getText());
+		assertEquals("D1", ps[1].line(0).child(0).getText());
+		assertEquals("E", ps[1].line(1).getText());
+
+		assertEquals(1, ps[2].size());
+		assertEquals("F", ps[2].line(0).getText());
+	}
+
+	@Test
+	public void test_tab_at_the_line_head() {
+		Line root = root("A\n\t\tB");
+		assertEquals("\tB", root.child(0).child(0).getText());
+	}
+
+	@Test
+	public void test_list_item() {
+		Line root = root4file("list.txt");
+		Paragraph[] ps = root.child(0).getParagraphs();
+		Paragraph[] ps2;
+		assertEquals(1, ps.length);
+		assertTrue(ps[0].isUnorderedList());
+
+		ListItem li = (ListItem) ps[0].line(0);
+		assertEquals("a", li.getText());
+		ps2 = li.getParagraphs();
+		assertEquals(1, ps2.length);
+		assertTrue(ps2[0].isOrderedList());
+		assertEquals("a1", ps2[0].line(0).getText());
+		assertEquals("a2", ps2[0].line(1).getText());
+
+		li = (ListItem) ps[0].line(1);
+		assertEquals("b", li.getText());
+		ps2 = li.getParagraphs();
+		assertEquals(1, ps2.length);
+		assertTrue(ps2[0].isUnorderedList());
+		assertEquals("b1", ps2[0].line(0).getText());
+		assertEquals("b2", ps2[0].line(1).getText());
+
+		li = (ListItem) ps[0].line(2);
+		assertEquals("c", li.getText());
+		ps2 = li.getParagraphs();
+		assertEquals(1, ps2.length);
+		assertFalse(ps2[0].isUnorderedList());
+		assertFalse(ps2[0].isOrderedList());
+		assertEquals("c1", ps2[0].line(0).getText());
+		assertEquals("c2", ps2[0].line(1).getText());
+
+		li = (ListItem) ps[0].line(3);
+		assertEquals("d", li.getText());
+		ps2 = li.getParagraphs();
+		assertEquals(1, ps2.length);
+		assertFalse(ps2[0].isUnorderedList());
+		assertFalse(ps2[0].isOrderedList());
+		assertEquals("\td1", ps2[0].line(0).getText());
+		assertEquals("d2", ps2[0].line(1).getText());
+
+		Line line2 = root.child(1);
+		assertEquals(2, line2.size());
+		assertTrue(line2.child(0).isBlank());
+		assertTrue(line2.child(1).isBlank());
 	}
 }

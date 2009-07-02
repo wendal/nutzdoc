@@ -8,7 +8,7 @@ import org.nutz.lang.Strings;
 
 public class Line extends Ele implements Text {
 
-	private List<Inline> eles;
+	private List<Inline> inlines;
 	private List<Line> children;
 	private Line parent;
 	private int deep;
@@ -24,8 +24,8 @@ public class Line extends Ele implements Text {
 
 	protected Line() {
 		super();
-		eles = Doc.list(Inline.class);
-		children = Doc.list(Line.class);
+		inlines = Doc.LIST(Inline.class);
+		children = Doc.LIST(Line.class);
 	}
 
 	public int deep() {
@@ -93,32 +93,46 @@ public class Line extends Ele implements Text {
 		return children.get(0);
 	}
 
-	public Iterator<Line> children() {
+	public Iterator<Line> childIterator() {
 		return children.iterator();
+	}
+
+	public Line[] children() {
+		return children.toArray(new Line[children.size()]);
 	}
 
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
-		for (Text t : eles)
+		for (Text t : inlines)
 			sb.append(t.getText());
 		return sb.toString();
 	}
 
 	public boolean isBlank() {
-		for (Text t : eles)
+		for (Text t : inlines)
 			if (!t.isBlank())
 				return false;
 		return true;
 	}
 
 	public void setText(String text) {
-		eles.clear();
-		eles.add(Doc.inline(text));
+		inlines.clear();
+		inlines.add(Doc.inline(text));
+	}
+
+	public Line insert(Inline ele) {
+		ele.setBlock(this);
+		inlines.add(0, ele);
+		return this;
+	}
+
+	public Line insert(String text) {
+		return insert(Doc.inline(text));
 	}
 
 	public Line append(Inline ele) {
 		ele.setBlock(this);
-		eles.add(ele);
+		inlines.add(ele);
 		return this;
 	}
 
@@ -127,20 +141,20 @@ public class Line extends Ele implements Text {
 	}
 
 	public Line clearInlines() {
-		eles.clear();
+		inlines.clear();
 		return this;
 	}
 
 	public Iterator<Inline> iterator() {
-		return eles.iterator();
+		return inlines.iterator();
 	}
 
 	public Inline[] inlines() {
-		return eles.toArray(new Inline[eles.size()]);
+		return inlines.toArray(new Inline[inlines.size()]);
 	}
 
 	public Inline inline(int index) {
-		return eles.get(index);
+		return inlines.get(index);
 	}
 
 	public Style getRealStyle() {
@@ -162,5 +176,54 @@ public class Line extends Ele implements Text {
 		for (Line b : children)
 			sb.append("\n").append(b);
 		return sb.toString();
+	}
+
+	private static class ParagraphStack {
+
+		private List<Paragraph> ps;
+		private List<Line> stack;
+
+		ParagraphStack() {
+			ps = Doc.LIST(Paragraph.class);
+			stack = Doc.LIST(Line.class);
+		}
+
+		void push(Line line) {
+			if (line instanceof Code || line instanceof Including || line instanceof IndexTable) {
+				if (stack.size() > 0) {
+					ps.add(new Paragraph(stack));
+					stack = Doc.LIST(Line.class);
+				}
+				ps.add(new Paragraph(line));
+				return;
+			}
+			if (line.isBlank())
+				if (stack.size() > 0) {
+					ps.add(new Paragraph(stack));
+					stack = Doc.LIST(Line.class);
+					return;
+				}
+			stack.add(line);
+		}
+
+		Paragraph[] getParagraphs() {
+			if (stack.size() > 0) {
+				ps.add(new Paragraph(stack));
+				stack = Doc.LIST(Line.class);
+			}
+			return ps.toArray(new Paragraph[ps.size()]);
+		}
+
+	}
+
+	public Paragraph[] getParagraphs() {
+		ParagraphStack ps = new ParagraphStack();
+		for (Line l : children)
+			ps.push(l);
+		return ps.getParagraphs();
+	}
+
+	public boolean isHeading() {
+		return children.size() > 0;
 	}
 }

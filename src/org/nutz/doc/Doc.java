@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.nutz.lang.Lang;
+
 public class Doc {
 
-	public static <T> List<T> list(Class<T> type) {
+	public static <T> List<T> LIST(Class<T> type) {
 		return new ArrayList<T>();
 	}
 
@@ -16,11 +18,15 @@ public class Doc {
 		return i;
 	}
 
-	public static Line line(List<Inline> eles) {
-		Line b = new Line();
-		for (Inline e : eles)
-			b.append(e);
-		return b;
+	public static <T extends Line> Line line(Class<T> type, List<Inline> eles) {
+		try {
+			Line b = type.newInstance();
+			for (Inline e : eles)
+				b.append(e);
+			return b;
+		} catch (Exception e) {
+			throw Lang.wrapThrow(e);
+		}
 	}
 
 	public static Line line(Inline ele) {
@@ -73,6 +79,42 @@ public class Doc {
 	}
 
 	private Line root;
+	private String title;
+	private String subTitle;
+	private String author;
+	private String lastModify;
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getSubTitle() {
+		return subTitle;
+	}
+
+	public void setSubTitle(String sutTitle) {
+		this.subTitle = sutTitle;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public String getLastModify() {
+		return lastModify;
+	}
+
+	public void setLastModify(String lastModify) {
+		this.lastModify = lastModify;
+	}
 
 	public Line root() {
 		return root;
@@ -87,7 +129,7 @@ public class Doc {
 			return null;
 		Line root = Doc.line(line.getText());
 		if (level > 0) {
-			for (Iterator<Line> it = line.children(); it.hasNext();) {
+			for (Iterator<Line> it = line.childIterator(); it.hasNext();) {
 				Line indxtab = getIndex(it.next(), level - 1);
 				if (null != indxtab)
 					root.addChild(indxtab);

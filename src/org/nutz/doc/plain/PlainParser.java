@@ -15,7 +15,9 @@ import org.nutz.doc.Doc;
 import org.nutz.doc.DocParser;
 import org.nutz.doc.Inline;
 import org.nutz.doc.Media;
+import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Refer;
+import org.nutz.doc.UnorderedListItem;
 import org.nutz.doc.style.Font;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -44,13 +46,17 @@ public class PlainParser implements DocParser {
 			while (null != (line = br.readLine())) {
 				LinekWrapper bw = parseLine(br, line);
 				// find the parent to append
-				while (b.hasParent() && b.deep() > bw.deep)
+				while (b.hasParent() && b.deep() > bw.deep) {
 					b = b.parent();
+				}
 				if (bw.line instanceof RootLine) {
-					for (Iterator<Line> it = ((RootLine) bw.line).root.children(); it.hasNext();) {
+					for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it
+							.hasNext();) {
 						b.addChild(it.next());
 					}
 				} else {
+					if (b.deep() < bw.deep)
+						bw.line.insert(Strings.dup('\t', bw.deep - b.deep()));
 					b.addChild(bw.line);
 					b = bw.line;
 				}
@@ -89,6 +95,8 @@ public class PlainParser implements DocParser {
 	private static Pattern CODEEND = Pattern.compile("[}]{3}$");
 	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)([1-9])",
 			Pattern.CASE_INSENSITIVE);
+	private static Pattern OL = Pattern.compile("^(#[\\s]+)(.*)$");
+	private static Pattern UL = Pattern.compile("^([*][\\s]+)(.*)$");
 
 	private Line parseInlines(BufferedReader reader, int deep, String s) {
 		/*
@@ -153,7 +161,7 @@ public class PlainParser implements DocParser {
 		 * The line is a index table
 		 */
 		matcher = INDEXTABLE.matcher(s);
-		if(matcher.find()){
+		if (matcher.find()) {
 			return Doc.indexTable(Integer.valueOf(matcher.group(2)));
 		}
 		/*
@@ -162,7 +170,22 @@ public class PlainParser implements DocParser {
 		List<Inline> inlines = new ArrayList<Inline>();
 		LinkedCharArray lca = new LinkedCharArray();
 		StringBuilder sb = new StringBuilder();
-		char[] cs = s.toCharArray();
+		Class<? extends Line> lineType;
+		char[] cs;
+		matcher = UL.matcher(s);
+		if (matcher.find()) {
+			cs = matcher.group(2).toCharArray();
+			lineType = UnorderedListItem.class;
+		} else {
+			matcher = OL.matcher(s);
+			if (matcher.find()) {
+				cs = matcher.group(2).toCharArray();
+				lineType = OrderedListItem.class;
+			} else {
+				cs = s.toCharArray();
+				lineType = Line.class;
+			}
+		}
 		for (char c : cs) {
 			switch (c) {
 			case '{':
@@ -222,7 +245,7 @@ public class PlainParser implements DocParser {
 			sb.append(lca.clear());
 		if (sb.length() > 0)
 			inlines.add(toInline(sb.toString()));
-		return Doc.line(inlines);
+		return Doc.line(lineType, inlines);
 	}
 
 	private static Pattern QUOTE = Pattern.compile("^([{])(.*)([}])$");

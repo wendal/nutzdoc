@@ -4,6 +4,22 @@ import org.nutz.doc.style.Style;
 
 public abstract class Ele {
 
+	private static int ID = 0;
+
+	private int id;
+
+	protected Ele() {
+		id = ++ID;
+	}
+
+	public int ID() {
+		return id;
+	}
+
+	public String UID() {
+		return "H" + id;
+	}
+
 	private Style style;
 
 	public Style getStyle() {
@@ -19,7 +35,7 @@ public abstract class Ele {
 	public boolean hasStyle() {
 		return style != null;
 	}
-	
+
 	public abstract Style getRealStyle();
-	
+
 }
