@@ -180,11 +180,11 @@ public class Line extends Ele implements Text {
 
 	private static class ParagraphStack {
 
-		private List<Paragraph> ps;
+		private List<Block> ps;
 		private List<Line> stack;
 
 		ParagraphStack() {
-			ps = Doc.LIST(Paragraph.class);
+			ps = Doc.LIST(Block.class);
 			stack = Doc.LIST(Line.class);
 		}
 
@@ -198,37 +198,37 @@ public class Line extends Ele implements Text {
 		void push(Line line) {
 			if (line instanceof Code || line instanceof Including || line instanceof IndexTable) {
 				if (stack.size() > 0) {
-					ps.add(new Paragraph(stack));
+					ps.add(new Block(stack));
 					stack = Doc.LIST(Line.class);
 				}
-				ps.add(new Paragraph(line));
+				ps.add(new Block(line));
 				return;
 			}
 			if (line.isBlank()) {
 				if (stack.size() > 0) {
-					ps.add(new Paragraph(stack));
+					ps.add(new Block(stack));
 					stack = Doc.LIST(Line.class);
 				}
 				return;
 			}
 			if (stack.size() > 0 && line.getClass() != getLastLineType()) {
-				ps.add(new Paragraph(stack));
+				ps.add(new Block(stack));
 				stack = Doc.LIST(Line.class);
 			}
 			stack.add(line);
 		}
 
-		Paragraph[] getParagraphs() {
+		Block[] getParagraphs() {
 			if (stack.size() > 0) {
-				ps.add(new Paragraph(stack));
+				ps.add(new Block(stack));
 				stack = Doc.LIST(Line.class);
 			}
-			return ps.toArray(new Paragraph[ps.size()]);
+			return ps.toArray(new Block[ps.size()]);
 		}
 
 	}
 
-	public Paragraph[] getParagraphs() {
+	public Block[] getParagraphs() {
 		ParagraphStack ps = new ParagraphStack();
 		for (Line l : children)
 			ps.push(l);

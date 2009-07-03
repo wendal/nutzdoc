@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.nutz.lang.Lang;
+import org.nutz.lang.Strings;
 
 public class Doc {
 
@@ -83,8 +84,19 @@ public class Doc {
 	private String subTitle;
 	private String author;
 	private String lastModify;
+	private String docPath;
+
+	public String getDocPath() {
+		return docPath;
+	}
+
+	public void setDocPath(String docPath) {
+		this.docPath = docPath;
+	}
 
 	public String getTitle() {
+		if (Strings.isBlank(title))
+			return "Untitled";
 		return title;
 	}
 

@@ -21,7 +21,7 @@ import org.nutz.doc.Media;
 import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Refer;
 import org.nutz.doc.UnorderedListItem;
-import org.nutz.doc.style.Font;
+import org.nutz.doc.style.FontStyle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
@@ -275,13 +275,13 @@ public class PlainParser implements DocParser {
 				for (char c : mark.toCharArray()) {
 					switch (c) {
 					case '~':
-						inline.getStyle().getFont().addStyle(Font.STRIKE);
+						inline.getStyle().getFont().addStyle(FontStyle.STRIKE);
 						break;
 					case '_':
-						inline.getStyle().getFont().addStyle(Font.ITALIC);
+						inline.getStyle().getFont().addStyle(FontStyle.ITALIC);
 						break;
 					case '*':
-						inline.getStyle().getFont().addStyle(Font.BOLD);
+						inline.getStyle().getFont().addStyle(FontStyle.BOLD);
 						break;
 					case '^':
 						inline.getStyle().getFont().setAsSup();

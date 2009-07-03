@@ -2,7 +2,7 @@ package org.nutz.doc.style;
 
 import org.nutz.lang.Maths;
 
-public class Font {
+public class FontStyle {
 
 	public static void main(String[] args) {
 
@@ -19,22 +19,22 @@ public class Font {
 	private int style;
 	private TYPE type;
 
-	public Font addStyle(int style) {
+	public FontStyle addStyle(int style) {
 		this.style |= style;
 		return this;
 	}
 
-	public Font setStyle(int style) {
+	public FontStyle setStyle(int style) {
 		this.style = style;
 		return this;
 	}
 
-	public Font setAsSub() {
+	public FontStyle setAsSub() {
 		type = TYPE.SUB;
 		return this;
 	}
 
-	public Font setAsSup() {
+	public FontStyle setAsSup() {
 		type = TYPE.SUP;
 		return this;
 	}
@@ -67,7 +67,7 @@ public class Font {
 		return Maths.isMask(this.style, style);
 	}
 
-	public void merge(Font f) {
+	public void merge(FontStyle f) {
 		style |= f.style;
 	}
 

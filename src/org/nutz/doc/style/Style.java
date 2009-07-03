@@ -2,11 +2,11 @@ package org.nutz.doc.style;
 
 public class Style {
 
-	private Font font;
+	private FontStyle font;
 
-	public Font getFont() {
+	public FontStyle getFont() {
 		if (null == font)
-			font = new Font();
+			font = new FontStyle();
 		return font;
 	}
 

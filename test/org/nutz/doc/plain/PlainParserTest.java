@@ -15,7 +15,7 @@ import org.nutz.doc.Doc;
 import org.nutz.doc.ListItem;
 import org.nutz.doc.Media;
 import org.nutz.doc.OrderedListItem;
-import org.nutz.doc.Paragraph;
+import org.nutz.doc.Block;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
@@ -240,7 +240,7 @@ public class PlainParserTest {
 	@Test
 	public void test_eval_paragraphs() {
 		Line root = root("A\nB\nC\n\nD\n\tD1\nE\n\nF");
-		Paragraph[] ps = root.getParagraphs();
+		Block[] ps = root.getParagraphs();
 		assertEquals(3, ps.length);
 
 		assertEquals(3, ps[0].size());
@@ -266,8 +266,8 @@ public class PlainParserTest {
 	@Test
 	public void test_list_item() {
 		Line root = root4file("list.txt");
-		Paragraph[] ps = root.child(0).getParagraphs();
-		Paragraph[] ps2;
+		Block[] ps = root.child(0).getParagraphs();
+		Block[] ps2;
 		assertEquals(1, ps.length);
 		assertTrue(ps[0].isUnorderedList());
 
@@ -322,7 +322,7 @@ public class PlainParserTest {
 		assertEquals("B", root.child(0).child(0).getText());
 		assertTrue((root.child(0).child(0) instanceof OrderedListItem));
 		
-		Paragraph[] ps = root.child(0).getParagraphs();
+		Block[] ps = root.child(0).getParagraphs();
 		assertEquals(1,ps.length);
 		assertTrue(ps[0].isOrderedList());
 		assertEquals("B",ps[0].li(0).getText());

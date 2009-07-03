@@ -9,7 +9,7 @@ import java.io.Writer;
 import java.util.List;
 
 import org.nutz.doc.*;
-import org.nutz.doc.style.Font;
+import org.nutz.doc.style.FontStyle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
@@ -45,17 +45,18 @@ public class HtmlDocRender implements DocRender {
 				html.add(tag("title").add(text(doc.getTitle())));
 			Tag body = tag("body");
 			html.add(body);
-			Paragraph[] ps = doc.root().getParagraphs();
-			for (Paragraph p : ps)
+			Block[] ps = doc.root().getParagraphs();
+			for (Block p : ps)
 				renderParagraph(body, p);
 			try {
 				writer.write(html.toString());
+				writer.flush();
 			} catch (IOException e) {
 				throw Lang.wrapThrow(e);
 			}
 		}
 
-		void renderParagraph(Tag parent, Paragraph p) {
+		void renderParagraph(Tag parent, Block p) {
 			if (p.isIndexTable()) {
 				parent.add(renderIndexTable((IndexTable) p.line(0)));
 			} else if (p.isOrderedList()) {
@@ -75,8 +76,8 @@ public class HtmlDocRender implements DocRender {
 			} else if (p.isHeading()) {
 				for (Line h : p.lines()) {
 					renderHeading(parent, h);
-					Paragraph[] pps = h.getParagraphs();
-					for (Paragraph pp : pps)
+					Block[] pps = h.getParagraphs();
+					for (Block pp : pps)
 						renderParagraph(parent, pp);
 				}
 			} else {
@@ -94,8 +95,8 @@ public class HtmlDocRender implements DocRender {
 			Tag li = tag("li");
 			tag.add(li.add(renderLine(l)));
 			if (l.size() > 0) {
-				Paragraph[] ps = l.getParagraphs();
-				for (Paragraph p : ps)
+				Block[] ps = l.getParagraphs();
+				for (Block p : ps)
 					renderParagraph(li, p);
 			}
 		}
@@ -123,7 +124,7 @@ public class HtmlDocRender implements DocRender {
 			} else {
 				tag = text(inline.getText());
 				if (inline.hasStyle() && inline.getStyle().hasFont()) {
-					Font font = inline.getStyle().getFont();
+					FontStyle font = inline.getStyle().getFont();
 					tag = wrapFont(tag, "b", font.isBold());
 					tag = wrapFont(tag, "i", font.isItalic());
 					tag = wrapFont(tag, "s", font.isStrike());

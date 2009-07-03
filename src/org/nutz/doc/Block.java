@@ -3,16 +3,16 @@ package org.nutz.doc;
 import java.util.Iterator;
 import java.util.List;
 
-public class Paragraph {
+public class Block {
 
 	private List<Line> lines;
 
-	Paragraph(Line line) {
+	Block(Line line) {
 		this.lines = Doc.LIST(Line.class);
 		this.lines.add(line);
 	}
 
-	Paragraph(List<Line> lines) {
+	Block(List<Line> lines) {
 		this.lines = lines;
 	}
 
