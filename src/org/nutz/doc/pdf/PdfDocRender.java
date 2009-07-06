@@ -90,7 +90,7 @@ public class PdfDocRender implements DocRender {
 		void render() {
 			pdf.open();
 			Chapter chap = new Chapter(p(doc.getTitle()), 0);
-			Block[] ps = doc.root().getParagraphs();
+			Block[] ps = doc.root().getBlocks();
 			for (Block p : ps)
 				renderBlock(chap, p);
 			try {
@@ -113,7 +113,7 @@ public class PdfDocRender implements DocRender {
 			} else if (p.isHeading()) {
 				for (Line h : p.lines()) {
 					Section sec = section.addSection(h.getText());
-					Block[] pps = h.getParagraphs();
+					Block[] pps = h.getBlocks();
 					for (Block pp : pps)
 						renderBlock(sec, pp);
 				}

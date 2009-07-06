@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.Code;
-import org.nutz.doc.Including;
+import org.nutz.doc.FinalLine;
+import org.nutz.doc.HorizontalLine;
 import org.nutz.doc.Line;
 import org.nutz.doc.Doc;
 import org.nutz.doc.DocParser;
@@ -25,7 +25,6 @@ import org.nutz.doc.style.FontStyle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
-import org.nutz.lang.util.LinkedCharArray;
 
 public class PlainParser implements DocParser {
 
@@ -50,7 +49,7 @@ public class PlainParser implements DocParser {
 			while (null != (line = br.readLine())) {
 				LinekWrapper bw = parseLine(br, line);
 				if (!(bw.line instanceof RootLine))
-					if (!(bw.line instanceof Including))
+					if (!(bw.line instanceof FinalLine))
 						if (bw.line.isBlank()) {
 							if (b.hasParent() || (b.hasParent() && b.isBlank()))
 								b = b.parent();
@@ -99,19 +98,23 @@ public class PlainParser implements DocParser {
 		for (; lw.deep < cs.length; lw.deep++)
 			if (cs[lw.deep] != '\t')
 				break;
-		lw.line = parseInlines(reader, lw.deep, new String(cs, lw.deep, cs.length - lw.deep));
+		String s = new String(cs, lw.deep, cs.length - lw.deep);
+		if (s.matches("^={5,}$"))
+			lw.line = new HorizontalLine();
+		else
+			lw.line = parseLine2(reader, lw.deep, s);
 		return lw;
 	}
 
 	private static Pattern INCLUDE = Pattern.compile("^@[>]?include:", Pattern.CASE_INSENSITIVE);
 	private static Pattern CODESTART = Pattern.compile("^([{]{3})(<[a-zA-Z]+>)");
 	private static Pattern CODEEND = Pattern.compile("[}]{3}$");
-	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)([1-9])",
+	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)(([0-9]:)?[0-9])",
 			Pattern.CASE_INSENSITIVE);
 	private static Pattern OL = Pattern.compile("^(#[\\s]+)(.*)$");
 	private static Pattern UL = Pattern.compile("^([*][\\s]+)(.*)$");
 
-	private Line parseInlines(BufferedReader reader, int deep, String s) {
+	private Line parseLine2(BufferedReader reader, int deep, String s) {
 		/*
 		 * The line is for include something
 		 */
@@ -175,14 +178,11 @@ public class PlainParser implements DocParser {
 		 */
 		matcher = INDEXTABLE.matcher(s);
 		if (matcher.find()) {
-			return Doc.indexTable(Integer.valueOf(matcher.group(2)));
+			return Doc.indexTable(s.substring(s.indexOf(':') + 1));
 		}
 		/*
 		 * The line is contains a group of text
 		 */
-		List<Inline> inlines = new ArrayList<Inline>();
-		LinkedCharArray lca = new LinkedCharArray();
-		StringBuilder sb = new StringBuilder();
 		Class<? extends Line> lineType;
 		char[] cs;
 		matcher = UL.matcher(s);
@@ -199,66 +199,54 @@ public class PlainParser implements DocParser {
 				lineType = Line.class;
 			}
 		}
-		for (char c : cs) {
-			switch (c) {
-			case '{':
-				if (lca.last() == '{') {
-					sb.append(lca.clear());
-				} else {
-					if (lca.size() > 0)
-						sb.append(lca.clear());
-					if (sb.length() > 0) {
-						inlines.add(toInline(sb.toString()));
-						sb = new StringBuilder();
-					}
-					lca.push(c);
-				}
+		return Doc.line(lineType, parseInlines(cs));
+	}
+
+	private List<Inline> parseInlines(char[] cs) {
+		List<Inline> inlines = Doc.LIST(Inline.class);
+		TokenWalker tw = new TokenWalker(cs);
+		tw.add('`', '`').add('{', '}').add('<', '>').add('[', ']');
+		Token token;
+		while (null != (token = tw.next())) {
+			String s = token.getContent();
+			switch (token.getName()) {
+			case '`':
+				if (s.length() == 0)
+					inlines.add(Doc.inline("`"));
+				else
+					inlines.add(Doc.inline(s.toString()));
 				break;
-			case '}':
-				if (lca.first() == '{') {
-					sb.append(lca.push(c).clear());
-					inlines.add(toInline(sb.toString()));
-					sb = new StringBuilder();
-				} else {
-					lca.push(c);
+			case '{':
+				if (s.length() > 0)
+					inlines.add(toInline("{" + s + "}"));
+				break;
+			case '<':
+				if (s.length() > 0) {
+					Media media = Doc.media(s);
+					inlines.add(media);
 				}
 				break;
 			case '[':
-				if (lca.first() == '{') {
-					lca.push(c);
-				} else if (lca.last() == '[') {
-					sb.append(lca.clear());
-				} else {
-					if (lca.size() > 0)
-						sb.append(lca.clear());
-					if (sb.length() > 0) {
-						inlines.add(toInline(sb.toString()));
-						sb = new StringBuilder();
+				if (s.length() > 0) {
+					int pos = s.indexOf(' ');
+					if (pos > 0) {
+						String href = s.substring(0, pos);
+						List<Inline> inls = parseInlines(s.substring(pos + 1).toCharArray());
+						for (Inline il : inls)
+							il.href(href);
+						inlines.addAll(inls);
+					} else {
+						Inline inln = Doc.inline(s);
+						inln.href(s);
+						inlines.add(inln);
 					}
-					lca.push(c);
-				}
-				break;
-			case ']':
-				if (lca.first() == '{') {
-					lca.push(c);
-				} else if (lca.first() == '[') {
-					lca.push(c);
-					sb.append(lca.clear());
-					inlines.add(toInline(sb.toString()));
-					sb = new StringBuilder();
-				} else {
-					lca.push(c);
 				}
 				break;
 			default:
-				lca.push(c);
+				inlines.add(Doc.inline(token.getContent()));
 			}
 		}
-		if (lca.size() > 0)
-			sb.append(lca.clear());
-		if (sb.length() > 0)
-			inlines.add(toInline(sb.toString()));
-		return Doc.line(lineType, inlines);
+		return inlines;
 	}
 
 	private static Pattern QUOTE = Pattern.compile("^([{])(.*)([}])$");
@@ -312,12 +300,7 @@ public class PlainParser implements DocParser {
 				inline.href(ss[0]);
 				return inline;
 			} else {
-				String txt = ss[1];
-				Media media = parseMedia(txt);
-				if (null != media) {
-					media.href(ss[0]);
-					return media;
-				}
+				String txt = Lang.concatBy(1, ss.length - 1, ' ', ss).toString();
 				Inline inline = Doc.inline(txt);
 				inline.href(ss[0]);
 				return inline;

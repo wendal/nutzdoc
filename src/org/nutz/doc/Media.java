@@ -20,4 +20,14 @@ public class Media extends Inline {
 		this.src = src;
 	}
 
+	@Override
+	public String getText() {
+		return src.toString();
+	}
+
+	@Override
+	public boolean isBlank() {
+		return false;
+	}
+
 }

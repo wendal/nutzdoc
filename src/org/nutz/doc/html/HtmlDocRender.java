@@ -45,7 +45,7 @@ public class HtmlDocRender implements DocRender {
 				html.add(tag("title").add(text(doc.getTitle())));
 			Tag body = tag("body");
 			html.add(body);
-			Block[] ps = doc.root().getParagraphs();
+			Block[] ps = doc.root().getBlocks();
 			for (Block p : ps)
 				renderParagraph(body, p);
 			try {
@@ -57,7 +57,9 @@ public class HtmlDocRender implements DocRender {
 		}
 
 		void renderParagraph(Tag parent, Block p) {
-			if (p.isIndexTable()) {
+			if (p.isHr()) {
+				parent.add(tag("hr"));
+			} else if (p.isIndexTable()) {
 				parent.add(renderIndexTable((IndexTable) p.line(0)));
 			} else if (p.isOrderedList()) {
 				Tag tag = tag("ol");
@@ -76,7 +78,7 @@ public class HtmlDocRender implements DocRender {
 			} else if (p.isHeading()) {
 				for (Line h : p.lines()) {
 					renderHeading(parent, h);
-					Block[] pps = h.getParagraphs();
+					Block[] pps = h.getBlocks();
 					for (Block pp : pps)
 						renderParagraph(parent, pp);
 				}
@@ -95,7 +97,7 @@ public class HtmlDocRender implements DocRender {
 			Tag li = tag("li");
 			tag.add(li.add(renderLine(l)));
 			if (l.size() > 0) {
-				Block[] ps = l.getParagraphs();
+				Block[] ps = l.getBlocks();
 				for (Block p : ps)
 					renderParagraph(li, p);
 			}
@@ -148,7 +150,7 @@ public class HtmlDocRender implements DocRender {
 		}
 
 		Tag renderIndexTable(IndexTable table) {
-			Line indexes = doc.getIndex(table.getLevel());
+			Line indexes = doc.getIndex(table);
 			Tag tag = tag("div").attr("style", "padding:10pt");
 			for (Line l : indexes.children()) {
 				tag.add(renderIndex(l));

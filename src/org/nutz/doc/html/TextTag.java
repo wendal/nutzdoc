@@ -12,7 +12,9 @@ public class TextTag extends Tag {
 
 	@Override
 	public String toString() {
-		return name();
+		String s = name().replaceAll("[<]", "&lt;");
+		s = s.replaceAll("[>]", "&gt;");
+		return s;
 	}
 
 }

@@ -12,7 +12,7 @@ import org.nutz.lang.Streams;
 
 import static java.lang.System.*;
 
-public class DOCT {
+public class ZDoc {
 
 	public static void main(String[] args) throws IOException {
 		if (args.length != 2) {

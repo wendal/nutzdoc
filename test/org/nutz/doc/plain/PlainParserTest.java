@@ -88,7 +88,7 @@ public class PlainParserTest {
 
 	@Test
 	public void test_inline_media_png() {
-		String s = "Image: [org/nutz/doc/plain/nutz.png]";
+		String s = "Image: <org/nutz/doc/plain/nutz.png>";
 		Line root = root(s);
 
 		Inline e = root.child(0).inline(1);
@@ -98,8 +98,8 @@ public class PlainParserTest {
 	}
 
 	@Test
-	public void test_inline_media_anchor() {
-		String s = "Nutz: [http://nutz.googlecode.com org/nutz/doc/plain/nutz.png]";
+	public void test_inline_local_media_anchor() {
+		String s = "Nutz: [http://nutz.googlecode.com <org/nutz/doc/plain/nutz.png>]";
 		Line root = root(s);
 
 		Media media = (Media) root.child(0).inline(1);
@@ -107,6 +107,25 @@ public class PlainParserTest {
 		assertTrue(media.src().getFile().exists());
 		assertEquals("nutz.png", media.src().getFile().getName());
 		assertEquals("http://nutz.googlecode.com", media.getHref().toString());
+	}
+
+	@Test
+	public void test_inline_remote_media_anchor() {
+		String s = "Nutz: [http://nutz.googlecode.com <http://www.nutz.com/nutz.png>]";
+		Line root = root(s);
+
+		Media media = (Media) root.child(0).inline(1);
+		assertFalse(media.src().isLocal());
+		assertTrue(media.src().isHttp());
+		assertEquals("http://www.nutz.com/nutz.png", media.src().toString());
+		assertEquals("http://nutz.googlecode.com", media.getHref().toString());
+	}
+
+	@Test
+	public void test_inline_media_anchor_as_child() {
+		String s = "* Nutz:\n\t[http://nutz.googlecode.com <http://www.nutz.com/nutz.png>]";
+		Line root = root(s);
+		assertTrue(root.child(0).child(0).inline(0) instanceof Media);
 	}
 
 	@Test
@@ -128,7 +147,7 @@ public class PlainParserTest {
 	public void test_multiple_line_with_inline_anchor() {
 		String s = "A";
 		s += "\n\tB";
-		s += "\n\t\tA[b.gif]{*~^[http://nutz.googlecode.com Code]}";
+		s += "\n\t\tA<b.gif>{*~^[http://nutz.googlecode.com Code]}";
 		Line line = root(s).child(0).child(0).child(0);
 
 		assertEquals("A", line.inline(0).toString());
@@ -225,22 +244,25 @@ public class PlainParserTest {
 	public void test_index_table() {
 		Line root = root4file("indexTable_1.txt");
 		IndexTable it = (IndexTable) root.child(0);
-		assertEquals(4, it.getLevel());
 		assertEquals("\tABC", root.child(1).getText());
 		assertEquals("F", root.child(1).child(0).getText());
-		Line index = root.getDoc().getIndex(2);
+		Line index = root.getDoc().getIndex(Doc.indexTable("1,2"));
 		assertEquals("\tABC", index.child(0).getText());
 		assertEquals("L1", index.child(1).getText());
 		assertEquals("L1.1", index.child(1).child(0).getText());
 		assertEquals("L2", index.child(2).getText());
 		assertEquals("L2.1", index.child(2).child(0).getText());
-
+		index = root.getDoc().getIndex(it);
+		assertEquals("L1.1", index.child(0).getText());
+		assertEquals("L1.1.1", index.child(0).child(0).getText());
+		assertEquals("L2.1", index.child(1).getText());
+		assertEquals("L2.1.1", index.child(1).child(0).getText());
 	}
 
 	@Test
 	public void test_eval_paragraphs() {
 		Line root = root("A\nB\nC\n\nD\n\tD1\nE\n\nF");
-		Block[] ps = root.getParagraphs();
+		Block[] ps = root.getBlocks();
 		assertEquals(3, ps.length);
 
 		assertEquals(3, ps[0].size());
@@ -266,14 +288,14 @@ public class PlainParserTest {
 	@Test
 	public void test_list_item() {
 		Line root = root4file("list.txt");
-		Block[] ps = root.child(0).getParagraphs();
+		Block[] ps = root.child(0).getBlocks();
 		Block[] ps2;
 		assertEquals(1, ps.length);
 		assertTrue(ps[0].isUnorderedList());
 
 		ListItem li = ps[0].li(0);
 		assertEquals("a", li.getText());
-		ps2 = li.getParagraphs();
+		ps2 = li.getBlocks();
 		assertEquals(1, ps2.length);
 		assertTrue(ps2[0].isOrderedList());
 		assertEquals("a1", ps2[0].line(0).getText());
@@ -281,7 +303,7 @@ public class PlainParserTest {
 
 		li = ps[0].li(1);
 		assertEquals("b", li.getText());
-		ps2 = li.getParagraphs();
+		ps2 = li.getBlocks();
 		assertEquals(1, ps2.length);
 		assertTrue(ps2[0].isUnorderedList());
 		assertEquals("b1", ps2[0].line(0).getText());
@@ -289,7 +311,7 @@ public class PlainParserTest {
 
 		li = ps[0].li(2);
 		assertEquals("c", li.getText());
-		ps2 = li.getParagraphs();
+		ps2 = li.getBlocks();
 		assertEquals(2, ps2.length);
 		assertTrue(ps2[0].isUnorderedList());
 		assertTrue(ps2[1].isOrderedList());
@@ -298,7 +320,7 @@ public class PlainParserTest {
 
 		li = ps[0].li(3);
 		assertEquals("d", li.getText());
-		ps2 = li.getParagraphs();
+		ps2 = li.getBlocks();
 		assertEquals(2, ps2.length);
 		assertTrue(ps2[1].isOrderedList());
 		assertEquals("\td1", ps2[0].line(0).getText());
@@ -321,10 +343,43 @@ public class PlainParserTest {
 
 		assertEquals("B", root.child(0).child(0).getText());
 		assertTrue((root.child(0).child(0) instanceof OrderedListItem));
-		
-		Block[] ps = root.child(0).getParagraphs();
-		assertEquals(1,ps.length);
+
+		Block[] ps = root.child(0).getBlocks();
+		assertEquals(1, ps.length);
 		assertTrue(ps[0].isOrderedList());
-		assertEquals("B",ps[0].li(0).getText());
+		assertEquals("B", ps[0].li(0).getText());
+	}
+
+	@Test
+	public void test_escaping() {
+		Line root = root("A`[`B`]`C");
+		assertEquals("A[B]C", root.child(0).getText());
+	}
+
+	@Test
+	public void test_link_with_whitespace() {
+		Line root = root("[http://abc.com A B C]");
+		assertEquals("http://abc.com", root.child(0).inline(0).getHref().toString());
+		assertEquals("A B C", root.child(0).getText());
+	}
+
+	@Test
+	public void test_hr_1() {
+		Line root = root("A\n=====\nB");
+		Block[] ps = root.getBlocks();
+		assertEquals("A", ps[0].line(0).getText());
+		assertTrue(ps[1].isHr());
+		assertEquals("B", ps[2].line(0).getText());
+	}
+	
+	@Test
+	public void test_heading_with_including(){
+		Line root = root("A\n\t#index:3\n\tB");
+		assertEquals(1,root.size());
+		Block[] ps = root.getBlocks();
+		assertEquals("A", ps[0].line(0).getText());
+		ps = ps[0].line(0).getBlocks();
+		assertTrue(ps[0].isIndexTable());
+		assertEquals("B", ps[1].line(0).getText());
 	}
 }

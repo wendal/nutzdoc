@@ -66,10 +66,8 @@ public class Doc {
 		return code;
 	}
 
-	public static IndexTable indexTable(int level) {
-		IndexTable it = new IndexTable();
-		it.setLevel(level);
-		return it;
+	public static IndexTable indexTable(String s) {
+		return new IndexTable(s);
 	}
 
 	/*-----------------------------------------------------------------*/
@@ -132,23 +130,26 @@ public class Doc {
 		return root;
 	}
 
-	public Line getIndex(int level) {
-		return getIndex(root, level);
+	public Line getIndex(IndexTable idxt) {
+		Line ir = Doc.line((String) null);
+		attachIndex(ir, root, idxt);
+		return ir;
 	}
 
-	private static Line getIndex(Line line, int level) {
+	private static void attachIndex(Line indexParent, Line line, IndexTable indxt) {
 		if (line instanceof FinalLine || !line.isHeading())
-			return null;
-		Line root = Doc.line(line.getText());
-		root.id = line.id;
-		if (level > 0) {
-			for (Iterator<Line> it = line.childIterator(); it.hasNext();) {
-				Line indxtab = getIndex(it.next(), level - 1);
-				if (null != indxtab)
-					root.addChild(indxtab);
-			}
+			return;
+		if (indxt.atLeft(line.deep()))
+			return;
+		if (indxt.isin(line.deep())) {
+			Line io = Doc.line(line.getText());
+			io.id = line.id;
+			indexParent.addChild(io);
+			indexParent = io;
 		}
-		return root;
+		for (Iterator<Line> it = line.childIterator(); it.hasNext();) {
+			attachIndex(indexParent,it.next(),indxt);
+		}
 	}
 
 	public <T extends Line> boolean contains(Class<T> type) {

@@ -178,12 +178,12 @@ public class Line extends Ele implements Text {
 		return sb.toString();
 	}
 
-	private static class ParagraphStack {
+	private static class BlockStack {
 
 		private List<Block> ps;
 		private List<Line> stack;
 
-		ParagraphStack() {
+		BlockStack() {
 			ps = Doc.LIST(Block.class);
 			stack = Doc.LIST(Line.class);
 		}
@@ -209,6 +209,8 @@ public class Line extends Ele implements Text {
 					ps.add(new Block(stack));
 					stack = Doc.LIST(Line.class);
 				}
+				if(line instanceof HorizontalLine)
+					ps.add(new Block(line));
 				return;
 			}
 			if (stack.size() > 0 && line.getClass() != getLastLineType()) {
@@ -228,8 +230,8 @@ public class Line extends Ele implements Text {
 
 	}
 
-	public Block[] getParagraphs() {
-		ParagraphStack ps = new ParagraphStack();
+	public Block[] getBlocks() {
+		BlockStack ps = new BlockStack();
 		for (Line l : children)
 			ps.push(l);
 		return ps.getParagraphs();

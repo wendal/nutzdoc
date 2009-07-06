@@ -21,7 +21,7 @@ public class Refer {
 	}
 
 	public boolean isHttp() {
-		return path.matches("^(http://|https://)");
+		return path.startsWith("http://") || path.startsWith("https://");
 	}
 
 	public boolean isLocal() {
