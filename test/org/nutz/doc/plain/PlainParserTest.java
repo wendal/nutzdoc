@@ -246,7 +246,7 @@ public class PlainParserTest {
 	public void test_parse_code_with_child() {
 		Line root = root("{{{\nB\n}}}\n\tX");
 		assertEquals(2, root.size());
-		assertEquals("\tX", root.child(1).getText());
+		assertEquals("X", root.child(1).getText());
 	}
 
 	@Test
@@ -417,8 +417,12 @@ public class PlainParserTest {
 
 	@Test
 	public void test_child_of_blank_line() {
-		Line root = root("A\n\n\tB");
+		Line root = root("A\n\n\tB\n\nC");
 		assertEquals("A", root.child(0).getText());
 		assertEquals("B", root.child(0).child(0).getText());
+		Block[] bs = root.getBlocks();
+		assertEquals(2,bs.length);
+		assertEquals("A",bs[0].line(0).getText());
+		assertEquals("C",bs[1].line(0).getText());
 	}
 }

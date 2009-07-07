@@ -54,8 +54,9 @@ public class PlainParser implements DocParser {
 				if (!(bw.line instanceof RootLine))
 					if (!(bw.line instanceof FinalLine))
 						if (bw.line.isBlank()) {
-							if (b.hasParent() || (b.hasParent() && b.isBlank()))
+							if (b.hasParent() || (b.hasParent() && b.isBlank())) {
 								b = b.parent();
+  							}
 							b.addChild(bw.line);
 							b = bw.line;
 							continue;
