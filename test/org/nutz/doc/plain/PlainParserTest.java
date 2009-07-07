@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.nutz.doc.ZRow;
 import org.nutz.doc.Code;
 import org.nutz.doc.Including;
 import org.nutz.doc.IndexTable;
@@ -16,6 +17,7 @@ import org.nutz.doc.ListItem;
 import org.nutz.doc.Media;
 import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Block;
+import org.nutz.doc.Shell;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
@@ -233,7 +235,7 @@ public class PlainParserTest {
 		Code code2 = (Code) line2.child(0);
 		Line line3 = root.child(3);
 		assertEquals("This is the example java code:", line1.toString());
-		assertEquals(Code.TYPE.JAVA, code1.getType());
+		assertEquals(Code.TYPE.java, code1.getType());
 		assertEquals("public class Abc{\n\tprivate int num;\n\t\t// tt\n}", code1.getText());
 		assertEquals("Child:", line2.getText());
 		assertEquals("DROP TABLE t_abc;\n\t\t/*t*/", code2.getText());
@@ -241,13 +243,20 @@ public class PlainParserTest {
 	}
 
 	@Test
+	public void test_parse_code_with_child() {
+		Line root = root("{{{\nB\n}}}\n\tX");
+		assertEquals(2, root.size());
+		assertEquals("\tX", root.child(1).getText());
+	}
+
+	@Test
 	public void test_index_table() {
 		Line root = root4file("indexTable_1.txt");
 		IndexTable it = (IndexTable) root.child(0);
-		assertEquals("\tABC", root.child(1).getText());
+		assertEquals("\t\tABC", root.child(1).getText());
 		assertEquals("F", root.child(1).child(0).getText());
 		Line index = root.getDoc().getIndex(Doc.indexTable("1,2"));
-		assertEquals("\tABC", index.child(0).getText());
+		assertEquals("\t\tABC", index.child(0).getText());
 		assertEquals("L1", index.child(1).getText());
 		assertEquals("L1.1", index.child(1).child(0).getText());
 		assertEquals("L2", index.child(2).getText());
@@ -371,15 +380,45 @@ public class PlainParserTest {
 		assertTrue(ps[1].isHr());
 		assertEquals("B", ps[2].line(0).getText());
 	}
-	
+
 	@Test
-	public void test_heading_with_including(){
+	public void test_heading_with_including() {
 		Line root = root("A\n\t#index:3\n\tB");
-		assertEquals(1,root.size());
+		assertEquals(1, root.size());
 		Block[] ps = root.getBlocks();
 		assertEquals("A", ps[0].line(0).getText());
 		ps = ps[0].line(0).getBlocks();
 		assertTrue(ps[0].isIndexTable());
 		assertEquals("B", ps[1].line(0).getText());
+	}
+
+	@Test
+	public void test_one_row_shell() {
+		Line root = root("||A11||A12||");
+		ZRow row = (ZRow) root.child(0);
+		assertEquals(2, row.size());
+		assertEquals("A11", row.child(0).getText());
+		assertEquals("A12", row.child(1).getText());
+	}
+
+	@Test
+	public void test_basic_shell() {
+		Line root = root("A\n\t||C11||C12||\n\t||C21||C22||");
+		assertEquals("A", root.child(0).getText());
+		Shell shell = (Shell) root.getBlocks()[1];
+		assertEquals(2, shell.size());
+		ZRow[] rows = shell.rows();
+		assertEquals(2, rows.length);
+		assertEquals(2, rows[0].size());
+		assertEquals(2, rows[1].size());
+		assertEquals("C11", rows[0].child(0).getText());
+		assertEquals("C22", rows[1].child(1).getText());
+	}
+
+	@Test
+	public void test_child_of_blank_line() {
+		Line root = root("A\n\n\tB");
+		assertEquals("A", root.child(0).getText());
+		assertEquals("B", root.child(0).child(0).getText());
 	}
 }

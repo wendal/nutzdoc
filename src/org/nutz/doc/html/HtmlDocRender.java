@@ -47,7 +47,7 @@ public class HtmlDocRender implements DocRender {
 			html.add(body);
 			Block[] ps = doc.root().getBlocks();
 			for (Block p : ps)
-				renderParagraph(body, p);
+				renderBlock(body, p);
 			try {
 				writer.write(html.toString());
 				writer.flush();
@@ -56,8 +56,20 @@ public class HtmlDocRender implements DocRender {
 			}
 		}
 
-		void renderParagraph(Tag parent, Block p) {
-			if (p.isHr()) {
+		void renderBlock(Tag parent, Block p) {
+			if (p instanceof Shell) {
+				Tag tab = tag("table").attr("border", "1");
+				tab.attr("cellspacing", "2").attr("cellpadding", "4");
+				ZRow[] rows = ((Shell) p).rows();
+				for (ZRow row : rows) {
+					Tag tagTr = tag("tr");
+					for (Line td : row.children()) {
+						tagTr.add(tag("td").add(renderLine(td)));
+					}
+					tab.add(tagTr);
+				}
+				parent.add(tab);
+			} else if (p.isHr()) {
 				parent.add(tag("hr"));
 			} else if (p.isIndexTable()) {
 				parent.add(renderIndexTable((IndexTable) p.line(0)));
@@ -80,7 +92,7 @@ public class HtmlDocRender implements DocRender {
 					renderHeading(parent, h);
 					Block[] pps = h.getBlocks();
 					for (Block pp : pps)
-						renderParagraph(parent, pp);
+						renderBlock(parent, pp);
 				}
 			} else {
 				Tag tag = tag("p");
@@ -99,7 +111,7 @@ public class HtmlDocRender implements DocRender {
 			if (l.size() > 0) {
 				Block[] ps = l.getBlocks();
 				for (Block p : ps)
-					renderParagraph(li, p);
+					renderBlock(li, p);
 			}
 		}
 

@@ -11,5 +11,5 @@ public abstract class FinalLine extends Line {
 	public void addChild(Line block) {
 		parent().addChild(block);
 	}
-	
+
 }

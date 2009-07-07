@@ -9,7 +9,7 @@ import org.nutz.lang.Strings;
 public class Line extends Ele implements Text {
 
 	private List<Inline> inlines;
-	private List<Line> children;
+	protected List<Line> children;
 	private Line parent;
 	private int deep;
 	private Doc doc;
@@ -196,35 +196,42 @@ public class Line extends Ele implements Text {
 		}
 
 		void push(Line line) {
-			if (line instanceof Code || line instanceof Including || line instanceof IndexTable) {
-				if (stack.size() > 0) {
-					ps.add(new Block(stack));
-					stack = Doc.LIST(Line.class);
+			if (line instanceof ZRow) {
+				if (stack.size() == 0) {
+					stack.add(line);
+				} else {
+					Line last = stack.get(0);
+					if (!(last instanceof ZRow))
+						popStack();
+					stack.add(line);
 				}
+			} else if (line instanceof Code || line instanceof Including
+					|| line instanceof IndexTable) {
+				popStack();
 				ps.add(new Block(line));
-				return;
-			}
-			if (line.isBlank()) {
-				if (stack.size() > 0) {
-					ps.add(new Block(stack));
-					stack = Doc.LIST(Line.class);
-				}
-				if(line instanceof HorizontalLine)
+			} else if (line.isBlank()) {
+				popStack();
+				if (line instanceof HorizontalLine)
 					ps.add(new Block(line));
-				return;
+			} else {
+				if (stack.size() > 0 && line.getClass() != getLastLineType())
+					popStack();
+				stack.add(line);
 			}
-			if (stack.size() > 0 && line.getClass() != getLastLineType()) {
-				ps.add(new Block(stack));
-				stack = Doc.LIST(Line.class);
-			}
-			stack.add(line);
 		}
 
-		Block[] getParagraphs() {
+		private void popStack() {
 			if (stack.size() > 0) {
-				ps.add(new Block(stack));
+				if (stack.get(0) instanceof ZRow)
+					ps.add(new Shell(stack));
+				else
+					ps.add(new Block(stack));
 				stack = Doc.LIST(Line.class);
 			}
+		}
+
+		Block[] getBlock() {
+			popStack();
 			return ps.toArray(new Block[ps.size()]);
 		}
 
@@ -234,7 +241,7 @@ public class Line extends Ele implements Text {
 		BlockStack ps = new BlockStack();
 		for (Line l : children)
 			ps.push(l);
-		return ps.getParagraphs();
+		return ps.getBlock();
 	}
 
 	public boolean isHeading() {

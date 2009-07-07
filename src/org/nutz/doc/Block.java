@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Block {
 
-	private List<Line> lines;
+	protected List<Line> lines;
 
 	Block(Line line) {
 		this.lines = Doc.LIST(Line.class);

@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.Code;
+import org.nutz.doc.DocRender;
 import org.nutz.doc.FinalLine;
 import org.nutz.doc.HorizontalLine;
 import org.nutz.doc.Line;
@@ -21,6 +22,8 @@ import org.nutz.doc.Media;
 import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Refer;
 import org.nutz.doc.UnorderedListItem;
+import org.nutz.doc.ZRow;
+import org.nutz.doc.html.HtmlDocRender;
 import org.nutz.doc.style.FontStyle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -47,7 +50,7 @@ public class PlainParser implements DocParser {
 		Line b = doc.root();
 		try {
 			while (null != (line = br.readLine())) {
-				LinekWrapper bw = parseLine(br, line);
+				LineWrapper bw = parseLine(br, line);
 				if (!(bw.line instanceof RootLine))
 					if (!(bw.line instanceof FinalLine))
 						if (bw.line.isBlank()) {
@@ -79,7 +82,7 @@ public class PlainParser implements DocParser {
 		return doc;
 	}
 
-	private static class LinekWrapper {
+	private static class LineWrapper {
 		Line line;
 		int deep;
 	}
@@ -92,8 +95,8 @@ public class PlainParser implements DocParser {
 		}
 	}
 
-	private LinekWrapper parseLine(BufferedReader reader, String line) {
-		LinekWrapper lw = new LinekWrapper();
+	private LineWrapper parseLine(BufferedReader reader, String line) {
+		LineWrapper lw = new LineWrapper();
 		char[] cs = line.toCharArray();
 		for (; lw.deep < cs.length; lw.deep++)
 			if (cs[lw.deep] != '\t')
@@ -106,8 +109,9 @@ public class PlainParser implements DocParser {
 		return lw;
 	}
 
+	private static Pattern ROW = Pattern.compile("(?<=[|]{2})([^|]*)(?=[|]{2})");
 	private static Pattern INCLUDE = Pattern.compile("^@[>]?include:", Pattern.CASE_INSENSITIVE);
-	private static Pattern CODESTART = Pattern.compile("^([{]{3})(<[a-zA-Z]+>)");
+	private static Pattern CODESTART = Pattern.compile("^([{]{3})(<[a-zA-Z]+>)?");
 	private static Pattern CODEEND = Pattern.compile("[}]{3}$");
 	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)(([0-9]:)?[0-9])",
 			Pattern.CASE_INSENSITIVE);
@@ -115,6 +119,20 @@ public class PlainParser implements DocParser {
 	private static Pattern UL = Pattern.compile("^([*][\\s]+)(.*)$");
 
 	private Line parseLine2(BufferedReader reader, int deep, String s) {
+		String ss = Strings.trim(s);
+		/*
+		 * The line is row
+		 */
+		if (ss.startsWith("||") && ss.endsWith("||")) {
+			ZRow row = Doc.row();
+			Matcher m = ROW.matcher(ss);
+			while (m.find()) {
+				String sln = m.group();
+				LineWrapper lw = parseLine(reader, sln);
+				row.addChild(lw.line);
+			}
+			return row;
+		}
 		/*
 		 * The line is for include something
 		 */
@@ -143,15 +161,20 @@ public class PlainParser implements DocParser {
 		 * The line is for code zzh: the real code should not appear in same
 		 * line of the CODESTART
 		 */
-		matcher = CODESTART.matcher(Strings.trim(s));
-		if (matcher.find()) {
+		if (ss.startsWith("{{{")) {
 			StringBuilder sb = new StringBuilder();
 			Code.TYPE type = null;
 			// Get the code type
+			matcher = CODESTART.matcher(ss);
+			matcher.find();
 			if (matcher.groupCount() == 2) {
-				String tstr = matcher.group(2);
-				tstr = tstr.substring(1, tstr.length() - 1);
-				type = Code.TYPE.valueOf(tstr);
+				try {
+					String tstr = matcher.group(2);
+					tstr = tstr.substring(1, tstr.length() - 1);
+					type = Code.TYPE.valueOf(tstr.toLowerCase());
+				} catch (Exception e) {
+					type = Code.TYPE.Unknown;
+				}
 			}
 			// read line
 			// and the CODEEND should not appear in the same line of real code.
@@ -323,10 +346,13 @@ public class PlainParser implements DocParser {
 	}
 
 	public static void main(String[] args) {
-		String s = "@>include:dkd;dldkaf aabc";
-		Matcher matcher = INCLUDE.matcher(s);
-		matcher.find();
-		String refer = Strings.trim(s.substring(matcher.end()));
-		System.out.printf("{%s}", refer);
+		String s = "||A11||A12||";
+		s += "\n||A21||A22||";
+		DocParser parser = new PlainParser();
+		Doc doc = parser.parse(Lang.ins(s));
+		DocRender render = new HtmlDocRender();
+		StringBuilder sb = new StringBuilder();
+		render.render(Lang.ops(sb), doc);
+		System.out.println(sb);
 	}
 }

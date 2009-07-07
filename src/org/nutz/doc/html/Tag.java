@@ -31,7 +31,7 @@ class Tag {
 		System.out.println(tag);
 	}
 
-	private static final Pattern BLOCK = Pattern.compile("^(head|div|p|ul|ol|blockquote|pre|title|h[1-9]|li|hr)$",
+	private static final Pattern BLOCK = Pattern.compile("^(head|div|p|ul|ol|blockquote|pre|title|h[1-9]|li|hr|table|tr|td)$",
 			Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern INLINE = Pattern.compile(

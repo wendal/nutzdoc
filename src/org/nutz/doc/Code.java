@@ -1,9 +1,9 @@
 package org.nutz.doc;
 
-public class Code extends Line {
+public class Code extends FinalLine {
 
 	public static enum TYPE {
-		Unknown, HTML, JAVA, JSON, Javascript, SQL, XML
+		Unknown, html, java, json, javascript, sql, xml
 	}
 
 	private TYPE type;

@@ -69,6 +69,10 @@ public class Doc {
 	public static IndexTable indexTable(String s) {
 		return new IndexTable(s);
 	}
+	
+	public static ZRow row(){
+		return new ZRow();
+	}
 
 	/*-----------------------------------------------------------------*/
 
