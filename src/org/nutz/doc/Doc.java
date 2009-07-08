@@ -38,17 +38,6 @@ public class Doc {
 		return line(inline(text));
 	}
 
-	public static Including including(String s) {
-		return including(s);
-	}
-
-	public static Including including(Refer refer, DocParser parser) {
-		Including inc = new Including();
-		inc.setRefer(refer);
-		inc.setParser(parser);
-		return inc;
-	}
-
 	public static Refer refer(String str) {
 		return new Refer(str);
 	}
@@ -69,8 +58,8 @@ public class Doc {
 	public static IndexTable indexTable(String s) {
 		return new IndexTable(s);
 	}
-	
-	public static ZRow row(){
+
+	public static ZRow row() {
 		return new ZRow();
 	}
 
@@ -79,6 +68,7 @@ public class Doc {
 	public Doc() {
 		root = new Line();
 		root.setDoc(this);
+		root.setDeep(-1);
 	}
 
 	private Line root;
@@ -152,7 +142,7 @@ public class Doc {
 			indexParent = io;
 		}
 		for (Iterator<Line> it = line.childIterator(); it.hasNext();) {
-			attachIndex(indexParent,it.next(),indxt);
+			attachIndex(indexParent, it.next(), indxt);
 		}
 	}
 

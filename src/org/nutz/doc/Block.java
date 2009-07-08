@@ -58,10 +58,6 @@ public class Block {
 				return false;
 		return true;
 	}
-
-	public boolean isIncluding() {
-		return (lines.size() == 1 && lines.get(0) instanceof Including);
-	}
 	
 	public boolean isHr(){
 		return (lines.size() == 1 && lines.get(0) instanceof HorizontalLine);

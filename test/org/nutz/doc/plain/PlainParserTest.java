@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.junit.Test;
 import org.nutz.doc.ZRow;
 import org.nutz.doc.Code;
-import org.nutz.doc.Including;
 import org.nutz.doc.IndexTable;
 import org.nutz.doc.Inline;
 import org.nutz.doc.Line;
@@ -170,11 +169,10 @@ public class PlainParserTest {
 	public void test_simple_include() {
 		String s = "doc1";
 		s += "\n\t@include: org/nutz/doc/plain/doc.txt";
-		s += "\ndoc2";
-		s += "\n\t@>include: org/nutz/doc/plain/doc.txt";
+		s += "\n\ttxt";
 		Line root = root(s);
+		assertEquals(1,root.size());
 		assertEquals("doc1", root.child(0).getText());
-		assertEquals("doc2", root.child(1).getText());
 
 		Line line = root.child(0).child(0);
 		assertEquals("A: ", line.inline(0).toString());
@@ -192,10 +190,8 @@ public class PlainParserTest {
 		Media media = (Media) line.inline(1);
 		assertEquals("nutz.png", media.src().getFile().getName());
 		assertEquals("http://nutz.googlecode.com", media.getHref().toString());
-
-		Including inc = (Including) root.child(1).child(0);
-		assertTrue(inc.getRefer().isLocal());
-		assertEquals("doc.txt", inc.getRefer().getFile().getName());
+		
+		assertEquals("txt",root.child(0).child(1).getText());
 	}
 
 	@Test
@@ -253,10 +249,10 @@ public class PlainParserTest {
 	public void test_index_table() {
 		Line root = root4file("indexTable_1.txt");
 		IndexTable it = (IndexTable) root.child(0);
-		assertEquals("\t\tABC", root.child(1).getText());
+		assertEquals("ABC", root.child(1).getText());
 		assertEquals("F", root.child(1).child(0).getText());
-		Line index = root.getDoc().getIndex(Doc.indexTable("1,2"));
-		assertEquals("\t\tABC", index.child(0).getText());
+		Line index = root.getDoc().getIndex(Doc.indexTable("0,1"));
+		assertEquals("ABC", index.child(0).getText());
 		assertEquals("L1", index.child(1).getText());
 		assertEquals("L1.1", index.child(1).child(0).getText());
 		assertEquals("L2", index.child(2).getText());
@@ -291,12 +287,13 @@ public class PlainParserTest {
 	@Test
 	public void test_tab_at_the_line_head() {
 		Line root = root("A\n\t\tB");
-		assertEquals("\tB", root.child(0).child(0).getText());
+		assertEquals("B", root.child(0).child(0).getText());
 	}
 
 	@Test
 	public void test_list_item() {
 		Line root = root4file("list.txt");
+		assertEquals(4,root.size());
 		Block[] ps = root.child(0).getBlocks();
 		Block[] ps2;
 		assertEquals(1, ps.length);
@@ -332,16 +329,15 @@ public class PlainParserTest {
 		ps2 = li.getBlocks();
 		assertEquals(2, ps2.length);
 		assertTrue(ps2[1].isOrderedList());
-		assertEquals("\td1", ps2[0].line(0).getText());
+		assertEquals("d1", ps2[0].line(0).getText());
 		assertEquals("d2", ps2[1].line(0).getText());
 
 		Line line2 = root.child(1);
 		assertEquals(0, line2.size());
 
 		assertTrue(root.child(2).isBlank());
-		assertTrue(root.child(3).isBlank());
 
-		assertEquals("-End-", root.child(4).getText());
+		assertEquals("-End-", root.child(3).getText());
 	}
 
 	@Test
@@ -405,7 +401,7 @@ public class PlainParserTest {
 	public void test_basic_shell() {
 		Line root = root("A\n\t||C11||C12||\n\t||C21||C22||");
 		assertEquals("A", root.child(0).getText());
-		Shell shell = (Shell) root.getBlocks()[1];
+		Shell shell = (Shell) root.child(0).getBlocks()[0];
 		assertEquals(2, shell.size());
 		ZRow[] rows = shell.rows();
 		assertEquals(2, rows.length);

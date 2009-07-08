@@ -116,7 +116,7 @@ public class HtmlDocRender implements DocRender {
 		}
 
 		private void renderHeading(Tag parent, Line h) {
-			Tag hn = tag("h" + h.deep());
+			Tag hn = tag("h" + (h.deep() + 1));
 			if (h.getDoc().contains(IndexTable.class))
 				hn.add(tag("a").attr("name", h.UID()));
 			hn.add(text(h.getText()));

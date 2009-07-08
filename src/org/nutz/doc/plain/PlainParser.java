@@ -47,45 +47,97 @@ public class PlainParser implements DocParser {
 		 */
 		Doc doc = new Doc();
 		String line;
-		Line b = doc.root();
+		LineWrapper root = new LineWrapper();
+		root.line = doc.root();
+		root.deep = -1;
+		/*
+		 * Parse each line
+		 */
+		List<LineWrapper> lineList = Doc.LIST(LineWrapper.class);
 		try {
-			while (null != (line = br.readLine())) {
-				LineWrapper bw = parseLine(br, line);
-				if (!(bw.line instanceof RootLine))
-					if (!(bw.line instanceof FinalLine))
-						if (bw.line.isBlank()) {
-							if (b.hasParent() || (b.hasParent() && b.isBlank())) {
-								b = b.parent();
-  							}
-							b.addChild(bw.line);
-							b = bw.line;
-							continue;
-						}
-				// find the parent to append
-				while (b.hasParent() && b.deep() > bw.deep) {
-					b = b.parent();
-				}
-				if (bw.line instanceof RootLine) {
-					for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it
-							.hasNext();) {
-						b.addChild(it.next());
-					}
-				} else {
-					if (b.deep() < bw.deep)
-						bw.line.insert(Strings.dup('\t', bw.deep - b.deep()));
-					b.addChild(bw.line);
-					b = bw.line;
-				}
-			}
+			while (null != (line = br.readLine()))
+				lineList.add(parseLine(br, line));
 		} catch (IOException e) {
 			throw Lang.wrapThrow(e);
 		}
+		LineWrapper[] lines = lineList.toArray(new LineWrapper[lineList.size()]);
+		/*
+		 * Make tree
+		 */
+		for (int i = 0; i < lines.length; i++) {
+			LineWrapper bw = lines[i];
+			LineWrapper prev = root;
+			for (int x = i - 1; x >= 0; x--) {
+				if (lines[x].line.is(RootLine.class))
+					continue;
+				if (lines[x].line.is(FinalLine.class))
+					continue;
+				prev = lines[x];
+				break;
+			}
+
+			if (bw.line.is(Line.class) && bw.line.isBlank()) {
+				// check next un-blank line is child of pre-line
+				LineWrapper next = null;
+				int j = i + 1;
+				for (; j < lines.length; j++)
+					if (!lines[j].line.is(Line.class) || !lines[j].line.isBlank()) {
+						next = lines[j];
+						break;
+					}
+				if (null == next)
+					break;
+				if (next.deep > prev.deep) {
+					prev.line.addChild(next.line);
+				} else {
+					Line parent = prev.line;
+					while (parent.deep() >= next.deep) {
+						parent = parent.parent();
+					}
+					parent.addChild(bw.line);
+					parent.addChild(next.line);
+				}
+				i = j;
+			} else {
+				Line parent = prev.line;
+				while (parent.deep() >= bw.deep) {
+					parent = parent.parent();
+				}
+				if (bw.line instanceof RootLine) {
+					for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it
+							.hasNext();)
+						parent.addChild(it.next());
+
+				} else {
+					parent.addChild(bw.line);
+				}
+			}
+		}
+		/*
+		 * for (int i = 0; i < lines.length; i++) { LineWrapper bw = lines[i];
+		 * if (!(bw.line instanceof RootLine)) if (!(bw.line instanceof
+		 * FinalLine)) if (bw.line.isBlank()) { if (b.hasParent() ||
+		 * (b.hasParent() && b.isBlank())) b = b.parent(); b.addChild(bw.line);
+		 * b = bw.line; continue; } // find the parent to append while
+		 * (b.hasParent() && b.deep() > bw.deep) { b = b.parent(); } if (bw.line
+		 * instanceof RootLine) { for (Iterator<Line> it = ((RootLine)
+		 * bw.line).root.childIterator(); it.hasNext();) {
+		 * b.addChild(it.next()); } } else { if (b.deep() < bw.deep)
+		 * bw.line.insert(Strings.dup('\t', bw.deep - b.deep()));
+		 * b.addChild(bw.line); b = bw.line; } }
+		 */
 		return doc;
 	}
 
 	private static class LineWrapper {
 		Line line;
 		int deep;
+
+		@Override
+		public String toString() {
+			return String.format("%d:\t%s", deep, line.toString());
+		}
+
 	}
 
 	private static class RootLine extends Line {
@@ -111,7 +163,7 @@ public class PlainParser implements DocParser {
 	}
 
 	private static Pattern ROW = Pattern.compile("(?<=[|]{2})([^|]*)(?=[|]{2})");
-	private static Pattern INCLUDE = Pattern.compile("^@[>]?include:", Pattern.CASE_INSENSITIVE);
+	private static Pattern INCLUDE = Pattern.compile("^@include:", Pattern.CASE_INSENSITIVE);
 	private static Pattern CODESTART = Pattern.compile("^([{]{3})(<[a-zA-Z]+>)?");
 	private static Pattern CODEEND = Pattern.compile("[}]{3}$");
 	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)(([0-9]:)?[0-9])",
@@ -145,17 +197,13 @@ public class PlainParser implements DocParser {
 				throw Lang.makeThrow("Fail to find doc file '%s'!!!", re.getFile()
 						.getAbsolutePath());
 			}
-			if (s.startsWith("@>")) {
-				return Doc.including(re, this);
-			} else {
-				try {
-					InputStream ins = Streams.fileIn(re.getFile());
-					Doc doc = this.parse(ins);
-					ins.close();
-					return new RootLine(doc.root());
-				} catch (IOException e) {
-					throw Lang.wrapThrow(e);
-				}
+			try {
+				InputStream ins = Streams.fileIn(re.getFile());
+				Doc doc = this.parse(ins);
+				ins.close();
+				return new RootLine(doc.root());
+			} catch (IOException e) {
+				throw Lang.wrapThrow(e);
 			}
 		}
 		/*

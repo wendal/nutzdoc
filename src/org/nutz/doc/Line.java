@@ -120,6 +120,10 @@ public class Line extends Ele implements Text {
 		inlines.add(Doc.inline(text));
 	}
 
+	public <T extends Line> boolean is(Class<T> type) {
+		return this.getClass() == type;
+	}
+
 	public Line insert(Inline ele) {
 		ele.setBlock(this);
 		inlines.add(0, ele);
@@ -171,7 +175,7 @@ public class Line extends Ele implements Text {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Strings.dup('\t', deep() - 1));
+		sb.append(Strings.dup('\t', deep()));
 		sb.append(getText());
 		for (Line b : children)
 			sb.append("\n").append(b);
@@ -205,8 +209,7 @@ public class Line extends Ele implements Text {
 						popStack();
 					stack.add(line);
 				}
-			} else if (line instanceof Code || line instanceof Including
-					|| line instanceof IndexTable) {
+			} else if (line instanceof Code || line instanceof IndexTable) {
 				popStack();
 				ps.add(new Block(line));
 			} else if (line.isBlank()) {
