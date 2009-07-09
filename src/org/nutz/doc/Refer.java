@@ -24,6 +24,10 @@ public class Refer {
 		return path.startsWith("http://") || path.startsWith("https://");
 	}
 
+	public boolean isRelative() {
+		return path.matches("^([\\w.]+[/])*([\\w.]+)$");
+	}
+
 	public boolean isLocal() {
 		return null != getFile();
 	}

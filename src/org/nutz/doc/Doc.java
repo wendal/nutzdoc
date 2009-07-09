@@ -1,5 +1,6 @@
 package org.nutz.doc;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -76,14 +77,14 @@ public class Doc {
 	private String subTitle;
 	private String author;
 	private String lastModify;
-	private String docPath;
+	private File file;
 
-	public String getDocPath() {
-		return docPath;
+	public File getFile() {
+		return file;
 	}
 
-	public void setDocPath(String docPath) {
-		this.docPath = docPath;
+	public void setFile(File file) {
+		this.file = file;
 	}
 
 	public String getTitle() {
