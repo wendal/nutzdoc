@@ -53,10 +53,15 @@ public class Block {
 	}
 
 	public boolean isHeading() {
-		for (Line l : lines)
-			if(!l.isHeading())
-				return false;
-		return true;
+		if(lines.size()==0)
+			return false;
+		return lines.get(size()-1).isHeading();
+	}
+	
+	public Block[] getBlocks(){
+		if(!isHeading())
+			return null;
+		return lines.get(size()-1).getBlocks();
 	}
 	
 	public boolean isHr(){
@@ -82,5 +87,17 @@ public class Block {
 				re = true;
 		}
 		return re;
+	}
+
+	public Doc getDoc() {
+		return lines.get(0).getDoc();
+	}
+	
+	public int depth(){
+		return lines.get(0).depth();
+	}
+	
+	public String UID(){
+		return lines.get(size()-1).UID();
 	}
 }

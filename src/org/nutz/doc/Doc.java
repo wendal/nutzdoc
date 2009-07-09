@@ -68,7 +68,7 @@ public class Doc {
 	public Doc() {
 		root = new Line();
 		root.setDoc(this);
-		root.setDeep(-1);
+		root.setDepth(-1);
 	}
 
 	private Line root;
@@ -133,16 +133,17 @@ public class Doc {
 	private static void attachIndex(Line indexParent, Line line, IndexTable indxt) {
 		if (line instanceof FinalLine || !line.isHeading())
 			return;
-		if (indxt.atLeft(line.deep()))
+		if (indxt.atLeft(line.depth()))
 			return;
-		if (indxt.isin(line.deep())) {
+		if (indxt.isin(line.depth())) {
 			Line io = Doc.line(line.getText());
 			io.id = line.id;
 			indexParent.addChild(io);
 			indexParent = io;
 		}
 		for (Iterator<Line> it = line.childIterator(); it.hasNext();) {
-			attachIndex(indexParent, it.next(), indxt);
+			Line next = it.next();
+			attachIndex(indexParent, next, indxt);
 		}
 	}
 

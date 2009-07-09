@@ -28,7 +28,7 @@ public class HtmlDocRender implements DocRender {
 	}
 
 	private static final String[] OLTYPES = { "1", "a", "i" };
-	private static final String[] ULTYPES = { "square", "disc", "circle" };
+	private static final String[] ULTYPES = { "disc", "circle", "square" };
 
 	private static class InnerRender {
 		private Writer writer;
@@ -41,8 +41,12 @@ public class HtmlDocRender implements DocRender {
 
 		void render() {
 			Tag html = tag("html");
+			Tag head = tag("head");
+			html.add(head);
+			head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT",
+					"text/html; charset=UTF-8"));
 			if (!Strings.isBlank(doc.getTitle()))
-				html.add(tag("title").add(text(doc.getTitle())));
+				head.add(tag("title").add(text(doc.getTitle())));
 			Tag body = tag("body");
 			html.add(body);
 			Block[] ps = doc.root().getBlocks();
@@ -56,11 +60,11 @@ public class HtmlDocRender implements DocRender {
 			}
 		}
 
-		void renderBlock(Tag parent, Block p) {
-			if (p instanceof Shell) {
+		void renderBlock(Tag parent, Block block) {
+			if (block instanceof Shell) {
 				Tag tab = tag("table").attr("border", "1");
 				tab.attr("cellspacing", "2").attr("cellpadding", "4");
-				ZRow[] rows = ((Shell) p).rows();
+				ZRow[] rows = ((Shell) block).rows();
 				for (ZRow row : rows) {
 					Tag tagTr = tag("tr");
 					for (Line td : row.children()) {
@@ -69,41 +73,39 @@ public class HtmlDocRender implements DocRender {
 					tab.add(tagTr);
 				}
 				parent.add(tab);
-			} else if (p.isHr()) {
+			} else if (block.isHr()) {
 				parent.add(tag("hr"));
-			} else if (p.isIndexTable()) {
-				parent.add(renderIndexTable((IndexTable) p.line(0)));
-			} else if (p.isOrderedList()) {
+			} else if (block.isIndexTable()) {
+				parent.add(renderIndexTable((IndexTable) block.line(0)));
+			} else if (block.isOrderedList()) {
 				Tag tag = tag("ol");
-				for (Line l : p.lines()) {
+				for (Line l : block.lines()) {
 					renderListItem(tag, l);
 				}
 				parent.add(tag);
-			} else if (p.isUnorderedList()) {
+			} else if (block.isUnorderedList()) {
 				Tag tag = tag("ul");
-				for (Line l : p.lines()) {
+				for (Line l : block.lines()) {
 					renderListItem(tag, l);
 				}
 				parent.add(tag);
-			} else if (p.isCode()) {
-				parent.add(tag("pre").add(text(p.line(0).getText())));
-			} else if (p.isHeading()) {
-				for (Line h : p.lines()) {
-					renderHeading(parent, h);
-					Block[] pps = h.getBlocks();
-					for (Block pp : pps)
-						renderBlock(parent, pp);
-				}
+			} else if (block.isCode()) {
+				parent.add(tag("pre").add(text(block.line(0).getText())));
+			} else if (block.isHeading()) {
+				renderHeading(parent, block);
+				Block[] pps = block.getBlocks();
+				for (Block pp : pps)
+					renderBlock(parent, pp);
 			} else {
 				Tag tag = tag("p");
-				for (Line l : p.lines())
+				for (Line l : block.lines())
 					tag.add(renderLine(l));
 				parent.add(tag);
 			}
 		}
 
 		private void renderListItem(Tag tag, Line l) {
-			int liDeep = l.parent().countMyTypes();
+			int liDeep = l.countMyTypeInAncestors();
 			String[] ss = tag.name().equalsIgnoreCase("UL") ? ULTYPES : OLTYPES;
 			tag.attr("type", ss[liDeep % ss.length]);
 			Tag li = tag("li");
@@ -115,11 +117,13 @@ public class HtmlDocRender implements DocRender {
 			}
 		}
 
-		private void renderHeading(Tag parent, Line h) {
-			Tag hn = tag("h" + (h.deep() + 1));
-			if (h.getDoc().contains(IndexTable.class))
-				hn.add(tag("a").attr("name", h.UID()));
-			hn.add(text(h.getText()));
+		private void renderHeading(Tag parent, Block block) {
+			Tag hn = tag("h" + (block.depth() + 1));
+			if (block.getDoc().contains(IndexTable.class))
+				hn.add(tag("a").attr("name", block.UID()));
+			for (Line l : block.lines()) {
+				hn.add(renderLine(l));
+			}
 			parent.add(hn);
 		}
 
@@ -163,7 +167,7 @@ public class HtmlDocRender implements DocRender {
 
 		Tag renderIndexTable(IndexTable table) {
 			Line indexes = doc.getIndex(table);
-			Tag tag = tag("div").attr("style", "padding:10pt");
+			Tag tag = tag("ul").attr("class", "zdoc_index_table");
 			for (Line l : indexes.children()) {
 				tag.add(renderIndex(l));
 			}
@@ -171,12 +175,14 @@ public class HtmlDocRender implements DocRender {
 		}
 
 		Tag renderIndex(Line index) {
-			Tag tag = tag("div");
-			if (index.deep() > 0)
-				tag.attr("style", "margin-left:14pt");
+			Tag tag = tag("li");
 			tag.add(tag("a").attr("href", "#" + index.UID()).add(text(index.getText())));
-			for (Line sub : index.children())
-				tag.add(renderIndex(sub));
+			if (index.size() > 0) {
+				Tag ul = tag("ul");
+				for (Line sub : index.children())
+					ul.add(renderIndex(sub));
+				tag.add(ul);
+			}
 			return tag;
 		}
 	}

@@ -11,7 +11,7 @@ public class Line extends Ele implements Text {
 	private List<Inline> inlines;
 	protected List<Line> children;
 	private Line parent;
-	private int deep;
+	private int depth;
 	private Doc doc;
 
 	public Doc getDoc() {
@@ -28,14 +28,14 @@ public class Line extends Ele implements Text {
 		children = Doc.LIST(Line.class);
 	}
 
-	public int deep() {
-		return deep;
+	public int depth() {
+		return depth;
 	}
 
-	Line setDeep(int deep) {
-		this.deep = deep;
+	Line setDepth(int depth) {
+		this.depth = depth;
 		for (Line l : children)
-			l.setDeep(deep + 1);
+			l.setDepth(depth + 1);
 		return this;
 	}
 
@@ -54,14 +54,14 @@ public class Line extends Ele implements Text {
 	public void addChild(Line l) {
 		l.parent(this);
 		l.setDoc(doc);
-		l.setDeep(this.deep + 1);
+		l.setDepth(this.depth + 1);
 		children.add(l);
 	}
 
 	public void addChild(int index, Line l) {
 		l.parent(this);
 		l.setDoc(doc);
-		l.setDeep(this.deep + 1);
+		l.setDepth(this.depth + 1);
 		children.add(index, l);
 	}
 
@@ -79,6 +79,13 @@ public class Line extends Ele implements Text {
 
 	public Line child(int index) {
 		return children.get(index);
+	}
+
+	public Line child(int... path) {
+		Line l = this;
+		for (int index : path)
+			l = l.child(index);
+		return l;
 	}
 
 	public Line lastChild() {
@@ -175,7 +182,7 @@ public class Line extends Ele implements Text {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Strings.dup('\t', deep()));
+		sb.append(Strings.dup('\t', depth()));
 		sb.append(getText());
 		for (Line b : children)
 			sb.append("\n").append(b);
@@ -192,20 +199,13 @@ public class Line extends Ele implements Text {
 			stack = Doc.LIST(Line.class);
 		}
 
-		@SuppressWarnings("unchecked")
-		<T extends Line> Class<T> getLastLineType() {
-			if (stack.size() == 0)
-				return null;
-			return (Class<T>) stack.get(stack.size() - 1).getClass();
-		}
-
 		void push(Line line) {
 			if (line instanceof ZRow) {
 				if (stack.size() == 0) {
 					stack.add(line);
 				} else {
-					Line last = stack.get(0);
-					if (!(last instanceof ZRow))
+					Line first = stack.get(0);
+					if (!(first instanceof ZRow))
 						popStack();
 					stack.add(line);
 				}
@@ -217,8 +217,13 @@ public class Line extends Ele implements Text {
 				if (line instanceof HorizontalLine)
 					ps.add(new Block(line));
 			} else {
-				if (stack.size() > 0 && line.getClass() != getLastLineType())
-					popStack();
+				if (stack.size() > 0) {
+					Line last = stack.get(stack.size() - 1);
+					if (line.getClass() != last.getClass())
+						popStack();
+					else if (last.isHeading())
+						popStack();
+				}
 				stack.add(line);
 			}
 		}
@@ -248,7 +253,7 @@ public class Line extends Ele implements Text {
 	}
 
 	public boolean isHeading() {
-		if (this instanceof ListItem)
+		if (!is(Line.class))
 			return false;
 		return children.size() > 0;
 	}
@@ -262,13 +267,17 @@ public class Line extends Ele implements Text {
 		return false;
 	}
 
-	public <T extends Line> int countAncestor(Class<T> type) {
+	public <T extends Line> int countTypes(Class<T> type) {
 		if (!hasParent())
 			return 0;
-		return parent().countAncestor(type) + (this.getClass().isAssignableFrom(type) ? 1 : 0);
+		int me = this.getClass() == (type) ? 1 : 0;
+		int p = parent().countTypes(type);
+		return p + me;
 	}
 
-	public int countMyTypes() {
-		return countAncestor(this.getClass());
+	public int countMyTypeInAncestors() {
+		if (!hasParent())
+			return 0;
+		return parent().countTypes(this.getClass());
 	}
 }

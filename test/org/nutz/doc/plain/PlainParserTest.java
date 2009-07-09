@@ -171,7 +171,7 @@ public class PlainParserTest {
 		s += "\n\t@include: org/nutz/doc/plain/doc.txt";
 		s += "\n\ttxt";
 		Line root = root(s);
-		assertEquals(1,root.size());
+		assertEquals(1, root.size());
 		assertEquals("doc1", root.child(0).getText());
 
 		Line line = root.child(0).child(0);
@@ -190,8 +190,8 @@ public class PlainParserTest {
 		Media media = (Media) line.inline(1);
 		assertEquals("nutz.png", media.src().getFile().getName());
 		assertEquals("http://nutz.googlecode.com", media.getHref().toString());
-		
-		assertEquals("txt",root.child(0).child(1).getText());
+
+		assertEquals("txt", root.child(0).child(1).getText());
 	}
 
 	@Test
@@ -265,23 +265,25 @@ public class PlainParserTest {
 	}
 
 	@Test
-	public void test_eval_paragraphs() {
+	public void test_eval_blocks() {
 		Line root = root("A\nB\nC\n\nD\n\tD1\nE\n\nF");
-		Block[] ps = root.getBlocks();
-		assertEquals(3, ps.length);
+		Block[] bs = root.getBlocks();
+		assertEquals(4, bs.length);
 
-		assertEquals(3, ps[0].size());
-		assertEquals("A", ps[0].line(0).getText());
-		assertEquals("B", ps[0].line(1).getText());
-		assertEquals("C", ps[0].line(2).getText());
+		assertEquals(3, bs[0].size());
+		assertEquals("A", bs[0].line(0).getText());
+		assertEquals("B", bs[0].line(1).getText());
+		assertEquals("C", bs[0].line(2).getText());
 
-		assertEquals(2, ps[1].size());
-		assertEquals("D", ps[1].line(0).getText());
-		assertEquals("D1", ps[1].line(0).child(0).getText());
-		assertEquals("E", ps[1].line(1).getText());
+		assertEquals(1, bs[1].size());
+		assertEquals("D", bs[1].line(0).getText());
+		assertEquals("D1", bs[1].line(0).child(0).getText());
 
-		assertEquals(1, ps[2].size());
-		assertEquals("F", ps[2].line(0).getText());
+		assertEquals(1, bs[2].size());
+		assertEquals("E", bs[2].line(0).getText());
+
+		assertEquals(1, bs[3].size());
+		assertEquals("F", bs[3].line(0).getText());
 	}
 
 	@Test
@@ -291,9 +293,24 @@ public class PlainParserTest {
 	}
 
 	@Test
+	public void test_count_myType() {
+		String s = "A";
+		s += "\n\tB";
+		s += "\n\t\t# C";
+		s += "\n\t\t\t* D";
+		s += "\n\t\t\t\t# E";
+		s += "\n\t\t\t\t\t* F";
+		Line root = root(s);
+		assertEquals(0, root.child(0, 0, 0).countMyTypeInAncestors());
+		assertEquals(0, root.child(0, 0, 0, 0).countMyTypeInAncestors());
+		assertEquals(1, root.child(0, 0, 0, 0, 0).countMyTypeInAncestors());
+		assertEquals(1, root.child(0, 0, 0, 0, 0, 0).countMyTypeInAncestors());
+	}
+
+	@Test
 	public void test_list_item() {
 		Line root = root4file("list.txt");
-		assertEquals(4,root.size());
+		assertEquals(4, root.size());
 		Block[] ps = root.child(0).getBlocks();
 		Block[] ps2;
 		assertEquals(1, ps.length);
@@ -338,6 +355,18 @@ public class PlainParserTest {
 		assertTrue(root.child(2).isBlank());
 
 		assertEquals("-End-", root.child(3).getText());
+	}
+
+	@Test
+	public void test_list_as_child_of_line() {
+		Line root = root("A\n\t* LI\nB");
+		Block[] bs = root.getBlocks();
+		assertEquals(2, bs.length);
+		assertTrue(bs[0].isHeading());
+		assertEquals("B", bs[1].line(0).getText());
+		Block[] bss = bs[0].getBlocks();
+		assertEquals(1, bss.length);
+		assertTrue(bss[0].isUnorderedList());
 	}
 
 	@Test
@@ -417,8 +446,24 @@ public class PlainParserTest {
 		assertEquals("A", root.child(0).getText());
 		assertEquals("B", root.child(0).child(0).getText());
 		Block[] bs = root.getBlocks();
+		assertEquals(2, bs.length);
+		assertEquals("A", bs[0].line(0).getText());
+		assertEquals("C", bs[1].line(0).getText());
+	}
+
+	@Test
+	public void test_code_with_indent() {
+		Line root = root("A\n\t{{{\n\tX\n\n\tY\n\t}}}");
+		assertEquals(1, root.size());
+		assertEquals("A", root.child(0).getText());
+		Code code = (Code) root.child(0, 0);
+		assertEquals("X\n\nY", code.getText());
+	}
+	
+	@Test
+	public void test_get_block_with_blank(){
+		Line root = root("A\n\tA1\n\n\tA2");
+		Block[] bs = root.child(0).getBlocks();
 		assertEquals(2,bs.length);
-		assertEquals("A",bs[0].line(0).getText());
-		assertEquals("C",bs[1].line(0).getText());
 	}
 }
