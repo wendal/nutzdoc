@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.nutz.lang.Lang;
-import org.nutz.lang.Strings;
 
 public class Doc {
 
@@ -33,6 +32,13 @@ public class Doc {
 
 	public static Line line(Inline ele) {
 		return new Line().append(ele);
+	}
+
+	public static Line line(List<Inline> eles) {
+		Line l = new Line();
+		for (Inline ele : eles)
+			l.append(ele);
+		return l;
 	}
 
 	public static Line line(String text) {
@@ -74,9 +80,7 @@ public class Doc {
 
 	private Line root;
 	private String title;
-	private String subTitle;
 	private String author;
-	private String lastModify;
 	private File file;
 
 	public File getFile() {
@@ -84,25 +88,15 @@ public class Doc {
 	}
 
 	public void setFile(File file) {
-		this.file = file;
+		this.file = file.getAbsoluteFile();
 	}
 
 	public String getTitle() {
-		if (Strings.isBlank(title))
-			return "Untitled";
 		return title;
 	}
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	public String getSubTitle() {
-		return subTitle;
-	}
-
-	public void setSubTitle(String sutTitle) {
-		this.subTitle = sutTitle;
 	}
 
 	public String getAuthor() {
@@ -113,12 +107,8 @@ public class Doc {
 		this.author = author;
 	}
 
-	public String getLastModify() {
-		return lastModify;
-	}
-
-	public void setLastModify(String lastModify) {
-		this.lastModify = lastModify;
+	public long lastModified() {
+		return file.lastModified();
 	}
 
 	public Line root() {
@@ -150,5 +140,17 @@ public class Doc {
 
 	public <T extends Line> boolean contains(Class<T> type) {
 		return root.contains(type);
+	}
+
+	public List<Media> getMedias() {
+		List<Media> medias = Doc.LIST(Media.class);
+		for (Line l : root().children)
+			medias.addAll(l.getMedias());
+		return medias;
+	}
+	
+	public void removeIndexTable(){
+		for (Line l : root().children)
+			l.removeIndexTable();
 	}
 }

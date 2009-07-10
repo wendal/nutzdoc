@@ -29,14 +29,14 @@ public class Inline extends Ele implements Text {
 		this.href = Doc.refer(str);
 	}
 
-	private Line block;
+	private Line line;
 
-	public Line getBlock() {
-		return block;
+	public Line getLine() {
+		return line;
 	}
 
-	void setBlock(Line block) {
-		this.block = block;
+	void setLine(Line block) {
+		this.line = block;
 	}
 
 	public String getText() {
@@ -53,8 +53,8 @@ public class Inline extends Ele implements Text {
 
 	public Style getRealStyle() {
 		if (hasStyle())
-			return getStyle().merge(getBlock().getRealStyle());
-		return getBlock().getRealStyle();
+			return getStyle().merge(getLine().getRealStyle());
+		return getLine().getRealStyle();
 	}
 
 	@Override

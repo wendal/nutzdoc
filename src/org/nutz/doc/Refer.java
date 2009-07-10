@@ -10,10 +10,20 @@ public class Refer {
 
 	private String path;
 
+	private String base;
+
 	Refer(String path) {
 		if (Strings.isBlank(path))
 			throw Lang.makeThrow("Path can not be null!!!");
 		this.path = path.replace('\\', '/');
+	}
+
+	public String getBase() {
+		return base;
+	}
+
+	void setBase(String base) {
+		this.base = base;
 	}
 
 	public boolean isInner() {
@@ -33,7 +43,10 @@ public class Refer {
 	}
 
 	public File getFile() {
-		return Files.findFile(path);
+		File f = Files.findFile(path);
+		if (null == f && !Strings.isBlank(base))
+			return Files.findFile(base + "/" + path);
+		return f;
 	}
 
 	@Override

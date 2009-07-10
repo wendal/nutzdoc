@@ -15,6 +15,8 @@ public class Line extends Ele implements Text {
 	private Doc doc;
 
 	public Doc getDoc() {
+		if (hasParent())
+			return parent.getDoc();
 		return doc;
 	}
 
@@ -53,7 +55,6 @@ public class Line extends Ele implements Text {
 
 	public void addChild(Line l) {
 		l.parent(this);
-		l.setDoc(doc);
 		l.setDepth(this.depth + 1);
 		children.add(l);
 	}
@@ -132,7 +133,7 @@ public class Line extends Ele implements Text {
 	}
 
 	public Line insert(Inline ele) {
-		ele.setBlock(this);
+		ele.setLine(this);
 		inlines.add(0, ele);
 		return this;
 	}
@@ -142,7 +143,7 @@ public class Line extends Ele implements Text {
 	}
 
 	public Line append(Inline ele) {
-		ele.setBlock(this);
+		ele.setLine(this);
 		inlines.add(ele);
 		return this;
 	}
@@ -279,5 +280,26 @@ public class Line extends Ele implements Text {
 		if (!hasParent())
 			return 0;
 		return parent().countTypes(this.getClass());
+	}
+
+	public List<Media> getMedias() {
+		List<Media> medias = Doc.LIST(Media.class);
+		for (Inline il : inlines)
+			if (il instanceof Media)
+				medias.add((Media) il);
+		for (Line l : children)
+			medias.addAll(l.getMedias());
+		return medias;
+	}
+
+	public void removeIndexTable() {
+		List<Line> list = children;
+		children = Doc.LIST(Line.class);
+		for (Line l : list) {
+			if (l instanceof IndexTable)
+				continue;
+			l.removeIndexTable();
+			addChild(l);
+		}
 	}
 }

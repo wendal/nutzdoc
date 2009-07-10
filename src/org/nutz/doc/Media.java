@@ -17,6 +17,8 @@ public class Media extends Inline {
 	}
 
 	public void src(Refer src) {
+		if (null != this.getLine().getDoc().getFile())
+			src.setBase(getLine().getDoc().getFile().getParent());
 		this.src = src;
 	}
 
