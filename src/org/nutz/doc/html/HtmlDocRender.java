@@ -148,6 +148,7 @@ public class HtmlDocRender implements DocRender {
 					tag = wrapFont(tag, "s", font.isStrike());
 					tag = wrapFont(tag, "sub", font.isSub());
 					tag = wrapFont(tag, "sup", font.isSup());
+					tag = wrapFontColor(tag, font);
 				}
 			}
 			if (null != inline.getHref())
@@ -158,6 +159,12 @@ public class HtmlDocRender implements DocRender {
 		private static Tag wrapFont(Tag tag, String tagName, boolean yes) {
 			if (yes)
 				return tag(tagName).add(tag);
+			return tag;
+		}
+
+		private static Tag wrapFontColor(Tag tag, FontStyle font) {
+			if (font.hasColor())
+				return tag("span").attr("style", "color:" + font.getColor() + ";").add(tag);
 			return tag;
 		}
 

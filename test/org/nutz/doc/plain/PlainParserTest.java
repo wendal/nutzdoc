@@ -477,4 +477,14 @@ public class PlainParserTest {
 		assertTrue(inlines[1].getStyle().getFont().isItalic());
 		assertEquals("C", inlines[2].getText());
 	}
+
+	@Test
+	public void test_inline_color() {
+		Line root = root("A{*#00F;_B}C");
+		Inline[] inlines = root.child(0).inlines();
+		assertEquals("A", inlines[0].getText());
+		assertTrue(inlines[1].getStyle().getFont().hasColor());
+		assertEquals("#0000FF", inlines[1].getStyle().getFont().getColor().toString());
+		assertEquals("C", inlines[2].getText());
+	}
 }

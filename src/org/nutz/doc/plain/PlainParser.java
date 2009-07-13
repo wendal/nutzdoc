@@ -325,7 +325,7 @@ public class PlainParser implements DocParser {
 	}
 
 	private static Pattern QUOTE = Pattern.compile("^([{])(.*)([}])$");
-	private static Pattern MARK = Pattern.compile("^[~_*^,]*");
+	private static Pattern MARK = Pattern.compile("^(([~_*^,])|(#[0-9a-fA-F]{3,6};))*");
 
 	private Inline toInline(String s) {
 		Matcher m = QUOTE.matcher(s);
@@ -335,7 +335,9 @@ public class PlainParser implements DocParser {
 			if (m.find()) {
 				String mark = m.group();
 				Inline inline = parseInline(s.substring(mark.length()));
-				for (char c : mark.toCharArray()) {
+				char[] cs = mark.toCharArray();
+				for (int i = 0; i < cs.length; i++) {
+					char c = cs[i];
 					switch (c) {
 					case '~':
 						inline.getStyle().getFont().addStyle(FontStyle.STRIKE);
@@ -351,6 +353,15 @@ public class PlainParser implements DocParser {
 						break;
 					case ',':
 						inline.getStyle().getFont().setAsSub();
+						break;
+					case '#':
+						int j = i + 1;
+						for (; j < cs.length; j++)
+							if (cs[j] == ';')
+								break;
+						String color = mark.substring(i, j);
+						i = j;
+						inline.getStyle().getFont().setColor(color);
 						break;
 					}
 				}

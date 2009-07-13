@@ -18,6 +18,25 @@ public class FontStyle {
 
 	private int style;
 	private TYPE type;
+	private Color color;
+
+	public boolean hasColor() {
+		return null != color;
+	}
+
+	public Color getColor() {
+		if (!hasColor())
+			color = new Color();
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = new Color(color);
+	}
+
+	public void removeColor() {
+		color = null;
+	}
 
 	public FontStyle addStyle(int style) {
 		this.style |= style;
