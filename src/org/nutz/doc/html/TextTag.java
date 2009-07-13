@@ -12,8 +12,8 @@ public class TextTag extends Tag {
 
 	@Override
 	public String toString() {
-		String s = name().replaceAll("[<]", "&lt;");
-		s = s.replaceAll("[>]", "&gt;");
+		String s = name().replace("<", "&lt;");
+		s = s.replace(">", "&gt;");
 		return s;
 	}
 

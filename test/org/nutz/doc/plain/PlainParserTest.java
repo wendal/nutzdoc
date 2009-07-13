@@ -459,11 +459,22 @@ public class PlainParserTest {
 		Code code = (Code) root.child(0, 0);
 		assertEquals("X\n\nY", code.getText());
 	}
-	
+
 	@Test
-	public void test_get_block_with_blank(){
+	public void test_get_block_with_blank() {
 		Line root = root("A\n\tA1\n\n\tA2");
 		Block[] bs = root.child(0).getBlocks();
-		assertEquals(2,bs.length);
+		assertEquals(2, bs.length);
+	}
+
+	@Test
+	public void test_nested_inlines() {
+		Line root = root("A[abc.htm {_B B}]C");
+		Inline[] inlines = root.child(0).inlines();
+		assertEquals("A", inlines[0].getText());
+		assertEquals("B B", inlines[1].getText());
+		assertEquals("abc.htm", inlines[1].getHref().toString());
+		assertTrue(inlines[1].getStyle().getFont().isItalic());
+		assertEquals("C", inlines[2].getText());
 	}
 }
