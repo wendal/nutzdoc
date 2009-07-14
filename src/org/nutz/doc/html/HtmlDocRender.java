@@ -49,9 +49,11 @@ public class HtmlDocRender implements DocRender {
 				head.add(tag("title").add(text(doc.getTitle())));
 			Tag body = tag("body");
 			html.add(body);
+			Tag container = tag("div").attr("class", "zdoc_body");
+			body.add(container);
 			Block[] ps = doc.root().getBlocks();
 			for (Block p : ps)
-				renderBlock(body, p);
+				renderBlock(container, p);
 			try {
 				writer.write(html.toString());
 				writer.flush();

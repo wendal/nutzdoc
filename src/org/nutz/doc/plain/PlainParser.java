@@ -145,7 +145,7 @@ public class PlainParser implements DocParser {
 			if (cs[lw.deep] != '\t')
 				break;
 		String s = new String(cs, lw.deep, cs.length - lw.deep);
-		if (s.matches("^={5,}$"))
+		if (s.matches(HR))
 			lw.line = new HorizontalLine();
 		else
 			lw.line = parseLine2(reader, doc, lw.deep, s);
@@ -161,6 +161,7 @@ public class PlainParser implements DocParser {
 	private static Pattern DOC_TITLE = Pattern.compile("^(#title:)(.*)$", Pattern.CASE_INSENSITIVE);
 	private static Pattern OL = Pattern.compile("^([\\s]*[#][\\s]+)(.*)$");
 	private static Pattern UL = Pattern.compile("^([\\s]*[*][\\s]+)(.*)$");
+	private static String HR = "^-{5,}$";
 
 	private Line parseLine2(BufferedReader reader, Doc doc, int deep, String s) {
 		Matcher matcher;
