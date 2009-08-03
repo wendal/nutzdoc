@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="nutzdoc" default="go" basedir=".">
+
+	<description>This is nutzdoc autobuild file.</description>
+
+	<property name="PROJECT_HOME" value="../" />
+	<property name="PROJECT_SRC" value="${PROJECT_HOME}/src" />
+	<property name="TEMP" value="${PROJECT_HOME}/temp" />
+
+	<property environment="env" />
+	<property name="JAVA_HOME" value="${env.JAVA_HOME}" />
+	<property name="DEP_HOME" value="${env.NDOC_DEPHOME}" />
+	<property name="TOMCAT_HOME" value="${env.TOMCAT_HOME}" />
+	<property name="COMMON_HOME" value="${env.COMMON_HOME}" />
+
+	<path id="CLASSPATH">
+		<fileset dir="${JAVA_HOME}" casesensitive="no">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${DEP_HOME}" casesensitive="no">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init" description="make dir">
+		<mkdir dir="${TEMP}" />
+	</target>
+
+	<target name="compile" depends="init" description="compile src file">
+		<javac srcdir="${PROJECT_SRC}" destdir="${TEMP}" debug="true" debuglevel="lines,vars,source" deprecation="true" nowarn="false" source="1.6" target="1.6">
+			<classpath refid="CLASSPATH" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile" description="pacakge the classes to be a jar">
+		<jar destfile="${COMMON_HOME}/nutz.doc-source.jar" basedir="${PROJECT_SRC}"/>
+		<jar destfile="${COMMON_HOME}/nutz.doc.jar" basedir="${TEMP}" />
+	</target>
+
+	<target name="go" depends="jar">
+		<delete dir="${TEMP}" />
+	</target>
+
+</project>
