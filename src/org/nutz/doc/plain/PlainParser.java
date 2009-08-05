@@ -159,6 +159,8 @@ public class PlainParser implements DocParser {
 	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)(([0-9],)?[0-9])$",
 			Pattern.CASE_INSENSITIVE);
 	private static Pattern DOC_TITLE = Pattern.compile("^(#title:)(.*)$", Pattern.CASE_INSENSITIVE);
+	private static Pattern DOC_AUTHOR = Pattern.compile("^(#author:)(.*)$",
+			Pattern.CASE_INSENSITIVE);
 	private static Pattern OL = Pattern.compile("^([\\s]*[#][\\s]+)(.*)$");
 	private static Pattern UL = Pattern.compile("^([\\s]*[*][\\s]+)(.*)$");
 	private static String HR = "^[\\s]*-{5,}[\\s]*$";
@@ -172,6 +174,11 @@ public class PlainParser implements DocParser {
 		matcher = DOC_TITLE.matcher(ss);
 		if (matcher.find()) {
 			doc.setTitle(matcher.group(2));
+			return null;
+		}
+		matcher = DOC_AUTHOR.matcher(ss);
+		if (matcher.find()) {
+			doc.setAuthor(matcher.group(2));
 			return null;
 		}
 		/*

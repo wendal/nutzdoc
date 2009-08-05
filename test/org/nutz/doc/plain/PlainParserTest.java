@@ -405,7 +405,7 @@ public class PlainParserTest {
 		assertTrue(ps[1].isHr());
 		assertEquals("B", ps[2].line(0).getText());
 	}
-	
+
 	@Test
 	public void test_hr_2() {
 		Line root = root("A\n ----- 	\nB");
@@ -495,5 +495,13 @@ public class PlainParserTest {
 		assertTrue(inlines[1].getStyle().getFont().hasColor());
 		assertEquals("#0000FF", inlines[1].getStyle().getFont().getColor().toString());
 		assertEquals("C", inlines[2].getText());
+	}
+
+	@Test
+	public void test_title_author() {
+		String s = "#title:A\n#author:B";
+		Doc doc = new PlainParser().parse(Lang.ins(s));
+		assertEquals("A", doc.getTitle());
+		assertEquals("B", doc.getAuthor());
 	}
 }
