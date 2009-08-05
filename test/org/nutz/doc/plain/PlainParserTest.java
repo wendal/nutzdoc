@@ -399,7 +399,16 @@ public class PlainParserTest {
 
 	@Test
 	public void test_hr_1() {
-		Line root = root("A\n=====\nB");
+		Line root = root("A\n-----\nB");
+		Block[] ps = root.getBlocks();
+		assertEquals("A", ps[0].line(0).getText());
+		assertTrue(ps[1].isHr());
+		assertEquals("B", ps[2].line(0).getText());
+	}
+	
+	@Test
+	public void test_hr_2() {
+		Line root = root("A\n ----- 	\nB");
 		Block[] ps = root.getBlocks();
 		assertEquals("A", ps[0].line(0).getText());
 		assertTrue(ps[1].isHr());

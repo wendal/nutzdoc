@@ -161,7 +161,7 @@ public class PlainParser implements DocParser {
 	private static Pattern DOC_TITLE = Pattern.compile("^(#title:)(.*)$", Pattern.CASE_INSENSITIVE);
 	private static Pattern OL = Pattern.compile("^([\\s]*[#][\\s]+)(.*)$");
 	private static Pattern UL = Pattern.compile("^([\\s]*[*][\\s]+)(.*)$");
-	private static String HR = "^-{5,}$";
+	private static String HR = "^[\\s]*-{5,}[\\s]*$";
 
 	private Line parseLine2(BufferedReader reader, Doc doc, int deep, String s) {
 		Matcher matcher;
