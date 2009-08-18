@@ -33,6 +33,25 @@ public class PlainParserTest {
 		Line root = doc.root();
 		return root;
 	}
+	
+	@Test
+	public void test_parse_media(){
+		Media media = (Media) root("<a.gif>").child(0).inline(0);
+		assertEquals(0,media.height());
+		assertEquals(0,media.width());
+		assertEquals("a.gif",media.src().getPath());
+		
+		media = (Media) root("<10x7:a.gif>").child(0).inline(0);
+		assertEquals(10,media.width());
+		assertEquals(7,media.height());
+		assertEquals("a.gif",media.src().getPath());
+		
+		media = (Media) root("<4x4:http://www.zzh.com/a.gif>").child(0).inline(0);
+		assertEquals(4,media.height());
+		assertEquals(4,media.width());
+		assertEquals("http://www.zzh.com/a.gif",media.src().getPath());
+		assertTrue(media.src().isHttp());
+	}
 
 	@Test
 	public void test_basic_structure() {
@@ -504,4 +523,5 @@ public class PlainParserTest {
 		assertEquals("A", doc.getTitle());
 		assertEquals("B", doc.getAuthor());
 	}
+	
 }

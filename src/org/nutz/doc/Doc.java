@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.nutz.lang.Lang;
+import org.nutz.lang.Strings;
 
 public class Doc {
 
@@ -49,8 +52,20 @@ public class Doc {
 		return new Refer(str);
 	}
 
-	public static Media media(String src) {
+	private static Pattern SIZE = Pattern.compile("^([0-9]+[xX][0-9]+)(:)");
+
+	public static Media media(String str) {
+		if (null == str)
+			return null;
+		Matcher mat = SIZE.matcher(str);
+		String src = str;
 		Media m = new Media();
+		if (mat.find()) {
+			src = str.substring(mat.group().length());
+			String size = mat.group(1);
+			String[] ss = Strings.splitIgnoreBlank(size, "[xX]");
+			m.width(Integer.parseInt(ss[0])).height((Integer.parseInt(ss[1])));
+		}
 		m.src(src);
 		return m;
 	}
@@ -148,8 +163,8 @@ public class Doc {
 			medias.addAll(l.getMedias());
 		return medias;
 	}
-	
-	public void removeIndexTable(){
+
+	public void removeIndexTable() {
 		for (Line l : root().children)
 			l.removeIndexTable();
 	}
