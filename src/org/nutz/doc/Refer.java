@@ -10,20 +10,13 @@ public class Refer {
 
 	private String path;
 
-	private String base;
+	private DocBase base;
 
-	Refer(String path) {
+	Refer(DocBase base, String path) {
+		this.base = base;
 		if (Strings.isBlank(path))
 			throw Lang.makeThrow("Path can not be null!!!");
 		this.path = path.replace('\\', '/');
-	}
-
-	public String getBase() {
-		return base;
-	}
-
-	void setBase(String base) {
-		this.base = base;
 	}
 
 	public boolean isInner() {
@@ -42,11 +35,18 @@ public class Refer {
 		return null != getFile();
 	}
 
+	public String getBasePath() {
+		return base.getAbsolutePath();
+	}
+
 	public File getFile() {
-		File f = Files.findFile(path);
-		if (null == f && !Strings.isBlank(base))
-			return Files.findFile(base + "/" + path);
-		return f;
+		if (isHttp() || isInner())
+			return null;
+		if (!isRelative())
+			return new File(path);
+		File bf = new File(base.getAbsolutePath());
+		String fp = bf.isFile() ? bf.getParent() + "/" + path : bf.getAbsolutePath() + "/" + path;
+		return Files.findFile(fp);
 	}
 
 	public String getPath() {

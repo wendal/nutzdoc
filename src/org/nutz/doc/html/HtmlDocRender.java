@@ -140,7 +140,12 @@ public class HtmlDocRender implements DocRender {
 		Tag renderInline(Inline inline) {
 			Tag tag;
 			if (inline instanceof Media) {
-				tag = tag("img").attr("src", ((Media) inline).getSrc());
+				Media media = (Media) inline;
+				tag = tag("img").attr("src", media.getSrc());
+				if (media.width() > 0)
+					tag.attr("width", media.width());
+				if (media.height() > 0)
+					tag.attr("height", media.height());
 			} else {
 				tag = text(inline.getText());
 				if (inline.hasStyle() && inline.getStyle().hasFont()) {

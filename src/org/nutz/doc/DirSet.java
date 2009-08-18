@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
@@ -26,6 +27,7 @@ public class DirSet {
 	private Map<File, DirDoc> mapDDs;
 	private Map<File, Doc> mapDocs;
 	private String indexTable;
+	private Document xml;
 
 	public DirSet(File home, DocParser parser) {
 		mapDDs = new HashMap<File, DirDoc>();
@@ -35,7 +37,7 @@ public class DirSet {
 		File dd = new File(home.getAbsolutePath() + "/index.xml");
 		if (dd.exists() && dd.isFile()) {
 			try {
-				Document xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(dd);
+				xml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(dd);
 				Element ele = xml.getDocumentElement();
 				indexTable = DirDoc.attr(ele, "index");
 				dirdoc = parserDirDoc(home, ele);
@@ -94,6 +96,19 @@ public class DirSet {
 		}
 	}
 
+	private void updateDocMediaToBasePath(Doc doc) {
+		for (Media media : doc.getMedias()) {
+			if (!media.src().isRelative())
+				continue;
+			File mediaFile = media.src().getFile();
+			if (null == mediaFile)
+				continue;
+			String relativePath = mediaFile.getAbsolutePath().substring(
+					home.getAbsolutePath().length() + 1);
+			media.src(relativePath);
+		}
+	}
+
 	public Doc mergeDocSet() {
 		if (null == dirdoc)
 			throw Lang.makeThrow("Lack 'index.xml' in '%s'", home.getAbsolutePath());
@@ -107,8 +122,10 @@ public class DirSet {
 	public Doc mergeDocSet(DirDoc dd) {
 		File file = dd.getDocFile();
 		Doc doc = mapDocs.get(file);
-		if (null != doc)
+		if (null != doc) {
+			updateDocMediaToBasePath(doc);
 			return doc;
+		}
 		doc = new Doc();
 		doc.setAuthor(dd.getAuthor());
 		doc.setTitle(dd.getTitle());
@@ -133,16 +150,48 @@ public class DirSet {
 		return root;
 	}
 
-	public void visitDocs(DirVisitor dv) {
+	public void visitDocs(DocVisitor dv) {
 		visitDocs(root, dv);
 	}
 
-	private static void visitDocs(Dir dir, DirVisitor dv) {
+	private static void visitDocs(Dir dir, DocVisitor dv) {
 		for (Doc doc : dir.docs()) {
 			dv.visit(doc);
 		}
 		for (Dir d : dir.dirs())
 			visitDocs(d, dv);
+	}
+
+	public void visitXml(ElementVisitor xv) {
+		visitXml(xml.getDocumentElement(), xv);
+	}
+
+	private static void visitXml(Element ele, ElementVisitor xv) {
+		xv.visit(ele);
+		NodeList nl = ele.getChildNodes();
+		for (int i = 0; i < nl.getLength(); i++)
+			if (nl.item(i) instanceof Element)
+				visitXml((Element) nl.item(i), xv);
+	}
+
+	public void visitFile(final FileVisitor fv) {
+		final File home = this.home;
+		visitXml(new ElementVisitor() {
+			public void visit(Element ele) {
+				String title = DirDoc.attr(ele, "title");
+				String path = DirDoc.attr(ele, "path");
+				int depth = 0;
+				while (ele.getParentNode() != ele.getOwnerDocument()) {
+					depth++;
+					ele = (Element) ele.getParentNode();
+					String myPath = DirDoc.attr(ele, "path");
+					if (null != myPath)
+						path = myPath + "/" + path;
+				}
+				path = home.getAbsolutePath() + "/" + path;
+				fv.visit(Files.findFile(path), title, depth);
+			}
+		});
 	}
 
 }

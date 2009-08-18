@@ -3,7 +3,7 @@ package org.nutz.doc;
 import org.nutz.doc.style.Style;
 import org.nutz.lang.Strings;
 
-public class Inline extends Ele implements Text {
+public class Inline extends Ele implements Text, DocBase {
 
 	protected Inline() {
 		super();
@@ -26,7 +26,7 @@ public class Inline extends Ele implements Text {
 	}
 
 	public void href(String str) {
-		this.href = Doc.refer(str);
+		this.href = Doc.refer(this, str);
 	}
 
 	private Line line;
@@ -37,6 +37,11 @@ public class Inline extends Ele implements Text {
 
 	void setLine(Line block) {
 		this.line = block;
+	}
+
+	@Override
+	public String getAbsolutePath() {
+		return line.getDoc().getAbsolutePath();
 	}
 
 	public String getText() {

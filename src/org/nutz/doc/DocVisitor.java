@@ -1,6 +1,6 @@
 package org.nutz.doc;
 
-public interface DirVisitor {
+public interface DocVisitor {
 
 	void visit(Doc doc);
 

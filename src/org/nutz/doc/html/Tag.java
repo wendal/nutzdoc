@@ -8,13 +8,13 @@ import org.nutz.lang.meta.Pair;
 
 import static java.lang.String.*;
 
-class Tag {
+public class Tag {
 
-	static Tag tag(String name) {
+	public static Tag tag(String name) {
 		return new Tag(name);
 	}
 
-	static TextTag text(String text) {
+	public static TextTag text(String text) {
 		return new TextTag(text);
 	}
 
@@ -31,7 +31,8 @@ class Tag {
 		System.out.println(tag);
 	}
 
-	private static final Pattern BLOCK = Pattern.compile("^(head|div|p|ul|ol|blockquote|pre|title|h[1-9]|li|hr|table|tr|td)$",
+	private static final Pattern BLOCK = Pattern.compile(
+			"^(head|div|p|ul|ol|blockquote|pre|title|h[1-9]|li|hr|table|tr|td)$",
 			Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern INLINE = Pattern.compile(
@@ -115,6 +116,10 @@ class Tag {
 			attr.setValue(value);
 		}
 		return this;
+	}
+
+	public Tag attr(String name, int value) {
+		return attr(name, String.valueOf(value));
 	}
 
 	private Pair findAttr(String name) {

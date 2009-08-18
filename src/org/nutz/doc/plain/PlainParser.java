@@ -200,7 +200,7 @@ public class PlainParser implements DocParser {
 		matcher = INCLUDE.matcher(s);
 		if (matcher.find()) {
 			String rs = Strings.trim(s.substring(matcher.end()));
-			Refer re = Doc.refer(rs);
+			Refer re = Doc.refer(doc, rs);
 			if (null == re.getFile() || !re.getFile().exists()) {
 				throw Lang.makeThrow("Fail to find doc file '%s'!!!", re.getFile()
 						.getAbsolutePath());

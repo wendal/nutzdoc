@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
-public class Doc {
+public class Doc implements DocBase {
 
 	public static <T> List<T> LIST(Class<T> type) {
 		return new ArrayList<T>();
@@ -48,8 +48,8 @@ public class Doc {
 		return line(inline(text));
 	}
 
-	public static Refer refer(String str) {
-		return new Refer(str);
+	public static Refer refer(DocBase base, String str) {
+		return new Refer(base, str);
 	}
 
 	private static Pattern SIZE = Pattern.compile("^([0-9]+[xX][0-9]+)(:)");
@@ -100,6 +100,11 @@ public class Doc {
 
 	public File getFile() {
 		return file;
+	}
+
+	@Override
+	public String getAbsolutePath() {
+		return null == file ? null : file.getAbsolutePath();
 	}
 
 	public void setFile(File file) {
