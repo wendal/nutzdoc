@@ -12,7 +12,6 @@ import org.nutz.doc.plain.PlainParser;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
-import org.nutz.lang.Strings;
 import org.nutz.lang.segment.CharSegment;
 import org.nutz.lang.segment.Segment;
 
