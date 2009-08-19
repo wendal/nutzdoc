@@ -1,9 +1,9 @@
 package org.nutz.doc;
 
-import java.io.OutputStream;
+import java.io.File;
 
 public interface DocRender {
 
-	void render(OutputStream ops, Doc doc);
+	void render(File dest, Doc doc);
 
 }

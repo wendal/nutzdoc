@@ -1,6 +1,7 @@
 package org.nutz.doc.pdf;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 
 import org.nutz.doc.Doc;
@@ -10,6 +11,7 @@ import org.nutz.doc.Block;
 import org.nutz.doc.style.FontStyle;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 
 import com.lowagie.text.Chapter;
@@ -69,8 +71,19 @@ public class PdfDocRender implements DocRender {
 	}
 
 	@Override
-	public void render(OutputStream ops, Doc doc) {
-		new InnerRender(ops, doc).render();
+	public void render(File dest, Doc doc) {
+		OutputStream ops = null;
+		try {
+			ops = Streams.fileOut(dest);
+			new InnerRender(ops, doc).render();
+		} finally {
+			if (null != ops)
+				try {
+					ops.close();
+				} catch (IOException e) {
+					throw Lang.wrapThrow(e);
+				}
+		}
 	}
 
 	private static class InnerRender {

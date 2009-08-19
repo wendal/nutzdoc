@@ -44,6 +44,9 @@ public class Refer {
 			return null;
 		if (!isRelative())
 			return new File(path);
+		File f = Files.findFile(path);
+		if (null != f)
+			return f;
 		File bf = new File(base.getAbsolutePath());
 		String fp = bf.isFile() ? bf.getParent() + "/" + path : bf.getAbsolutePath() + "/" + path;
 		return Files.findFile(fp);

@@ -2,6 +2,7 @@ package org.nutz.doc.plain;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -17,6 +18,7 @@ import org.nutz.doc.Media;
 import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Block;
 import org.nutz.doc.Shell;
+import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
@@ -29,27 +31,40 @@ public class PlainParserTest {
 
 	private static Line root(String s) {
 		DocParser parser = new PlainParser();
-		Doc doc = parser.parse(Lang.ins(s));
+		Doc doc = parser.parse(TFile(s));
 		Line root = doc.root();
 		return root;
 	}
-	
+
+	private static File TFile(String s) {
+		File f = Files.findFile("org/nutz/doc/plain/code.txt");
+		f = new File(f.getParent() + "/tmps.txt");
+		if (!f.exists())
+			try {
+				Files.createNewFile(f);
+			} catch (IOException e) {
+				throw Lang.wrapThrow(e);
+			}
+		Lang.writeAll(Streams.fileOutw(f), s);
+		return f;
+	}
+
 	@Test
-	public void test_parse_media(){
+	public void test_parse_media() {
 		Media media = (Media) root("<a.gif>").child(0).inline(0);
-		assertEquals(0,media.height());
-		assertEquals(0,media.width());
-		assertEquals("a.gif",media.src().getPath());
-		
+		assertEquals(0, media.height());
+		assertEquals(0, media.width());
+		assertEquals("a.gif", media.src().getPath());
+
 		media = (Media) root("<10x7:a.gif>").child(0).inline(0);
-		assertEquals(10,media.width());
-		assertEquals(7,media.height());
-		assertEquals("a.gif",media.src().getPath());
-		
+		assertEquals(10, media.width());
+		assertEquals(7, media.height());
+		assertEquals("a.gif", media.src().getPath());
+
 		media = (Media) root("<4x4:http://www.zzh.com/a.gif>").child(0).inline(0);
-		assertEquals(4,media.height());
-		assertEquals(4,media.width());
-		assertEquals("http://www.zzh.com/a.gif",media.src().getPath());
+		assertEquals(4, media.height());
+		assertEquals(4, media.width());
+		assertEquals("http://www.zzh.com/a.gif", media.src().getPath());
 		assertTrue(media.src().isHttp());
 	}
 
@@ -519,9 +534,9 @@ public class PlainParserTest {
 	@Test
 	public void test_title_author() {
 		String s = "#title:A\n#author:B";
-		Doc doc = new PlainParser().parse(Lang.ins(s));
+		Doc doc = new PlainParser().parse(TFile(s));
 		assertEquals("A", doc.getTitle());
 		assertEquals("B", doc.getAuthor());
 	}
-	
+
 }

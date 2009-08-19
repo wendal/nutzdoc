@@ -2,8 +2,10 @@ package org.nutz.doc;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,6 +90,7 @@ public class Doc implements DocBase {
 	/*-----------------------------------------------------------------*/
 
 	public Doc() {
+		attributes = new HashMap<String, Object>();
 		root = new Line();
 		root.setDoc(this);
 		root.setDepth(-1);
@@ -97,6 +100,11 @@ public class Doc implements DocBase {
 	private String title;
 	private String author;
 	private File file;
+	private Map<String, Object> attributes;
+
+	public Map<String, Object> attributes() {
+		return attributes;
+	}
 
 	public File getFile() {
 		return file;
@@ -172,5 +180,20 @@ public class Doc implements DocBase {
 	public void removeIndexTable() {
 		for (Line l : root().children)
 			l.removeIndexTable();
+	}
+
+	public String getRelativePath(File file) {
+		File base = this.getFile();
+		if (base.isFile())
+			base = base.getParentFile();
+		String[] bb = Strings.splitIgnoreBlank(base.getAbsolutePath(), "[\\\\/]");
+		String[] ff = Strings.splitIgnoreBlank(file.getAbsolutePath(), "[\\\\/]");
+		int pos = 0;
+		for (; pos < Math.min(bb.length, ff.length); pos++)
+			if (!bb[pos].equals(ff[pos]))
+				break;
+		String path = Strings.dup("../", bb.length-pos);
+		path += Lang.concatBy(pos, ff.length-pos, '/', ff);
+		return path;
 	}
 }

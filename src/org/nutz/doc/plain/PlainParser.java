@@ -1,6 +1,7 @@
 package org.nutz.doc.plain;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.Code;
-import org.nutz.doc.DocRender;
 import org.nutz.doc.FinalLine;
 import org.nutz.doc.HorizontalLine;
 import org.nutz.doc.Line;
@@ -23,7 +23,6 @@ import org.nutz.doc.OrderedListItem;
 import org.nutz.doc.Refer;
 import org.nutz.doc.UnorderedListItem;
 import org.nutz.doc.ZRow;
-import org.nutz.doc.html.HtmlDocRender;
 import org.nutz.doc.style.FontStyle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -32,91 +31,102 @@ import org.nutz.lang.Strings;
 public class PlainParser implements DocParser {
 
 	@Override
-	public Doc parse(InputStream ins) {
-		/*
-		 * Prepare the reader
-		 */
-		BufferedReader br;
+	public Doc parse(File src) {
+		InputStream ins = null;
 		try {
-			br = new BufferedReader(new InputStreamReader(ins, "UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			throw Lang.wrapThrow(e1);
-		}
-		/*
-		 * Parepare document
-		 */
-		Doc doc = new Doc();
-		String line;
-		LineWrapper root = new LineWrapper();
-		root.line = doc.root();
-		root.deep = -1;
-		/*
-		 * Parse each line
-		 */
-		List<LineWrapper> lineList = Doc.LIST(LineWrapper.class);
-		try {
-			while (null != (line = br.readLine())) {
-				LineWrapper lw = parseLine(br, doc, line);
-				if (lw.line == null)
-					continue;
-				lineList.add(lw);
+			ins = Streams.fileIn(src);
+			/*
+			 * Prepare the reader
+			 */
+			BufferedReader br;
+			try {
+				br = new BufferedReader(new InputStreamReader(ins, "UTF-8"));
+			} catch (UnsupportedEncodingException e1) {
+				throw Lang.wrapThrow(e1);
 			}
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
-		}
-		LineWrapper[] lines = lineList.toArray(new LineWrapper[lineList.size()]);
-		/*
-		 * Make tree
-		 */
-		for (int i = 0; i < lines.length; i++) {
-			LineWrapper bw = lines[i];
-			LineWrapper prev = root;
-			for (int x = i - 1; x >= 0; x--) {
-				if (lines[x].line.is(RootLine.class))
-					continue;
-				if (lines[x].line.is(FinalLine.class))
-					continue;
-				prev = lines[x];
-				break;
+			/*
+			 * Parepare document
+			 */
+			Doc doc = new Doc();
+			String line;
+			LineWrapper root = new LineWrapper();
+			root.line = doc.root();
+			root.deep = -1;
+			/*
+			 * Parse each line
+			 */
+			List<LineWrapper> lineList = Doc.LIST(LineWrapper.class);
+			try {
+				while (null != (line = br.readLine())) {
+					LineWrapper lw = parseLine(br, doc, line);
+					if (lw.line == null)
+						continue;
+					lineList.add(lw);
+				}
+			} catch (IOException e) {
+				throw Lang.wrapThrow(e);
 			}
-			if (bw.line.is(Line.class) && bw.line.isBlank()) {
-				// check next un-blank line is child of pre-line
-				LineWrapper next = null;
-				int j = i + 1;
-				for (; j < lines.length; j++)
-					if (!lines[j].line.is(Line.class) || !lines[j].line.isBlank()) {
-						next = lines[j];
-						break;
-					}
-				if (null == next)
+			LineWrapper[] lines = lineList.toArray(new LineWrapper[lineList.size()]);
+			/*
+			 * Make tree
+			 */
+			for (int i = 0; i < lines.length; i++) {
+				LineWrapper bw = lines[i];
+				LineWrapper prev = root;
+				for (int x = i - 1; x >= 0; x--) {
+					if (lines[x].line.is(RootLine.class))
+						continue;
+					if (lines[x].line.is(FinalLine.class))
+						continue;
+					prev = lines[x];
 					break;
-				if (next.deep > prev.deep) {
-					prev.line.addChild(next.line);
+				}
+				if (bw.line.is(Line.class) && bw.line.isBlank()) {
+					// check next un-blank line is child of pre-line
+					LineWrapper next = null;
+					int j = i + 1;
+					for (; j < lines.length; j++)
+						if (!lines[j].line.is(Line.class) || !lines[j].line.isBlank()) {
+							next = lines[j];
+							break;
+						}
+					if (null == next)
+						break;
+					if (next.deep > prev.deep) {
+						prev.line.addChild(next.line);
+					} else {
+						Line parent = prev.line;
+						while (parent.depth() >= next.deep) {
+							parent = parent.parent();
+						}
+						parent.addChild(bw.line);
+						parent.addChild(next.line);
+					}
+					i = j;
 				} else {
 					Line parent = prev.line;
-					while (parent.depth() >= next.deep) {
+					while (parent.depth() >= bw.deep) {
 						parent = parent.parent();
 					}
-					parent.addChild(bw.line);
-					parent.addChild(next.line);
-				}
-				i = j;
-			} else {
-				Line parent = prev.line;
-				while (parent.depth() >= bw.deep) {
-					parent = parent.parent();
-				}
-				if (bw.line instanceof RootLine) {
-					for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it
-							.hasNext();)
-						parent.addChild(it.next());
+					if (bw.line instanceof RootLine) {
+						for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it
+								.hasNext();)
+							parent.addChild(it.next());
 
-				} else {
-					parent.addChild(bw.line);
+					} else {
+						parent.addChild(bw.line);
+					}
 				}
 			}
+			return doc;
+		} finally {
+			if (null != ins)
+				try {
+					ins.close();
+				} catch (IOException e) {
+					throw Lang.wrapThrow(e);
+				}
 		}
-		return doc;
 	}
 
 	private static class LineWrapper {
@@ -205,14 +215,8 @@ public class PlainParser implements DocParser {
 				throw Lang.makeThrow("Fail to find doc file '%s'!!!", re.getFile()
 						.getAbsolutePath());
 			}
-			try {
-				InputStream ins = Streams.fileIn(re.getFile());
-				Doc doc2 = this.parse(ins);
-				ins.close();
-				return new RootLine(doc2.root());
-			} catch (IOException e) {
-				throw Lang.wrapThrow(e);
-			}
+			Doc doc2 = this.parse(re.getFile());
+			return new RootLine(doc2.root());
 		}
 		/*
 		 * The line is for code zzh: the real code should not appear in same
@@ -416,14 +420,4 @@ public class PlainParser implements DocParser {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		String s = "||A11||A12||";
-		s += "\n||A21||A22||";
-		DocParser parser = new PlainParser();
-		Doc doc = parser.parse(Lang.ins(s));
-		DocRender render = new HtmlDocRender();
-		StringBuilder sb = new StringBuilder();
-		render.render(Lang.ops(sb), doc);
-		System.out.println(sb);
-	}
 }

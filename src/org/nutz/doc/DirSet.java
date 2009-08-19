@@ -1,8 +1,6 @@
 package org.nutz.doc;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +9,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
-import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,30 +66,24 @@ public class DirSet {
 
 	private void load2(Dir dir, String regex) {
 		File[] fs = dir.getFile().listFiles();
-		try {
-			for (File f : fs) {
-				if (f.isDirectory() && !f.getName().startsWith(".")) {
-					Dir sub = new Dir(f);
-					dir.dirs().add(sub);
-					load2(sub, regex);
-				} else if (f.isFile() && f.getName().matches(regex)) {
-					InputStream ins = Streams.fileIn(f);
-					Doc doc = parser.parse(ins);
-					ins.close();
-					doc.setFile(f.getAbsoluteFile());
-					DirDoc dd = mapDDs.get(f);
-					if (null != dd) {
-						if (Strings.isBlank(doc.getAuthor()))
-							doc.setAuthor(dd.getAuthor());
-						if (Strings.isBlank(doc.getTitle()))
-							doc.setTitle(dd.getTitle());
-					}
-					dir.docs().add(doc);
-					mapDocs.put(f, doc);
+		for (File f : fs) {
+			if (f.isDirectory() && !f.getName().startsWith(".")) {
+				Dir sub = new Dir(f);
+				dir.dirs().add(sub);
+				load2(sub, regex);
+			} else if (f.isFile() && f.getName().matches(regex)) {
+				Doc doc = parser.parse(f);
+				doc.setFile(f.getAbsoluteFile());
+				DirDoc dd = mapDDs.get(f);
+				if (null != dd) {
+					if (Strings.isBlank(doc.getAuthor()))
+						doc.setAuthor(dd.getAuthor());
+					if (Strings.isBlank(doc.getTitle()))
+						doc.setTitle(dd.getTitle());
 				}
+				dir.docs().add(doc);
+				mapDocs.put(f, doc);
 			}
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
 		}
 	}
 

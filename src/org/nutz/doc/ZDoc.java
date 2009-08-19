@@ -1,10 +1,10 @@
 package org.nutz.doc;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.nutz.doc.html.HtmlDocRender;
 import org.nutz.doc.html.Tag;
@@ -76,10 +76,53 @@ public class ZDoc {
 	/**
 	 * @param src
 	 * @param dest
+	 * @throws IOException
 	 */
-	private static void dir2dir(File src, final File dest, final String ext) {
+	private static void dir2dir(File src, final File dest, final String ext) throws IOException {
 		DirSet ds = new DirSet(src, new PlainParser());
 		ds.load(".*[.]man");
+		// If find all .html .htm .js .css file and, copy it
+		copyResourceFiles(src, dest);
+		writeIndexHtml(src, dest, ext, ds);
+		final File docCss = Files.findFile(src.getAbsolutePath() + "/zdoc.css");
+		final int pos = src.getAbsolutePath().length();
+		ds.visitDocs(new DocVisitor() {
+			public void visit(Doc doc) {
+				File f = new File(dest.getAbsolutePath() + "/"
+						+ doc.getFile().getAbsolutePath().substring(pos));
+				String path = f.getParent();
+				f = new File(path + "/" + Files.getName(f) + ext);
+				if (null != docCss)
+					doc.attributes().put("css", docCss);
+				try {
+					doc2file(doc, f);
+				} catch (IOException e) {
+					throw Lang.wrapThrow(e);
+				}
+			}
+		});
+	}
+
+	private static Pattern RSFS = Pattern.compile("^(.*[.])(html|htm|js|css)$",
+			Pattern.CASE_INSENSITIVE);
+	private static void copyResourceFiles(File src, final File dest) throws IOException {
+		File[] rsfs = src.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				if (name.equalsIgnoreCase("index.html"))
+					return false;
+				if (name.equalsIgnoreCase("zdoc.css"))
+					return false;
+				return RSFS.matcher(name).find();
+			}
+		});
+		for (File rsf : rsfs) {
+			File drs = new File(dest.getAbsolutePath() + "/" + rsf.getName());
+			Files.copyFile(rsf, drs);
+		}
+	}
+
+	private static void writeIndexHtml(File src, final File dest, final String ext, DirSet ds)
+			throws IOException {
 		String html = renderHeadingHtml(src, ext, ds);
 		Segment seg = new CharSegment(Lang.readAll(Streams.fileInr(src.getAbsolutePath()
 				+ "/index.html")));
@@ -91,17 +134,6 @@ public class ZDoc {
 		}
 		seg.set("html", html);
 		Lang.writeAll(Streams.fileOutw(index), seg.toString());
-
-		final int pos = src.getAbsolutePath().length();
-		ds.visitDocs(new DocVisitor() {
-			public void visit(Doc doc) {
-				File f = new File(dest.getAbsolutePath() + "/"
-						+ doc.getFile().getAbsolutePath().substring(pos));
-				String path = f.getParent();
-				f = new File(path + "/" + Files.getName(f) + ext);
-				doc2file(doc, f);
-			}
-		});
 	}
 
 	private static String renderHeadingHtml(File src, final String ext, DirSet ds) {
@@ -135,7 +167,7 @@ public class ZDoc {
 					href = href.substring(0, pos) + ext;
 					li.add(Tag.tag("a").attr("href", href).add(Tag.text(title)));
 				} else
-					li.add(Tag.text(title));
+					li.add(Tag.text(title)).attr("class", "heading");
 				return li;
 			}
 		});
@@ -149,11 +181,15 @@ public class ZDoc {
 	/**
 	 * @param src
 	 * @param dest
+	 * @throws IOException
 	 */
-	private static void dir2file(File src, File dest) {
+	private static void dir2file(File src, File dest) throws IOException {
+		final File docCss = Files.findFile(src.getAbsolutePath() + "/zdoc.css");
 		DirSet ds = new DirSet(src, new PlainParser());
 		ds.load(".*[.]man");
 		Doc doc = ds.mergeDocSet();
+		if (null != docCss)
+			doc.attributes().put("css", docCss);
 		doc.setFile(src);
 		doc2file(doc, dest);
 	}
@@ -162,12 +198,11 @@ public class ZDoc {
 	 * @param src
 	 * @param dest
 	 * @throws IOException
+	 * @throws IOException
 	 */
 	private static void file2file(File src, File dest) throws IOException {
 		DocParser parser = new PlainParser();
-		InputStream ins = Streams.fileIn(src);
-		Doc doc = parser.parse(ins);
-		ins.close();
+		Doc doc = parser.parse(src);
 		doc.setFile(src);
 		doc2file(doc, dest);
 	}
@@ -176,36 +211,31 @@ public class ZDoc {
 	 * @param doc
 	 * @param dest
 	 * @throws IOException
+	 * @throws IOException
 	 */
-	private static void doc2file(Doc doc, File dest) {
+	private static void doc2file(Doc doc, File dest) throws IOException {
 		DocRender render = evalDocRender(dest);
-		try {
-			if (dest.isDirectory())
-				Files.deleteDir(dest);
-			if (!dest.exists())
-				Files.createNewFile(dest);
-			// Copy all medias and update media @src
-			List<Media> medias = doc.getMedias();
-			System.out.printf("doc base: %s\n", doc.getFile());
-			for (Media m : medias) {
-				if (!m.src().isRelative())
-					continue;
-				System.out.printf("media: %s => %s\n", m.src().getBasePath(), m.src().getPath());
-				File tar = m.src().getFile();
-				if (null != tar) {
-					String parent = dest.isDirectory() ? dest.getAbsolutePath() : dest.getParent();
-					File d = new File(parent + "/" + m.getSrc());
-					System.out.printf("copy to: %s\n", d);
-					Files.copyFile(tar, d);
-				}
+		if (dest.isDirectory())
+			Files.deleteDir(dest);
+		if (!dest.exists())
+			Files.createNewFile(dest);
+		// Copy all medias and update media @src
+		List<Media> medias = doc.getMedias();
+		System.out.printf("doc base: %s\n", doc.getFile());
+		for (Media m : medias) {
+			if (!m.src().isRelative())
+				continue;
+			System.out.printf("media: %s => %s\n", m.src().getBasePath(), m.src().getPath());
+			File tar = m.src().getFile();
+			if (null != tar) {
+				String parent = dest.isDirectory() ? dest.getAbsolutePath() : dest.getParent();
+				File d = new File(parent + "/" + m.getSrc());
+				System.out.printf("copy to: %s\n", d);
+				Files.copyFile(tar, d);
 			}
-			// Trans to dest
-			OutputStream ops = Streams.fileOut(dest);
-			render.render(ops, doc);
-			ops.close();
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
 		}
+		// Trans to dest
+		render.render(dest, doc);
 	}
 
 	/**

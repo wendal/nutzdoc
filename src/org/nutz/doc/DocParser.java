@@ -1,9 +1,9 @@
 package org.nutz.doc;
 
-import java.io.InputStream;
+import java.io.File;
 
 public interface DocParser {
 	
-	Doc parse(InputStream ins);
+	Doc parse(File src);
 	
 }

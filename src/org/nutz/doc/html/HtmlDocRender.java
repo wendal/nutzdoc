@@ -1,16 +1,16 @@
 package org.nutz.doc.html;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.List;
 
 import org.nutz.doc.*;
 import org.nutz.doc.style.FontStyle;
+import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 
 import static org.nutz.doc.html.Tag.*;
@@ -18,12 +18,34 @@ import static org.nutz.doc.html.Tag.*;
 public class HtmlDocRender implements DocRender {
 
 	@Override
-	public void render(OutputStream ops, Doc doc) {
+	public void render(File dest, Doc doc) {
+		Writer w = null;
 		try {
-			Writer w = new BufferedWriter(new OutputStreamWriter(ops, "UTF-8"));
+			w = new BufferedWriter(Streams.fileOutw(dest));
 			new InnerRender(w, doc).render();
-		} catch (UnsupportedEncodingException e) {
+			// Copy CSS
+			// System.out.printf("CSS: %s ", doc.attributes().get("css"));
+			if (doc.attributes().get("css") instanceof File) {
+				File css = (File) doc.attributes().get("css");
+				String cssPath = doc.getRelativePath(css);
+				File newCss = new File(dest.getParent() + "/" + cssPath);
+				// System.out.printf(">> copy >> %s > ", newCss);
+				if (!newCss.exists() || newCss.lastModified() != css.lastModified()) {
+					Files.copyFile(css, newCss);
+					// System.out.printf("OK\n");
+				} else {
+					// System.out.printf("Already\n");
+				}
+			} // Done for copy CSS
+		} catch (Exception e) {
 			throw Lang.wrapThrow(e);
+		} finally {
+			if (null != w)
+				try {
+					w.close();
+				} catch (IOException e) {
+					throw Lang.wrapThrow(e);
+				}
 		}
 	}
 
@@ -47,6 +69,12 @@ public class HtmlDocRender implements DocRender {
 					"text/html; charset=UTF-8"));
 			if (!Strings.isBlank(doc.getTitle()))
 				head.add(tag("title").add(text(doc.getTitle())));
+			if (doc.attributes().get("css") instanceof File) {
+				File css = (File) doc.attributes().get("css");
+				String cssHref = doc.getRelativePath(css);
+				head.add(Tag.tag("link").attr("href", cssHref).attr("rel", "stylesheet").attr(
+						"type", "text/css"));
+			}
 			Tag body = tag("body");
 			html.add(body);
 			Tag container = tag("div").attr("class", "zdoc_body");

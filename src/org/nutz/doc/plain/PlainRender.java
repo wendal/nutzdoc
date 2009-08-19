@@ -1,6 +1,6 @@
 package org.nutz.doc.plain;
 
-import java.io.OutputStream;
+import java.io.File;
 
 import org.nutz.doc.DocRender;
 import org.nutz.doc.Doc;
@@ -8,6 +8,7 @@ import org.nutz.doc.Doc;
 public class PlainRender implements DocRender {
 
 	@Override
-	public void render(OutputStream ops, Doc doc) {}
+	public void render(File dest, Doc doc) {}
 
+	
 }
