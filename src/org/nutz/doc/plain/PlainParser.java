@@ -286,13 +286,13 @@ public class PlainParser implements DocParser {
 				lineType = Line.class;
 			}
 		}
-		return Doc.line(lineType, parseInlines(cs));
+		return Doc.line(lineType, parseInlineList(cs));
 	}
 
-	private List<Inline> parseInlines(char[] cs) {
+	private List<Inline> parseInlineList(char[] cs) {
 		List<Inline> inlines = Doc.LIST(Inline.class);
 		TokenWalker tw = new TokenWalker(cs);
-		tw.add('`', '`').add('{', '}').add('<', '>').add('[', ']');
+		tw.add('`', '`', true).add('{', '}').add('<', '>').add('[', ']');
 		Token token;
 		while (null != (token = tw.next())) {
 			String s = token.getContent();
@@ -305,7 +305,7 @@ public class PlainParser implements DocParser {
 				break;
 			case '{':
 				if (s.length() > 0)
-					inlines.add(toInline("{" + s + "}"));
+					inlines.add(toInline(s));
 				break;
 			case '<':
 				if (s.length() > 0) {
@@ -318,7 +318,7 @@ public class PlainParser implements DocParser {
 					int pos = s.indexOf(' ');
 					if (pos > 0) {
 						String href = s.substring(0, pos);
-						List<Inline> inls = parseInlines(s.substring(pos + 1).toCharArray());
+						List<Inline> inls = parseInlineList(s.substring(pos + 1).toCharArray());
 						for (Inline il : inls)
 							il.href(href);
 						inlines.addAll(inls);
@@ -336,49 +336,44 @@ public class PlainParser implements DocParser {
 		return inlines;
 	}
 
-	private static Pattern QUOTE = Pattern.compile("^([{])(.*)([}])$");
 	private static Pattern MARK = Pattern.compile("^(([~_*^,])|(#[0-9a-fA-F]{3,6};))*");
 
 	private Inline toInline(String s) {
-		Matcher m = QUOTE.matcher(s);
+		Matcher m = MARK.matcher(s);
 		if (m.find()) {
-			s = m.group(2);
-			m = MARK.matcher(s);
-			if (m.find()) {
-				String mark = m.group();
-				Inline inline = parseInline(s.substring(mark.length()));
-				char[] cs = mark.toCharArray();
-				for (int i = 0; i < cs.length; i++) {
-					char c = cs[i];
-					switch (c) {
-					case '~':
-						inline.getStyle().getFont().addStyle(FontStyle.STRIKE);
-						break;
-					case '_':
-						inline.getStyle().getFont().addStyle(FontStyle.ITALIC);
-						break;
-					case '*':
-						inline.getStyle().getFont().addStyle(FontStyle.BOLD);
-						break;
-					case '^':
-						inline.getStyle().getFont().setAsSup();
-						break;
-					case ',':
-						inline.getStyle().getFont().setAsSub();
-						break;
-					case '#':
-						int j = i + 1;
-						for (; j < cs.length; j++)
-							if (cs[j] == ';')
-								break;
-						String color = mark.substring(i, j);
-						i = j;
-						inline.getStyle().getFont().setColor(color);
-						break;
-					}
+			String mark = m.group();
+			Inline inline = parseInline(s.substring(mark.length()));
+			char[] cs = mark.toCharArray();
+			for (int i = 0; i < cs.length; i++) {
+				char c = cs[i];
+				switch (c) {
+				case '~':
+					inline.getStyle().getFont().addStyle(FontStyle.STRIKE);
+					break;
+				case '_':
+					inline.getStyle().getFont().addStyle(FontStyle.ITALIC);
+					break;
+				case '*':
+					inline.getStyle().getFont().addStyle(FontStyle.BOLD);
+					break;
+				case '^':
+					inline.getStyle().getFont().setAsSup();
+					break;
+				case ',':
+					inline.getStyle().getFont().setAsSub();
+					break;
+				case '#':
+					int j = i + 1;
+					for (; j < cs.length; j++)
+						if (cs[j] == ';')
+							break;
+					String color = mark.substring(i, j);
+					i = j;
+					inline.getStyle().getFont().setColor(color);
+					break;
 				}
-				return inline;
 			}
+			return inline;
 		}
 		return parseInline(s);
 	}

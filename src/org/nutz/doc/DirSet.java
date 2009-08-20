@@ -79,7 +79,7 @@ public class DirSet {
 				doc.setFile(f.getAbsoluteFile());
 				DirDoc dd = mapDDs.get(f);
 				if (null != dd) {
-					if (doc.hasAuthor())
+					if (!doc.hasAuthor())
 						doc.setAuthor(dd.getAuthor());
 					if (Strings.isBlank(doc.getTitle()))
 						doc.setTitle(dd.getTitle());

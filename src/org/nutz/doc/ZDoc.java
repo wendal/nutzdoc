@@ -125,9 +125,11 @@ public class ZDoc {
 
 	private static void writeIndexHtml(File src, final File dest, final String ext, DirSet ds)
 			throws IOException {
+		File indexHtml = Files.findFile(src.getAbsolutePath() + "/index.html");
+		if (null == indexHtml)
+			return;
 		String html = renderHeadingHtml(src, ext, ds);
-		Segment seg = new CharSegment(Lang.readAll(Streams.fileInr(src.getAbsolutePath()
-				+ "/index.html")));
+		Segment seg = new CharSegment(Lang.readAll(Streams.fileInr(indexHtml)));
 		File index = new File(dest.getAbsolutePath() + "/index" + ext);
 		try {
 			Files.createNewFile(index);

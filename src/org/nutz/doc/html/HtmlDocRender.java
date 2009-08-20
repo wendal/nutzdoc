@@ -74,35 +74,19 @@ public class HtmlDocRender implements DocRender {
 						"type", "text/css"));
 			}
 			Tag body = tag("body");
-			// The author tag
-			Tag author = null;
-			if (doc.hasAuthor()) {
-				String email = doc.getAuthor().getEmailString();
-				author = Tag.tag("div").attr("class", "zdoc_author");
-				author.add(Tag.text("by"));
-				author.add(Tag.tag("b").add(Tag.text(doc.getAuthor().getName())));
-				author.add(Tag.tag("a").attr("href", "mailto:" + email).add(
-						Tag.text("<" + email + ">")));
-			}
 			// Add doc header
 			body.add(Tag.tag("div").attr("class", "zdoc_header").add(Tag.text(doc.getTitle())));
-			if (null != author)
-				body.add(author);
+			// Add author
+			if (doc.hasAuthor())
+				body.add(appendAuthorTag(Tag.tag("div").attr("class", "zdoc_author")));
 
 			html.add(body);
 			Tag container = tag("div").attr("class", "zdoc_body");
 			body.add(container);
 
 			// Add doc footer
-			if (doc.hasAuthor()) {
-				String email = doc.getAuthor().getEmailString();
-				Tag footer = Tag.tag("div").attr("class", "zdoc_footer");
-				body.add(footer);
-				footer.add(Tag.text("by"));
-				footer.add(Tag.tag("b").add(Tag.text(doc.getAuthor().getName())));
-				footer.add(Tag.tag("a").attr("href", "mailto:" + email).add(
-						Tag.text("<" + email + ">")));
-			}
+			if (doc.hasAuthor())
+				body.add(appendAuthorTag(Tag.tag("div").attr("class", "zdoc_footer")));
 
 			// Render doc contents
 			Block[] ps = doc.root().getBlocks();
@@ -114,6 +98,16 @@ public class HtmlDocRender implements DocRender {
 			} catch (IOException e) {
 				throw Lang.wrapThrow(e);
 			}
+		}
+
+		private Tag appendAuthorTag(Tag ele) {
+			String email = doc.getAuthor().getEmailString();
+			ele.add(Tag.text("by"));
+			ele.add(Tag.tag("b").add(Tag.text(doc.getAuthor().getName())));
+			if (!Strings.isBlank(email))
+				ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(
+						Tag.text("<" + email + ">")));
+			return ele;
 		}
 
 		void renderBlock(Tag parent, Block block) {

@@ -18,4 +18,8 @@ class Token {
 		return content;
 	}
 
+	public boolean isToken() {
+		return 0 != (int) name;
+	}
+
 }

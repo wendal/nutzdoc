@@ -50,6 +50,14 @@ public class PlainParserTest {
 	}
 
 	@Test
+	public void test_escape_in_color() {
+		Line root = root("{*{A}}");
+		Inline inline = root.child(0).inline(0);
+		assertTrue(inline.getStyle().getFont().isBold());
+		assertEquals("{A}", inline.getText());
+	}
+
+	@Test
 	public void test_parse_media() {
 		Media media = (Media) root("<a.gif>").child(0).inline(0);
 		assertEquals(0, media.height());
@@ -536,7 +544,7 @@ public class PlainParserTest {
 		String s = "#title:A\n#author:B";
 		Doc doc = new PlainParser().parse(TFile(s));
 		assertEquals("A", doc.getTitle());
-		assertEquals("B", doc.getAuthor());
+		assertEquals("B", doc.getAuthor().toString());
 	}
 
 }
