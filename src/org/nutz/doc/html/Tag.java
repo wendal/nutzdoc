@@ -61,26 +61,38 @@ public class Tag {
 	}
 
 	public boolean isBlock() {
+		if(null==name)
+			return false;
 		return BLOCK.matcher(name).find();
 	}
 
 	public boolean isInline() {
+		if(null==name)
+			return false;
 		return INLINE.matcher(name).find();
 	}
 
 	public boolean isNoChild() {
+		if(null==name)
+			return true;
 		return NOCHILD.matcher(name).find();
 	}
 
 	public boolean isHtml() {
+		if(null==name)
+			return false;
 		return name.equalsIgnoreCase("html");
 	}
 
 	public boolean isBody() {
+		if(null==name)
+			return false;
 		return name.equalsIgnoreCase("body");
 	}
 
 	public boolean isChildAllInline() {
+		if(null==name)
+			return false;
 		for (Tag tag : children)
 			if (tag.isBlock())
 				return false;
@@ -144,7 +156,7 @@ public class Tag {
 			for (Tag tag : children) {
 				if (tag.isBlock() || tag.isBody())
 					sb.append('\n');
-				sb.append(tag);
+				sb.append(tag.toString());
 			}
 			if (!this.isChildAllInline())
 				sb.append('\n');

@@ -23,20 +23,7 @@ public class HtmlDocRender implements DocRender {
 		try {
 			w = new BufferedWriter(Streams.fileOutw(dest));
 			new InnerRender(w, doc).render();
-			// Copy CSS
-			// System.out.printf("CSS: %s ", doc.attributes().get("css"));
-			if (doc.attributes().get("css") instanceof File) {
-				File css = (File) doc.attributes().get("css");
-				String cssPath = doc.getRelativePath(css);
-				File newCss = new File(dest.getParent() + "/" + cssPath);
-				// System.out.printf(">> copy >> %s > ", newCss);
-				if (!newCss.exists() || newCss.lastModified() != css.lastModified()) {
-					Files.copyFile(css, newCss);
-					// System.out.printf("OK\n");
-				} else {
-					// System.out.printf("Already\n");
-				}
-			} // Done for copy CSS
+			copyCss(dest, doc);
 		} catch (Exception e) {
 			throw Lang.wrapThrow(e);
 		} finally {
@@ -46,6 +33,17 @@ public class HtmlDocRender implements DocRender {
 				} catch (IOException e) {
 					throw Lang.wrapThrow(e);
 				}
+		}
+	}
+
+	private void copyCss(File dest, Doc doc) throws IOException {
+		if (doc.attributes().get("css") instanceof File) {
+			File css = (File) doc.attributes().get("css");
+			String cssPath = doc.getRelativePath(css);
+			File newCss = new File(dest.getParent() + "/" + cssPath);
+			if (!newCss.exists() || newCss.lastModified() != css.lastModified()) {
+				Files.copyFile(css, newCss);
+			}
 		}
 	}
 
@@ -76,9 +74,37 @@ public class HtmlDocRender implements DocRender {
 						"type", "text/css"));
 			}
 			Tag body = tag("body");
+			// The author tag
+			Tag author = null;
+			if (doc.hasAuthor()) {
+				String email = doc.getAuthor().getEmailString();
+				author = Tag.tag("div").attr("class", "zdoc_author");
+				author.add(Tag.text("by"));
+				author.add(Tag.tag("b").add(Tag.text(doc.getAuthor().getName())));
+				author.add(Tag.tag("a").attr("href", "mailto:" + email).add(
+						Tag.text("<" + email + ">")));
+			}
+			// Add doc header
+			body.add(Tag.tag("div").attr("class", "zdoc_header").add(Tag.text(doc.getTitle())));
+			if (null != author)
+				body.add(author);
+
 			html.add(body);
 			Tag container = tag("div").attr("class", "zdoc_body");
 			body.add(container);
+
+			// Add doc footer
+			if (doc.hasAuthor()) {
+				String email = doc.getAuthor().getEmailString();
+				Tag footer = Tag.tag("div").attr("class", "zdoc_footer");
+				body.add(footer);
+				footer.add(Tag.text("by"));
+				footer.add(Tag.tag("b").add(Tag.text(doc.getAuthor().getName())));
+				footer.add(Tag.tag("a").attr("href", "mailto:" + email).add(
+						Tag.text("<" + email + ">")));
+			}
+
+			// Render doc contents
 			Block[] ps = doc.root().getBlocks();
 			for (Block p : ps)
 				renderBlock(container, p);

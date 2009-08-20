@@ -17,6 +17,8 @@ import org.w3c.dom.NodeList;
 
 public class DirSet {
 
+	private static final String ZDOC_NAME_REG = "(.*[.])([mM][aA][nN]|[zZ][dD][oO][cC])";
+
 	private DocParser parser;
 	private File home;
 	private Dir root;
@@ -42,6 +44,12 @@ public class DirSet {
 				throw Lang.wrapThrow(e);
 			}
 		}
+		this.root = new Dir(this.home);
+		this.load2(this.root, ZDOC_NAME_REG);
+	}
+
+	public String getDefaultAuthor() {
+		return dirdoc.getAuthor();
 	}
 
 	private DirDoc parserDirDoc(File dir, Element ele) {
@@ -59,11 +67,6 @@ public class DirSet {
 		return dd;
 	}
 
-	public void load(String regex) {
-		root = new Dir(home);
-		load2(root, regex);
-	}
-
 	private void load2(Dir dir, String regex) {
 		File[] fs = dir.getFile().listFiles();
 		for (File f : fs) {
@@ -76,7 +79,7 @@ public class DirSet {
 				doc.setFile(f.getAbsoluteFile());
 				DirDoc dd = mapDDs.get(f);
 				if (null != dd) {
-					if (Strings.isBlank(doc.getAuthor()))
+					if (doc.hasAuthor())
 						doc.setAuthor(dd.getAuthor());
 					if (Strings.isBlank(doc.getTitle()))
 						doc.setTitle(dd.getTitle());
@@ -145,8 +148,10 @@ public class DirSet {
 		visitDocs(root, dv);
 	}
 
-	private static void visitDocs(Dir dir, DocVisitor dv) {
+	private void visitDocs(Dir dir, DocVisitor dv) {
 		for (Doc doc : dir.docs()) {
+			if(!doc.hasAuthor())
+				doc.setAuthor(this.getDefaultAuthor());
 			dv.visit(doc);
 		}
 		for (Dir d : dir.dirs())
@@ -157,7 +162,7 @@ public class DirSet {
 		visitXml(xml.getDocumentElement(), xv);
 	}
 
-	private static void visitXml(Element ele, ElementVisitor xv) {
+	private void visitXml(Element ele, ElementVisitor xv) {
 		xv.visit(ele);
 		NodeList nl = ele.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++)
@@ -165,7 +170,7 @@ public class DirSet {
 				visitXml((Element) nl.item(i), xv);
 	}
 
-	public void visitFile(final FileVisitor fv) {
+	public void visitFile(final DocFileVisitor fv) {
 		final File home = this.home;
 		visitXml(new ElementVisitor() {
 			public void visit(Element ele) {
@@ -180,7 +185,14 @@ public class DirSet {
 						path = myPath + "/" + path;
 				}
 				path = home.getAbsolutePath() + "/" + path;
-				fv.visit(Files.findFile(path), title, depth);
+				File file = Files.findFile(path);
+				Doc doc = null;
+				if (Strings.isBlank(title))
+					if (null != file) {
+						doc = mapDocs.get(file);
+						title = null == doc ? file.getName() : doc.getTitle();
+					}
+				fv.visit(file, title, depth);
 			}
 		});
 	}

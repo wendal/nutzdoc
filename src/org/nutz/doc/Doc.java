@@ -98,7 +98,7 @@ public class Doc implements DocBase {
 
 	private Line root;
 	private String title;
-	private String author;
+	private Author author;
 	private File file;
 	private Map<String, Object> attributes;
 
@@ -127,12 +127,20 @@ public class Doc implements DocBase {
 		this.title = title;
 	}
 
-	public String getAuthor() {
+	public Author getAuthor() {
 		return author;
 	}
 
 	public void setAuthor(String author) {
+		this.author = new Author(author);
+	}
+
+	public void setAuthor(Author author) {
 		this.author = author;
+	}
+
+	public boolean hasAuthor() {
+		return null != this.author;
 	}
 
 	public long lastModified() {
@@ -192,8 +200,8 @@ public class Doc implements DocBase {
 		for (; pos < Math.min(bb.length, ff.length); pos++)
 			if (!bb[pos].equals(ff[pos]))
 				break;
-		String path = Strings.dup("../", bb.length-pos);
-		path += Lang.concatBy(pos, ff.length-pos, '/', ff);
+		String path = Strings.dup("../", bb.length - pos);
+		path += Lang.concatBy(pos, ff.length - pos, '/', ff);
 		return path;
 	}
 }

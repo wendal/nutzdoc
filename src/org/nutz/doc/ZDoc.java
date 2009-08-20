@@ -79,8 +79,7 @@ public class ZDoc {
 	 * @throws IOException
 	 */
 	private static void dir2dir(File src, final File dest, final String ext) throws IOException {
-		DirSet ds = new DirSet(src, new PlainParser());
-		ds.load(".*[.]man");
+		final DirSet ds = new DirSet(src, new PlainParser());
 		// If find all .html .htm .js .css file and, copy it
 		copyResourceFiles(src, dest);
 		writeIndexHtml(src, dest, ext, ds);
@@ -88,6 +87,8 @@ public class ZDoc {
 		final int pos = src.getAbsolutePath().length();
 		ds.visitDocs(new DocVisitor() {
 			public void visit(Doc doc) {
+				if (!doc.hasAuthor())
+					doc.setAuthor(ds.getDefaultAuthor());
 				File f = new File(dest.getAbsolutePath() + "/"
 						+ doc.getFile().getAbsolutePath().substring(pos));
 				String path = f.getParent();
@@ -105,6 +106,7 @@ public class ZDoc {
 
 	private static Pattern RSFS = Pattern.compile("^(.*[.])(html|htm|js|css)$",
 			Pattern.CASE_INSENSITIVE);
+
 	private static void copyResourceFiles(File src, final File dest) throws IOException {
 		File[] rsfs = src.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
@@ -141,7 +143,7 @@ public class ZDoc {
 		th.tag = Tag.tag("ul");
 		th.depth = 0;
 		th.home = src.getAbsolutePath();
-		ds.visitFile(new FileVisitor() {
+		ds.visitFile(new DocFileVisitor() {
 			public void visit(File file, String title, int depth) {
 				if (th.depth == depth) {
 					th.tag.add(createLi(file, title));
@@ -160,6 +162,10 @@ public class ZDoc {
 
 			private Tag createLi(File file, String title) {
 				Tag li = Tag.tag("li");
+				if (null != file) {
+					li.attr("title", file.getAbsolutePath().substring(th.home.length()).replace(
+							'\\', '/'));
+				}
 				if (null != file && file.isFile()) {
 					String href = file.getAbsolutePath().substring(th.home.length() + 1).replace(
 							'\\', '/');
@@ -186,8 +192,9 @@ public class ZDoc {
 	private static void dir2file(File src, File dest) throws IOException {
 		final File docCss = Files.findFile(src.getAbsolutePath() + "/zdoc.css");
 		DirSet ds = new DirSet(src, new PlainParser());
-		ds.load(".*[.]man");
 		Doc doc = ds.mergeDocSet();
+		if (!doc.hasAuthor())
+			doc.setAuthor(ds.getDefaultAuthor());
 		if (null != docCss)
 			doc.attributes().put("css", docCss);
 		doc.setFile(src);
