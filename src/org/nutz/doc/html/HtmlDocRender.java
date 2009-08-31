@@ -124,7 +124,8 @@ public class HtmlDocRender implements DocRender {
 				}
 				parent.add(tab);
 			} else if (block.isHr()) {
-				parent.add(tag("hr"));
+				// parent.add(tag("hr"));
+				parent.add(Tag.tag("div").attr("class", "hr"));
 			} else if (block.isIndexTable()) {
 				parent.add(renderIndexTable((IndexTable) block.line(0)));
 			} else if (block.isOrderedList()) {
