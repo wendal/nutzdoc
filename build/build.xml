@@ -8,18 +8,22 @@
 	<property name="TEMP" value="${PROJECT_HOME}/temp" />
 
 	<property environment="env" />
+	<property name="OP" value="${env.NUTZ_TARGET_DIR}" />
 	<property name="JAVA_HOME" value="${env.JAVA_HOME}" />
-	<property name="DEP_HOME" value="${env.NDOC_DEPHOME}" />
-	<property name="TOMCAT_HOME" value="${env.TOMCAT_HOME}" />
-	<property name="COMMON_HOME" value="${env.COMMON_HOME}" />
+	<property name="NUTZ_PATH" value="${env.NUTZ_PATH}" />
+	<property name="DEP_HOME" value="${env.NUTZ_DEPHOME}" />
+	
+	<property name="v" value="-1.2" />
 
 	<path id="CLASSPATH">
-		<fileset dir="${JAVA_HOME}" casesensitive="no">
-			<include name="*.jar" />
-		</fileset>
+		<pathelement location="${NUTZ_PATH}" />
 		<fileset dir="${DEP_HOME}" casesensitive="no">
 			<include name="*.jar" />
 		</fileset>
+		<pathelement location="${JAVA_HOME}/jre/javaws/javaws.jar" />
+		<pathelement location="${JAVA_HOME}/jre/lib/charsets.jar" />
+		<pathelement location="${JAVA_HOME}/jre/lib/rt.jar" />
+		<pathelement location="${JAVA_HOME}/lib/tools.jar" />
 	</path>
 
 	<target name="init" description="make dir">
@@ -33,8 +37,7 @@
 	</target>
 
 	<target name="jar" depends="compile" description="pacakge the classes to be a jar">
-		<jar destfile="${COMMON_HOME}/nutz.doc-source.jar" basedir="${PROJECT_SRC}"/>
-		<jar destfile="${COMMON_HOME}/nutz.doc.jar" basedir="${TEMP}" />
+		<jar destfile="${OP}/nutzdoc${v}.jar" basedir="${TEMP}" />
 	</target>
 
 	<target name="go" depends="jar">
