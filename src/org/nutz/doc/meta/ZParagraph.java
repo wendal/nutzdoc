@@ -10,9 +10,7 @@ public class ZParagraph {
 	private List<ZParagraph> children;
 	private ZParagraph parent;
 
-	public ZParagraph(ZDoc doc, ZParagraph parent) {
-		this.parent = parent;
-		this.doc = doc;
+	public ZParagraph() {
 		this.eles = new LinkedList<ZEle>();
 		this.children = new LinkedList<ZParagraph>();
 	}
@@ -28,6 +26,7 @@ public class ZParagraph {
 
 	public ZParagraph add(ZParagraph p) {
 		p.parent = this;
+		p.doc = this.doc;
 		children.add(p);
 		doc.setLast(p);
 		return this;
@@ -49,8 +48,26 @@ public class ZParagraph {
 		return doc;
 	}
 
+	public ZParagraph setDoc(ZDoc doc) {
+		this.doc = doc;
+		return this;
+	}
+
+	public String getText() {
+		StringBuilder sb = new StringBuilder();
+		for (ZEle ele : eles)
+			sb.append(ele.getText());
+		return sb.toString();
+	}
+
+	public int level() {
+		if (null == parent)
+			return 0;
+		return parent.level() + 1;
+	}
+
 	public static enum ZTYPE {
-		OL, UL, CODE, TABLE, ROW
+		OL, UL, CODE, TABLE, ROW, HR
 	}
 
 	private ZTYPE type;
@@ -88,8 +105,16 @@ public class ZParagraph {
 		return null == type;
 	}
 
+	public boolean isHr() {
+		return ZTYPE.HR == type;
+	}
+
 	public boolean isRoot() {
 		return null == parent;
+	}
+
+	public boolean isCanBeParent() {
+		return isOL() || isUL() || isNormal();
 	}
 
 }

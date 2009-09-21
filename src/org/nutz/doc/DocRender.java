@@ -7,6 +7,6 @@ import org.nutz.doc.meta.ZDoc;
 
 public interface DocRender {
 
-	void render(File dest, ZDoc doc) throws IOException;
+	void render(File file, ZDoc doc) throws IOException;
 
 }

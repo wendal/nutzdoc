@@ -2,8 +2,9 @@ package org.nutz.doc.meta;
 
 public class ZEle {
 
-	public ZEle() {
+	public ZEle(String text) {
 		style = new ZStyle();
+		this.text = text;
 	}
 
 	private ZParagraph paragraph;
@@ -37,7 +38,11 @@ public class ZEle {
 	public boolean hasRefer() {
 		return null != refer;
 	}
-	
-	
+
+	private String text;
+
+	public String getText() {
+		return text;
+	}
 
 }

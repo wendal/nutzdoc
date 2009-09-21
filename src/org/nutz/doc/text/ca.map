@@ -1,0 +1,23 @@
+For paragraph:
+
+default: org.nutz.doc.text.acceptor.ParagraphAcceptor
+[0,32]*
+	#
+		title:org.nutz.doc.text.acceptor.TitleAcceptor
+		author:org.nutz.doc.text.acceptor.AuthorAcceptor
+		verifier:org.nutz.doc.text.acceptor.VerifierAcceptor
+		index:org.nutz.doc.text.acceptor.IndexAcceptor
+		 :org.nutz.doc.text.acceptor.OLAcceptor
+	* :org.nutz.doc.text.acceptor.ULAcceptor
+	{{{:org.nutz.doc.text.acceptor.CodeAcceptor
+	||:org.nutz.doc.text.acceptor.RowAcceptor
+	-----:org.nutz.doc.text.acceptor.HrAcceptor
+	
+For Inline:
+
+[:org.nutz.doc.text.acceptor.ReferAcceptor
+<:org.nutz.doc.text.acceptor.ImageAcceptor
+{:org.nutz.doc.text.acceptor.StyleAcceptor
+`:org.nutz.doc.text.acceptor.EscapingAcceptor
+
+default: org.nutz.doc.text.acceptor.EleAcceptor

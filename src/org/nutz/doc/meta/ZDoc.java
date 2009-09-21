@@ -7,7 +7,7 @@ import java.util.List;
 public class ZDoc {
 
 	public ZDoc() {
-		root = new ZParagraph(this, null);
+		root = new ZParagraph().setDoc(this);
 		last = root;
 		authors = new LinkedList<Author>();
 		verifiers = new LinkedList<Author>();
@@ -16,7 +16,10 @@ public class ZDoc {
 	private List<Author> authors;
 	private List<Author> verifiers;
 	private File source;
-	private ZFolder folder;
+	
+	public String getTitle(){
+		return root.getText();
+	}
 
 	public File getSource() {
 		return source;
@@ -24,15 +27,6 @@ public class ZDoc {
 
 	public ZDoc setSource(File source) {
 		this.source = source;
-		return this;
-	}
-
-	public ZFolder getFolder() {
-		return folder;
-	}
-
-	public ZDoc setFolder(ZFolder folder) {
-		this.folder = folder;
 		return this;
 	}
 

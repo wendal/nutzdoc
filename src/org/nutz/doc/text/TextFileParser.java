@@ -8,7 +8,6 @@ import org.nutz.doc.meta.ZDoc;
 
 public class TextFileParser implements DocParser {
 
-	@Override
 	public ZDoc parse(File src) throws IOException {
 		TextParsing parsing = new TextParsing(src);
 		parsing.open();

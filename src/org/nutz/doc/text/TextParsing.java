@@ -12,21 +12,19 @@ import org.nutz.lang.Streams;
  * 
  * <pre>
  * WorkingStack
- * 		> descide the CharAcceptor
+ * 		&gt; descide the CharAcceptor
  * 
  * CharAcceptor  abstract
- * 		> accept(char c)
- * 		> done() boolean
- * 		> set(ZDoc zdoc)
- * 		> support nesting
+ * 		&gt; accept(char c)
+ * 		&gt; set(ZDoc zdoc)
+ * 		&gt; support nesting
  * 
- * impl: Link,Author, Title, 
+ * impl: Link,Author, Title,
  * 
- *  
  * </pre>
  * 
  * @author zozoh
- *
+ * 
  */
 class TextParsing {
 
@@ -57,9 +55,9 @@ class TextParsing {
 	}
 
 	void process() throws IOException {
-		while (-1 != next()) {
-			 
-		}
+		WorkingStack stack = new WorkingStack();
+		while (stack.accept(next())) {}
+		doc = (ZDoc) stack.getResult();
 	}
 
 }
