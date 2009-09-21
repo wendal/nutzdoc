@@ -80,7 +80,7 @@ public class DirSet {
 				DirDoc dd = mapDDs.get(f);
 				if (null != dd) {
 					if (!doc.hasAuthor())
-						doc.setAuthor(dd.getAuthor());
+						doc.addAuthor(dd.getAuthor());
 					if (Strings.isBlank(doc.getTitle()))
 						doc.setTitle(dd.getTitle());
 				}
@@ -121,7 +121,7 @@ public class DirSet {
 			return doc;
 		}
 		doc = new Doc();
-		doc.setAuthor(dd.getAuthor());
+		doc.addAuthor(dd.getAuthor());
 		doc.setTitle(dd.getTitle());
 		for (DirDoc d : dd.children()) {
 			Doc sub = mergeDocSet(d);
@@ -151,7 +151,7 @@ public class DirSet {
 	private void visitDocs(Dir dir, DocVisitor dv) {
 		for (Doc doc : dir.docs()) {
 			if(!doc.hasAuthor())
-				doc.setAuthor(this.getDefaultAuthor());
+				doc.addAuthor(this.getDefaultAuthor());
 			dv.visit(doc);
 		}
 		for (Dir d : dir.dirs())

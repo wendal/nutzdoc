@@ -88,9 +88,8 @@ public class ZDoc {
 		ds.visitDocs(new DocVisitor() {
 			public void visit(Doc doc) {
 				if (!doc.hasAuthor())
-					doc.setAuthor(ds.getDefaultAuthor());
-				File f = new File(dest.getAbsolutePath() + "/"
-						+ doc.getFile().getAbsolutePath().substring(pos));
+					doc.addAuthor(ds.getDefaultAuthor());
+				File f = new File(dest.getAbsolutePath() + "/" + doc.getFile().getAbsolutePath().substring(pos));
 				String path = f.getParent();
 				f = new File(path + "/" + Files.getName(f) + ext);
 				if (null != docCss)
@@ -104,8 +103,7 @@ public class ZDoc {
 		});
 	}
 
-	private static Pattern RSFS = Pattern.compile("^(.*[.])(html|htm|js|css)$",
-			Pattern.CASE_INSENSITIVE);
+	private static Pattern RSFS = Pattern.compile("^(.*[.])(html|htm|js|css)$", Pattern.CASE_INSENSITIVE);
 
 	private static void copyResourceFiles(File src, final File dest) throws IOException {
 		File[] rsfs = src.listFiles(new FilenameFilter() {
@@ -123,8 +121,7 @@ public class ZDoc {
 		}
 	}
 
-	private static void writeIndexHtml(File src, final File dest, final String ext, DirSet ds)
-			throws IOException {
+	private static void writeIndexHtml(File src, final File dest, final String ext, DirSet ds) throws IOException {
 		File indexHtml = Files.findFile(src.getAbsolutePath() + "/index.html");
 		if (null == indexHtml)
 			return;
@@ -165,12 +162,10 @@ public class ZDoc {
 			private Tag createLi(File file, String title) {
 				Tag li = Tag.tag("li");
 				if (null != file) {
-					li.attr("title", file.getAbsolutePath().substring(th.home.length()).replace(
-							'\\', '/'));
+					li.attr("title", file.getAbsolutePath().substring(th.home.length()).replace('\\', '/'));
 				}
 				if (null != file && file.isFile()) {
-					String href = file.getAbsolutePath().substring(th.home.length() + 1).replace(
-							'\\', '/');
+					String href = file.getAbsolutePath().substring(th.home.length() + 1).replace('\\', '/');
 					int pos = href.lastIndexOf('.');
 					href = href.substring(0, pos) + ext;
 					li.add(Tag.tag("a").attr("href", href).add(Tag.text(title)));
@@ -196,7 +191,7 @@ public class ZDoc {
 		DirSet ds = new DirSet(src, new PlainParser());
 		Doc doc = ds.mergeDocSet();
 		if (!doc.hasAuthor())
-			doc.setAuthor(ds.getDefaultAuthor());
+			doc.addAuthor(ds.getDefaultAuthor());
 		if (null != docCss)
 			doc.attributes().put("css", docCss);
 		doc.setFile(src);

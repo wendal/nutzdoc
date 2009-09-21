@@ -8,8 +8,7 @@ import org.nutz.lang.meta.Email;
 
 public class Author {
 
-	private static Pattern PTN = Pattern.compile("^(.+)([(])(.+@.+)([)])$",
-			Pattern.CASE_INSENSITIVE);
+	private static Pattern PTN = Pattern.compile("^(.+)([(])(.+@.+)([)])$", Pattern.CASE_INSENSITIVE);
 
 	public Author(String str) {
 		if (null != str) {
@@ -51,6 +50,16 @@ public class Author {
 
 	public void setEmail(Email email) {
 		this.email = email;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return name.equals(((Author) obj).name);
+	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
 	}
 
 	@Override

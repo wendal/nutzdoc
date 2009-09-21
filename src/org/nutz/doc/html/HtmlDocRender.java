@@ -63,15 +63,13 @@ public class HtmlDocRender implements DocRender {
 			Tag html = tag("html");
 			Tag head = tag("head");
 			html.add(head);
-			head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT",
-					"text/html; charset=UTF-8"));
+			head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT", "text/html; charset=UTF-8"));
 			if (!Strings.isBlank(doc.getTitle()))
 				head.add(tag("title").add(text(doc.getTitle())));
 			if (doc.attributes().get("css") instanceof File) {
 				File css = (File) doc.attributes().get("css");
 				String cssHref = doc.getRelativePath(css);
-				head.add(Tag.tag("link").attr("href", cssHref).attr("rel", "stylesheet").attr(
-						"type", "text/css"));
+				head.add(Tag.tag("link").attr("href", cssHref).attr("rel", "stylesheet").attr("type", "text/css"));
 			}
 			Tag body = tag("body");
 			// Add doc header
@@ -101,13 +99,21 @@ public class HtmlDocRender implements DocRender {
 		}
 
 		private Tag appendAuthorTag(Tag ele) {
-			String email = doc.getAuthor().getEmailString();
-			ele.add(Tag.text("by"));
-			ele.add(Tag.tag("b").add(Tag.text(doc.getAuthor().getName())));
-			if (!Strings.isBlank(email))
-				ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(
-						Tag.text("<" + email + ">")));
+			appendAuthors(ele, "By:", doc.getAuthors());
+			appendAuthors(ele, "Verify by:", doc.getVerifiers());
 			return ele;
+		}
+
+		private void appendAuthors(Tag ele, String prefix, List<Author> authors) {
+			if (authors.isEmpty())
+				return;
+			ele.add(Tag.tag("em").add(Tag.text(prefix)));
+			for (Author au : authors) {
+				String email = au.getEmailString();
+				ele.add(Tag.tag("b").add(Tag.text(au.getName())));
+				if (!Strings.isBlank(email))
+					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(Tag.text("<" + email + ">")));
+			}
 		}
 
 		void renderBlock(Tag parent, Block block) {

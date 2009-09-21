@@ -109,8 +109,7 @@ public class PlainParser implements DocParser {
 						parent = parent.parent();
 					}
 					if (bw.line instanceof RootLine) {
-						for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it
-								.hasNext();)
+						for (Iterator<Line> it = ((RootLine) bw.line).root.childIterator(); it.hasNext();)
 							parent.addChild(it.next());
 
 					} else {
@@ -166,11 +165,10 @@ public class PlainParser implements DocParser {
 	private static Pattern INCLUDE = Pattern.compile("^@include:", Pattern.CASE_INSENSITIVE);
 	private static Pattern CODESTART = Pattern.compile("^([{]{3})(<[a-zA-Z]+>)?");
 	private static Pattern CODEEND = Pattern.compile("[}]{3}$");
-	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)(([0-9],)?[0-9])$",
-			Pattern.CASE_INSENSITIVE);
+	private static Pattern INDEXTABLE = Pattern.compile("^(#index:)(([0-9],)?[0-9])$", Pattern.CASE_INSENSITIVE);
 	private static Pattern DOC_TITLE = Pattern.compile("^(#title:)(.*)$", Pattern.CASE_INSENSITIVE);
-	private static Pattern DOC_AUTHOR = Pattern.compile("^(#author:)(.*)$",
-			Pattern.CASE_INSENSITIVE);
+	private static Pattern DOC_AUTHOR = Pattern.compile("^(#author:)(.*)$", Pattern.CASE_INSENSITIVE);
+	private static Pattern DOC_VIRIFIER = Pattern.compile("^(#verifier:)(.*)$", Pattern.CASE_INSENSITIVE);
 	private static Pattern OL = Pattern.compile("^([\\s]*[#][\\s]+)(.*)$");
 	private static Pattern UL = Pattern.compile("^([\\s]*[*][\\s]+)(.*)$");
 	private static String HR = "^[\\s]*-{5,}[\\s]*$";
@@ -188,7 +186,12 @@ public class PlainParser implements DocParser {
 		}
 		matcher = DOC_AUTHOR.matcher(ss);
 		if (matcher.find()) {
-			doc.setAuthor(matcher.group(2));
+			doc.addAuthor(matcher.group(2));
+			return null;
+		}
+		matcher = DOC_VIRIFIER.matcher(ss);
+		if (matcher.find()) {
+			doc.addVerifier(matcher.group(2));
 			return null;
 		}
 		/*
@@ -212,8 +215,7 @@ public class PlainParser implements DocParser {
 			String rs = Strings.trim(s.substring(matcher.end()));
 			Refer re = Doc.refer(doc, rs);
 			if (null == re.getFile() || !re.getFile().exists()) {
-				throw Lang.makeThrow("Fail to find doc file '%s'!!!", re.getFile()
-						.getAbsolutePath());
+				throw Lang.makeThrow("Fail to find doc file '%s'!!!", re.getFile().getAbsolutePath());
 			}
 			Doc doc2 = this.parse(re.getFile());
 			return new RootLine(doc2.root());
@@ -403,8 +405,7 @@ public class PlainParser implements DocParser {
 	}
 
 	private static Pattern MEDIAS = Pattern.compile(
-			"^([/\\\\]|[a-zA-Z]:[/\\\\])?([a-zA-Z0-9_/\\\\])*([.](png|gif|jpeg|jpg))$",
-			Pattern.CASE_INSENSITIVE);
+			"^([/\\\\]|[a-zA-Z]:[/\\\\])?([a-zA-Z0-9_/\\\\])*([.](png|gif|jpeg|jpg))$", Pattern.CASE_INSENSITIVE);
 
 	private Media parseMedia(String s) {
 		if (MEDIAS.matcher(s).find()) {

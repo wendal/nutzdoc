@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -94,11 +95,14 @@ public class Doc implements DocBase {
 		root = new Line();
 		root.setDoc(this);
 		root.setDepth(-1);
+		authors = new LinkedList<Author>();
+		verifiers = new LinkedList<Author>();
 	}
 
 	private Line root;
 	private String title;
-	private Author author;
+	private List<Author> authors;
+	private List<Author> verifiers;
 	private File file;
 	private Map<String, Object> attributes;
 
@@ -127,20 +131,34 @@ public class Doc implements DocBase {
 		this.title = title;
 	}
 
-	public Author getAuthor() {
-		return author;
+	public List<Author> getVerifiers() {
+		return verifiers;
 	}
 
-	public void setAuthor(String author) {
-		this.author = new Author(author);
+	public List<Author> getAuthors() {
+		return authors;
 	}
 
-	public void setAuthor(Author author) {
-		this.author = author;
+	public void addVerifier(String verifier) {
+		addVerifier(new Author(verifier));
+	}
+
+	public void addVerifier(Author verifier) {
+		if (!verifiers.contains(verifier))
+			verifiers.add(verifier);
+	}
+
+	public void addAuthor(String author) {
+		addAuthor(new Author(author));
+	}
+
+	public void addAuthor(Author author) {
+		if (!authors.contains(author))
+			authors.add(author);
 	}
 
 	public boolean hasAuthor() {
-		return null != this.author;
+		return authors.size() > 0;
 	}
 
 	public long lastModified() {
