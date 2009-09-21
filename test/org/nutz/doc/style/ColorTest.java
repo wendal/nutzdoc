@@ -8,7 +8,7 @@ public class ColorTest {
 
 	@Test
 	public void test_parse_color_ffffff() {
-		Color c = new Color("FFFFFF");
+		ZColor c = new ZColor("FFFFFF");
 		assertEquals(255, c.getRed());
 		assertEquals(255, c.getGreen());
 		assertEquals(255, c.getBlue());
@@ -17,7 +17,7 @@ public class ColorTest {
 	
 	@Test
 	public void test_parse_color_ABC() {
-		Color c = new Color("#ABC");
+		ZColor c = new ZColor("#ABC");
 		assertEquals(170, c.getRed());
 		assertEquals(187, c.getGreen());
 		assertEquals(204, c.getBlue());
@@ -26,7 +26,7 @@ public class ColorTest {
 	
 	@Test
 	public void test_parse_color_00F() {
-		Color c = new Color("#00F");
+		ZColor c = new ZColor("#00F");
 		assertEquals(0, c.getRed());
 		assertEquals(0, c.getGreen());
 		assertEquals(255, c.getBlue());
