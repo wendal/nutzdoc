@@ -25,8 +25,7 @@ public class ZParagraph {
 	}
 
 	public ZParagraph add(ZParagraph p) {
-		p.parent = this;
-		p.doc = this.doc;
+		p.setParent(this);
 		children.add(p);
 		doc.setLast(p);
 		return this;
@@ -40,6 +39,12 @@ public class ZParagraph {
 		return children.size() > 0;
 	}
 
+	public ZParagraph setParent(ZParagraph parent) {
+		this.parent = parent;
+		this.setDoc(parent.getDoc());
+		return this;
+	}
+
 	public ZParagraph getParent() {
 		return parent;
 	}
@@ -50,6 +55,8 @@ public class ZParagraph {
 
 	public ZParagraph setDoc(ZDoc doc) {
 		this.doc = doc;
+		for (ZParagraph chd : children)
+			chd.setDoc(doc);
 		return this;
 	}
 
@@ -60,10 +67,15 @@ public class ZParagraph {
 		return sb.toString();
 	}
 
-	public int level() {
+	/**
+	 * Zero base, doc.root.depth == 0 ;
+	 * 
+	 * @return
+	 */
+	public int depth() {
 		if (null == parent)
 			return 0;
-		return parent.level() + 1;
+		return parent.depth() + 1;
 	}
 
 	public static enum ZTYPE {

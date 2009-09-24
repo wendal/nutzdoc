@@ -10,10 +10,7 @@ public class ZRefer {
 
 	private String path;
 
-	private ZEle ele;
-
-	ZRefer(ZEle ele) {
-		this.ele = ele;
+	public ZRefer() {
 		if (Strings.isBlank(path))
 			throw Lang.makeThrow("Path can not be null!!!");
 		this.path = path.replace('\\', '/');
@@ -31,15 +28,15 @@ public class ZRefer {
 		return path.matches("^([\\w.]+[/])*([\\w.]+)$");
 	}
 
-	public boolean isLocal() {
-		return null != getFile();
+	public boolean isLocal(ZEle ele) {
+		return null != getFile(ele);
 	}
 
-	public String getBasePath() {
+	public String getBasePath(ZEle ele) {
 		return ele.getParagraph().getDoc().getSource().getAbsolutePath();
 	}
 
-	public File getFile() {
+	public File getFile(ZEle ele) {
 		if (isHttp() || isInner())
 			return null;
 		if (!isRelative())
@@ -47,13 +44,17 @@ public class ZRefer {
 		File f = Files.findFile(path);
 		if (null != f)
 			return f;
-		File bf = new File(getBasePath());
+		File bf = new File(getBasePath(ele));
 		String fp = bf.isFile() ? bf.getParent() + "/" + path : bf.getAbsolutePath() + "/" + path;
 		return Files.findFile(fp);
 	}
 
 	public String getPath() {
 		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 
 	@Override

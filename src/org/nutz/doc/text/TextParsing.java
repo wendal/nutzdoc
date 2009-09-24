@@ -35,6 +35,8 @@ class TextParsing {
 
 	TextParsing(File src) {
 		this.src = src;
+		ZDoc doc = new ZDoc();
+		doc.setSource(src);
 	}
 
 	void open() {
@@ -56,8 +58,16 @@ class TextParsing {
 
 	void process() throws IOException {
 		WorkingStack stack = new WorkingStack();
-		while (stack.accept(next())) {}
-		doc = (ZDoc) stack.getResult();
+		stack.init(null);
+		char c;
+		while (-1 != (c = next())) {
+			if (!stack.accept(c)) {
+				stack.update(doc);
+				stack.init(null);
+			}
+		}
+		if (!stack.cache.isEmpty())
+			stack.update(doc);
 	}
 
 }

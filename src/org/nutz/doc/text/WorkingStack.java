@@ -1,79 +1,48 @@
 package org.nutz.doc.text;
 
-import org.nutz.doc.ZDocs;
 import org.nutz.doc.meta.ZDoc;
-import org.nutz.doc.meta.ZEle;
-import org.nutz.doc.meta.ZParagraph;
+import org.nutz.doc.text.acc.*;
 import org.nutz.lang.util.LinkedCharArray;
 
-public class WorkingStack extends CharAcceptor {
+class WorkingStack implements ParagraphAcceptor {
 
-	WorkingStack() {
-		doc = new ZDoc();
-		cache = new LinkedCharArray(256);
+	static char[] CS = { '\n', ':', '{', '<', '`', '[' };
+
+	boolean isJudgeTime(char c) {
+		for (char ch : CS)
+			if (ch == c)
+				return true;
+		return false;
 	}
 
-	private ZDoc doc;
-	private LinkedCharArray cache;
-	private CharAcceptor acceptor;
+	public WorkingStack() {
+		cache = new LinkedCharArray();
+	}
 
-	boolean accept(char c) {
-		// When end of stream, close whole stack
-		if (-1 == c) {
-			finish();
-			return false;
-		}
-		// If acceptor is avaliable, use it.
-		// util the accept is close, then update zdoc
-		if (null != acceptor) {
-			if (acceptor.accept(c))
-				return true;
-			updateDocAndRemoveAcceptor();
-			return true;
-		}
-		// push char to cache and try eval out one acceptor
-		else {
-			cache.push(c);
-			evalAcceptor();
+	LinkedCharArray cache;
+	private ParagraphAcceptor acceptor;
+
+	public boolean accept(char c) {
+		if (null != acceptor)
+			return acceptor.accept(c);
+		cache.push(c);
+		// Decide which ParagraphAcceptor should be created
+		if (isJudgeTime(c)) {
+			String s = cache.toString();
+			acceptor = new DefaultAcceptor();
 		}
 		return true;
 	}
 
-	private void finish() {
-		// If some string in cache, append as last child of doc root
-		if (cache.size() > 0) {
-			doc.root().add(ZDocs.p(cache.toString()));
-			cache.clear();
-		}
-		// then update the acceptor
-		else {
-			updateDocAndRemoveAcceptor();
-		}
+	@Override
+	public void update(ZDoc doc) {
+		acceptor.update(doc);
 	}
 
-	private void updateDocAndRemoveAcceptor() {
-		Object re = acceptor.getResult();
-		if (re instanceof ZEle) {
-			doc.last().append((ZEle) re);
-		} else if (re instanceof P) {
-			P p = (P) re;
-			ZParagraph last = doc.last();
-			while (last.level() > p.level)
-				last = last.getParent();
-			if (!last.isCanBeParent())
-				last = last.getParent();
-			last.add(p.p);
-		}
+	@Override
+	public void init(char[] cs) {
+		cache.clear();
 		acceptor = null;
 	}
 
-	private void evalAcceptor() {
-		
-	}
-
-	Object getResult() {
-		return doc;
-	}
-
-	void init(String s) {}
 }
