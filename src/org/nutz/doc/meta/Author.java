@@ -11,7 +11,7 @@ public class Author {
 	private static Pattern PTN = Pattern.compile("^(.+)([(])(.+@.+)([)])$",
 			Pattern.CASE_INSENSITIVE);
 
-	public Author(String str) {
+	Author(String str) {
 		if (null != str) {
 			Matcher m = PTN.matcher(str);
 			if (m.find() && m.groupCount() == 4) {

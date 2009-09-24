@@ -1,15 +1,15 @@
 package org.nutz.doc.text.acc;
 
 import java.util.regex.Matcher;
+
 import java.util.regex.Pattern;
 
+import org.nutz.doc.EleSet;
 import org.nutz.doc.meta.ZEle;
-import org.nutz.doc.meta.ZParagraph;
-import org.nutz.doc.text.EleAcceptor;
 
-import static org.nutz.doc.ZDocs.*;
+import static org.nutz.doc.meta.ZDocs.*;
 
-public class ImageAcceptor implements EleAcceptor {
+public class ImageAcceptor extends PureTextAcceptor {
 
 	private StringBuilder sb;
 
@@ -17,7 +17,6 @@ public class ImageAcceptor implements EleAcceptor {
 		sb = new StringBuilder();
 	}
 
-	@Override
 	public boolean accept(char c) {
 		if (c == '>')
 			return false;
@@ -27,8 +26,7 @@ public class ImageAcceptor implements EleAcceptor {
 
 	private static Pattern PTN = Pattern.compile("^([0-9]+)([Xx])([0-9]+)(:)(.+)$");
 
-	@Override
-	public void update(ZParagraph p) {
+	public void update(EleSet p) {
 		ZEle ele = ele(null);
 		String s = sb.toString();
 		Matcher m = PTN.matcher(sb);

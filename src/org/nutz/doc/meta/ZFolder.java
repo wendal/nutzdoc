@@ -8,7 +8,7 @@ public class ZFolder {
 	private List<ZDoc> docs;
 	private List<ZFolder> children;
 
-	public ZFolder() {
+	ZFolder() {
 		docs = new LinkedList<ZDoc>();
 		children = new LinkedList<ZFolder>();
 	}

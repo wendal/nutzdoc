@@ -1,8 +1,9 @@
 package org.nutz.doc.text.acc;
 
 import org.nutz.doc.EleSet;
+import org.nutz.doc.text.EleAcceptor;
 
-public class StyleAcceptor extends PureTextAcceptor {
+public class PureTextAcceptor implements EleAcceptor {
 
 	public boolean accept(char c) {
 		return false;

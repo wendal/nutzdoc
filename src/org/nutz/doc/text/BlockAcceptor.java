@@ -2,9 +2,11 @@ package org.nutz.doc.text;
 
 import org.nutz.doc.meta.ZDoc;
 
-public interface ParagraphAcceptor {
+public interface BlockAcceptor {
 
-	void init(char[] cs);
+	void init(int depth, String str);
+	
+	int depth();
 
 	boolean accept(char c);
 

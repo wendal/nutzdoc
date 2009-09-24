@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.regex.Pattern;
 
 import org.nutz.doc.meta.ZDoc;
+import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 
 /**
@@ -32,6 +34,7 @@ class TextParsing {
 	private Reader reader;
 	private ZDoc doc;
 	private char c;
+	private char prev;
 
 	TextParsing(File src) {
 		this.src = src;
@@ -52,22 +55,36 @@ class TextParsing {
 	}
 
 	char next() throws IOException {
+		prev = c;
 		c = (char) reader.read();
 		return c;
 	}
 
 	void process() throws IOException {
-		WorkingStack stack = new WorkingStack();
-		stack.init(null);
-		char c;
-		while (-1 != (c = next())) {
-			if (!stack.accept(c)) {
-				stack.update(doc);
-				stack.init(null);
-			}
+		WorkingStack stack = new WorkingStack(doc);
+		while (-1 != next()) {
+			if (prev == '\\') {
+				if (c == '\r' || c == '\n') {
+					do {
+						next();
+						if (c == -1)
+							break;
+					} while ('\r' == c || '\n' == c);
+				}
+			} else if (c == '\\')
+				continue;
+
+			stack.accept(c);
 		}
-		if (!stack.cache.isEmpty())
-			stack.update(doc);
+		stack.close();
+		formatList();
+	}
+
+	private static Pattern UL = Pattern.compile("^[ \t]*[*][ ].*$");
+	private static Pattern OL = Pattern.compile("^[ \t]*[#][ ].*$");
+
+	void formatList() {
+		throw Lang.makeThrow("No implement yet!");
 	}
 
 }

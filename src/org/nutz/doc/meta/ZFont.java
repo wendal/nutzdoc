@@ -2,6 +2,8 @@ package org.nutz.doc.meta;
 
 import org.nutz.lang.Maths;
 
+import static org.nutz.doc.meta.ZDocs.*;
+
 public class ZFont {
 
 	public static final int BOLD = 1;
@@ -11,6 +13,8 @@ public class ZFont {
 	private static enum TYPE {
 		NORMAL, SUB, SUP
 	}
+
+	ZFont() {}
 
 	private int style;
 	private TYPE type;
@@ -22,7 +26,7 @@ public class ZFont {
 
 	public ZColor getColor() {
 		if (!hasColor())
-			color = new ZColor();
+			color = color();
 		return color;
 	}
 

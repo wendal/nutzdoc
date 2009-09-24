@@ -1,48 +1,64 @@
 package org.nutz.doc.text;
 
 import org.nutz.doc.meta.ZDoc;
-import org.nutz.doc.text.acc.*;
+import org.nutz.doc.meta.ZDocs;
+
 import org.nutz.lang.util.LinkedCharArray;
 
-class WorkingStack implements ParagraphAcceptor {
+class WorkingStack {
 
-	static char[] CS = { '\n', ':', '{', '<', '`', '[' };
-
-	boolean isJudgeTime(char c) {
-		for (char ch : CS)
-			if (ch == c)
-				return true;
-		return false;
-	}
-
-	public WorkingStack() {
+	public WorkingStack(ZDoc doc) {
+		this.doc = doc;
 		cache = new LinkedCharArray();
+		acceptor = null;
+		depth = 0;
 	}
 
+	private ZDoc doc;
 	LinkedCharArray cache;
-	private ParagraphAcceptor acceptor;
+	private BlockAcceptor acceptor;
+	private int depth;
+	private int nextDepth;
 
-	public boolean accept(char c) {
-		if (null != acceptor)
-			return acceptor.accept(c);
+	public void accept(char c) {
+		if (null != acceptor) {
+			if (c == '\n') {
+				cache.push(c);
+				return;
+			} else if (c == '\t' && !cache.isEmpty()) {
+				nextDepth++;
+				return;
+			}
+			
+			if (cache.isEmpty()) {
+				if (!acceptor.accept(c)) {
+					acceptor.update(doc);
+					acceptor = null;
+				}
+			}
+			return;
+		}
+
+		if (cache.isEmpty()) {
+			if (c == '\t')
+				depth++;
+			return;
+		}
+
 		cache.push(c);
 		// Decide which ParagraphAcceptor should be created
-		if (isJudgeTime(c)) {
-			String s = cache.toString();
-			acceptor = new DefaultAcceptor();
+		if (Acceptors.isJudgeTime(cache, c)) {
+			String s = cache.popAll();
+			acceptor = Acceptors.evalBlockAcceptor(s);
+			acceptor.init(depth, s);
+			cache.clear();
 		}
-		return true;
 	}
 
-	@Override
-	public void update(ZDoc doc) {
-		acceptor.update(doc);
+	public void close() {
+		if (null != acceptor)
+			acceptor.update(doc);
+		if (!cache.isEmpty())
+			doc.last().add(ZDocs.p(cache.toString()));
 	}
-
-	@Override
-	public void init(char[] cs) {
-		cache.clear();
-		acceptor = null;
-	}
-
 }

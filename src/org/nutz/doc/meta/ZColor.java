@@ -42,7 +42,6 @@ public class ZColor {
 	}
 
 	public String toString() {
-		return ("#" + Strings.fillHex(red, 2) + Strings.fillHex(green, 2) + Strings
-				.fillHex(blue, 2)).toUpperCase();
+		return ("#" + Strings.fillHex(red, 2) + Strings.fillHex(green, 2) + Strings.fillHex(blue, 2)).toUpperCase();
 	}
 }

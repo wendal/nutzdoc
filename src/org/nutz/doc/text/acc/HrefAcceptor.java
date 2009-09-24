@@ -2,7 +2,7 @@ package org.nutz.doc.text.acc;
 
 import org.nutz.doc.EleSet;
 
-public class StyleAcceptor extends PureTextAcceptor {
+public class HrefAcceptor extends PureTextAcceptor {
 
 	public boolean accept(char c) {
 		return false;

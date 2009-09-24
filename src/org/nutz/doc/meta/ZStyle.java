@@ -2,6 +2,8 @@ package org.nutz.doc.meta;
 
 public class ZStyle {
 
+	ZStyle() {}
+
 	private ZFont font;
 
 	public ZFont getFont() {

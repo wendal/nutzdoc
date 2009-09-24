@@ -1,8 +1,10 @@
 package org.nutz.doc.meta;
 
+import java.util.regex.Pattern;
+
 public class ZEle {
 
-	public ZEle(String text) {
+	ZEle(String text) {
 		style = new ZStyle();
 		this.text = text;
 	}
@@ -35,13 +37,13 @@ public class ZEle {
 		this.width = width;
 	}
 
-	private ZParagraph paragraph;
+	private ZBlock paragraph;
 
-	public ZParagraph getParagraph() {
+	public ZBlock getParagraph() {
 		return paragraph;
 	}
 
-	public ZEle setParagraph(ZParagraph paragraph) {
+	public ZEle setParagraph(ZBlock paragraph) {
 		this.paragraph = paragraph;
 		return this;
 	}
@@ -54,6 +56,10 @@ public class ZEle {
 
 	public void setStyle(ZStyle style) {
 		this.style = style;
+	}
+
+	public boolean hasStyle() {
+		return null != style;
 	}
 
 	private ZRefer href;
@@ -83,6 +89,14 @@ public class ZEle {
 
 	public boolean isImage() {
 		return null != src;
+	}
+
+	private static Pattern PTN = Pattern.compile("^[ \t]*[\r]?[\n]$");
+
+	public boolean isBr() {
+		if (null == text)
+			return false;
+		return PTN.matcher(text).find();
 	}
 
 }

@@ -1,52 +1,71 @@
 package org.nutz.doc.text.acc;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.nutz.doc.ZDocs;
 import org.nutz.doc.meta.ZDoc;
+import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZEle;
-import org.nutz.doc.meta.ZParagraph;
-import org.nutz.doc.text.ParagraphAcceptor;
+import org.nutz.doc.meta.ZBlock;
+import org.nutz.doc.text.Acceptors;
+import org.nutz.doc.text.BlockAcceptor;
+import org.nutz.doc.text.EleAcceptor;
 
-public class DefaultAcceptor implements ParagraphAcceptor {
+public class DefaultAcceptor implements BlockAcceptor {
 
-	private List<ZEle> eles;
-	private int depth;
+	private EleCache eles;
+	protected int depth;
+	private EleAcceptor ea;
 
-	@Override
-	public void init(char[] cs) {
-		eles = new LinkedList<ZEle>();
-		depth = 0;
-		for (char c : cs)
-			if (c == '\t')
-				depth++;
-			else
-				break;
+	public void init(int depth, String str) {
+		eles = new EleCache();
+		this.depth = depth;
 	}
 
-	@Override
+	public int depth() {
+		return depth;
+	}
+
 	public boolean accept(char c) {
-		return false;
+		if (c == '\n' && ea != null) {
+			popAcceptor();
+		} else if (null == ea) {
+			ea = Acceptors.evalEleAcceptor(c);
+		}
+		if (!ea.accept(c)) {
+			popAcceptor();
+		}
+		return !eles.isEndBy2Br();
 	}
 
-	@Override
+	private void popAcceptor() {
+		ea.update(eles);
+		ea = null;
+	}
+
 	public void update(ZDoc doc) {
-		ZParagraph p = ZDocs.p();
-		for (ZEle e : eles)
-			p.append(e);
+		if (null != ea)
+			popAcceptor();
+
+		ZBlock p = makeBlock();
 
 		// find the parent
-		ZParagraph last = doc.last();
+		ZBlock last = doc.last();
 		while (depth < last.depth()) {
 			if (last.isRoot())
 				break;
 			last = last.getParent();
 		}
 		// code, only OL,UL,Normal can append child
-		while (!last.isCanBeParent())
+		while (!last.isNormal())
 			last = last.getParent();
 		last.add(p);
+	}
+
+	protected ZBlock makeBlock() {
+		ZBlock p = ZDocs.p();
+		if (eles.size() >= 0) {
+			for (ZEle e : eles.eles())
+				p.append(e);
+		}
+		return p;
 	}
 
 }

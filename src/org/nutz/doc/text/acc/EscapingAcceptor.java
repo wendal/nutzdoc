@@ -1,16 +1,13 @@
 package org.nutz.doc.text.acc;
 
-import org.nutz.doc.meta.ZParagraph;
-import org.nutz.doc.text.EleAcceptor;
+import org.nutz.doc.EleSet;
 
-public class EscapingAcceptor implements EleAcceptor {
+public class EscapingAcceptor extends PureTextAcceptor {
 
-	@Override
 	public boolean accept(char c) {
 		return false;
 	}
 
-	@Override
-	public void update(ZParagraph p) {}
+	public void update(EleSet p) {}
 
 }
