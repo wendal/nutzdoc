@@ -9,11 +9,7 @@ import org.nutz.lang.util.IntRange;
 
 public class ZBlock implements EleSet {
 
-	public static enum ZTYPE {
-		OL, UL, CODE, TABLE, ROW, HR
-	}
-
-	private ZTYPE type;
+	private ZType type;
 	private String title;
 	private ZDoc doc;
 	private List<ZEle> eles;
@@ -133,33 +129,33 @@ public class ZBlock implements EleSet {
 		this.title = title;
 	}
 
-	public ZTYPE getType() {
+	public ZType getType() {
 		return type;
 	}
 
-	public ZBlock setType(ZTYPE type) {
+	public ZBlock setType(ZType type) {
 		this.type = type;
 		return this;
 	}
 
 	public boolean isOL() {
-		return ZTYPE.OL == type;
+		return ZType.OL == type;
 	}
 
 	public boolean isUL() {
-		return ZTYPE.UL == type;
+		return ZType.UL == type;
 	}
 
 	public boolean isCode() {
-		return ZTYPE.CODE == type;
+		return ZType.CODE == type;
 	}
 
 	public boolean isTable() {
-		return ZTYPE.TABLE == type;
+		return ZType.TABLE == type;
 	}
 
 	public boolean isRow() {
-		return ZTYPE.ROW == type;
+		return ZType.ROW == type;
 	}
 
 	public boolean isNormal() {
@@ -167,7 +163,7 @@ public class ZBlock implements EleSet {
 	}
 
 	public boolean isHr() {
-		return ZTYPE.HR == type;
+		return ZType.HR == type;
 	}
 
 	public boolean isRoot() {
