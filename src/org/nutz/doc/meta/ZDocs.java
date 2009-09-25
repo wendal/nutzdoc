@@ -14,6 +14,26 @@ public class ZDocs {
 		return new ZBlock();
 	}
 
+	public static ZBlock hr() {
+		return block(ZType.HR);
+	}
+
+	public static ZBlock block(ZType type) {
+		return new ZBlock().setType(type);
+	}
+
+	public static ZBlock code() {
+		return block(ZType.CODE);
+	}
+
+	public static ZBlock ol() {
+		return block(ZType.OLI);
+	}
+
+	public static ZBlock ul() {
+		return block(ZType.ULI);
+	}
+
 	public static ZBlock index(IntRange ir) {
 		return p().setIndexRange(ir);
 	}
@@ -27,7 +47,7 @@ public class ZDocs {
 	}
 
 	public static ZBlock row() {
-		return p().setType(ZType.ROW);
+		return block(ZType.ROW);
 	}
 
 	public static ZEle ele(String text) {

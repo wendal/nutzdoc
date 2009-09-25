@@ -87,7 +87,13 @@ public class ZBlock implements EleSet {
 	}
 
 	public ZDoc getDoc() {
-		return doc;
+		if (null != doc)
+			return doc;
+		if (null != parent) {
+			doc = parent.getDoc();
+			return doc;
+		}
+		return null;
 	}
 
 	public ZBlock setDoc(ZDoc doc) {
@@ -146,6 +152,10 @@ public class ZBlock implements EleSet {
 		return ZType.UL == type;
 	}
 
+	public boolean isLI() {
+		return ZType.OLI == type || ZType.ULI == type;
+	}
+
 	public boolean isCode() {
 		return ZType.CODE == type;
 	}
@@ -194,4 +204,5 @@ public class ZBlock implements EleSet {
 	public int size() {
 		return children.size();
 	}
+
 }

@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.meta.Author;
+import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZType;
 import org.nutz.lang.Strings;
@@ -14,11 +15,21 @@ import org.nutz.lang.util.IntRange;
 
 class Line {
 
+	private static final Pattern CODE_START = Pattern.compile("^([{]{3})([ \t]*)(<.*>)?([ \t]*)$");
+	private static final Pattern CODE_END = Pattern.compile("^[}]{3}$");
+	private static final Pattern ROW = Pattern.compile("^[|][|].+[|][|]$");
+	private static final Pattern UL = Pattern.compile("^([*][ ])(.*)$");
+	private static final Pattern OL = Pattern.compile("^([#][ ])(.*)$");
+	private static final Pattern HR = Pattern.compile("^[-]{5,}$");
+	private static final Pattern VERIFIER = Pattern.compile("^([#]verifier:)(.*)$");
+	private static final Pattern AUTHOR = Pattern.compile("^([#]author:)(.*)$");
+	private static final Pattern INDEX_RANGE = Pattern.compile("^([#]index:)([0-9]+[,:][0-9]+)([ \t]*)$");
+
 	static Line make(Line parent, String text) {
 		return new Line(parent, text);
 	}
 
-	private ZType type;
+	ZType type;
 	private String codeType;
 	private Line parent;
 	private String text;
@@ -31,55 +42,87 @@ class Line {
 	private Author author;
 	private Author verifier;
 
-	private Line(Line parent, String text) {
+	private Line(Line parent, String txt) {
 		this.parent = parent;
 		if (null != parent) {
 			parent.children.add(this);
 			depth = parent.depth + 1;
 		}
-		this.text = text;
+		this.text = Strings.trim(txt);
 		children = new ArrayList<Line>();
 		// Tiltle
 		Matcher m = Pattern.compile("^([#]title:)(.*)$").matcher(text);
-		if (m.find())
+		if (m.find()) {
 			title = m.group(2);
+			return;
+		}
+		// Index Range
+		m = INDEX_RANGE.matcher(text);
+		if (m.find()) {
+			indexRange = IntRange.make(m.group(2));
+			return;
+		}
 		// Author
-		m = Pattern.compile("^([#]author:)(.*)$").matcher(text);
-		if (m.find())
+		m = AUTHOR.matcher(text);
+		if (m.find()) {
 			author = ZDocs.author(m.group(2));
+			return;
+		}
 		// Verifier
-		m = Pattern.compile("^([#]verifier:)(.*)$").matcher(text);
-		if (m.find())
+		m = VERIFIER.matcher(text);
+		if (m.find()) {
 			verifier = ZDocs.author(m.group(2));
-
-		// Code type
-		m = Pattern.compile("^([{]{3})([ \t]*)(<.*>)?([ \t]*)$").matcher(text);
+			return;
+		}
+		// HR
+		m = HR.matcher(text);
+		if (m.find()) {
+			type = ZType.HR;
+			return;
+		}
+		// Code start
+		m = CODE_START.matcher(text);
 		if (m.find()) {
 			String s = m.group(3);
 			if (null == s) {
 				codeType = "";
 			}
 			codeType = s.substring(1, s.length() - 1);
+			return;
 		}
-		// OL | UL | Row
-		if (text.matches("^[ ]*[#][ ].*$"))
-			type = ZType.OL;
-		else if (text.matches("^[ ]*[*][ ].*$"))
-			type = ZType.UL;
-		else if (text.matches("^[|][|].+[|][|][ \t]*$"))
-			type = ZType.ROW;
-		else if (text.matches("^[ \t]*[}]{3}[ \t]*$"))
+		// Code end
+		m = CODE_END.matcher(text);
+		if (m.find()) {
 			codeEnd = true;
+			return;
+		}
+		evalMode();
+	}
 
+	private void evalMode() {
 		// End by escape
 		endByEscape = (text.length() > 0)
-				&& ((text.length() == 1 && text.charAt(0) == '\\') || (text
-						.matches("^.*[^\\\\][\\\\]$")));
-		// Index Range
-		m = Pattern.compile("^([#]index:)([0-9]+[,:][0-9]+)([ \t]*)$").matcher(text);
-		if (m.find())
-			indexRange = IntRange.make(m.group(2));
-
+				&& ((text.length() == 1 && text.charAt(0) == '\\') || (text.matches("^.*[^\\\\][\\\\]$")));
+		// OL
+		Matcher m = OL.matcher(text);
+		if (m.find()) {
+			type = ZType.OLI;
+			text = m.group(2);
+			return;
+		}
+		// UL
+		m = UL.matcher(text);
+		if (m.find()) {
+			type = ZType.ULI;
+			text = m.group(2);
+			return;
+		}
+		// Row
+		m = ROW.matcher(text);
+		if (m.find()) {
+			type = ZType.ROW;
+			return;
+		}
 	}
 
 	Line getParent() {
@@ -104,28 +147,40 @@ class Line {
 		return children.iterator();
 	}
 
+	boolean hasChild() {
+		return children.size() > 0;
+	}
+
+	boolean withoutChild() {
+		return children.isEmpty();
+	}
+
 	int depth() {
 		return depth;
 	}
 
-	boolean isOL() {
-		return ZType.OL == type;
+	boolean isHr() {
+		return ZType.HR == type;
 	}
 
-	boolean isUL() {
-		return ZType.UL == type;
+	boolean isOLI() {
+		return ZType.OLI == type;
+	}
+
+	boolean isCodeStart() {
+		return null != codeType;
+	}
+
+	boolean isULI() {
+		return ZType.ULI == type;
 	}
 
 	boolean isRow() {
 		return ZType.ROW == type;
 	}
 
-	boolean isSameTypeWith(Line line) {
-		if (isOL())
-			return line.isOL();
-		if (isUL())
-			return line.isUL();
-		return true;
+	boolean isNormal() {
+		return null == type;
 	}
 
 	String getCodeType() {
@@ -158,6 +213,31 @@ class Line {
 
 	boolean isBlank() {
 		return Strings.isBlank(text);
+	}
+
+	void join(Line line) {
+		if (null != line) {
+			text = text + line.text;
+			evalMode();
+		}
+	}
+
+	ZBlock toBlock() {
+		return Parsing.toBlock(text.toCharArray());
+	}
+
+	public String toString() {
+		return toString(0);
+	}
+
+	public String toString(int depth) {
+		StringBuilder sb = new StringBuilder();
+		if (codeType == null)
+			sb.append(Strings.dup('\t', depth)).append(text);
+		Iterator<Line> it = children.iterator();
+		while (it.hasNext())
+			sb.append(toString(depth + 1));
+		return sb.toString();
 	}
 
 }
