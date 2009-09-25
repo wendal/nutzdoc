@@ -14,6 +14,9 @@ public class ZDocFileParser implements DocParser {
 		BufferedReader br = new BufferedReader(Streams.fileInr(src));
 		Parsing parsing = new Parsing(br);
 		parsing.parse();
+		try {
+			br.close();
+		} catch (Exception e) {}
 		return parsing.getDoc();
 	}
 
