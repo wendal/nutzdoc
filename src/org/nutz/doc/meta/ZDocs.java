@@ -27,11 +27,11 @@ public class ZDocs {
 	}
 
 	public static ZBlock ol() {
-		return block(ZType.OLI);
+		return block(ZType.OL);
 	}
 
 	public static ZBlock ul() {
-		return block(ZType.ULI);
+		return block(ZType.UL);
 	}
 
 	public static ZBlock index(IntRange ir) {
@@ -55,9 +55,7 @@ public class ZDocs {
 	}
 
 	public static ZRefer refer(String str) {
-		ZRefer r = new ZRefer();
-		r.setPath(str);
-		return r;
+		return new ZRefer(str);
 	}
 
 	public static ZColor color(String str) {
@@ -72,4 +70,7 @@ public class ZDocs {
 		return new Author(str);
 	}
 
+	public static ZStyle style() {
+		return new ZStyle();
+	}
 }

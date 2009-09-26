@@ -2,7 +2,6 @@ package org.nutz.doc.zdoc;
 
 import static org.nutz.doc.meta.ZDocs.*;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Iterator;
@@ -28,16 +27,15 @@ class Parsing {
 	}
 
 	void parse() throws IOException {
-		Scanning scanning = new Scanning(reader);
-		scanning.scan();
-		transform(doc.root(), scanning.get());
+		Line root = new Scanning().scan(reader);
+		transform(doc.root(), root);
 	}
 
 	private void transform(ZBlock p, Line line) {
 		if (line.withoutChild())
 			return;
 
-		Iterator<Line> it = line.it();
+		Iterator<Line> it = line.children().iterator();
 		LinkedList<Line> stack = new LinkedList<Line>();
 		while (it.hasNext()) {
 			line = it.next();
@@ -103,8 +101,8 @@ class Parsing {
 				continue;
 			}
 			// Let me considering the last element of the stack
-			if (last.isEndByEscape()) {
-				last.join(line);
+			if (last.isEndByEscaping()) {
+				last.join(line.getText());
 				continue;
 			}
 			// If line type changed, that's mean we need make a block
@@ -161,7 +159,8 @@ class Parsing {
 				List<LinkedCharArray> list = findCells(it.next().getText().toCharArray());
 				Iterator<LinkedCharArray> j = list.iterator();
 				while (j.hasNext()) {
-					row.add(toBlock(j.next().toArray()));
+					char[] cs = j.next().toArray();
+					row.add(toBlock(cs));
 				}
 				re.add(row);
 			}
@@ -174,7 +173,10 @@ class Parsing {
 			StringBuilder sb = new StringBuilder();
 			while (it.hasNext()) {
 				Line line = it.next();
-				sb.append(line.toString());
+				if (line.isCodeStart())
+					sb.append(line.getChildrenString());
+				else
+					sb.append(line.toString());
 			}
 			re.setText(sb.toString());
 		}
@@ -208,8 +210,12 @@ class Parsing {
 			} else if (c == '`') {
 				stack.push(c);
 				escape = true;
-			} else if (stack.endsWith(CELL_BORDER)) {
+			} else {
+				stack.push(c);
+			}
+			if (stack.endsWith(CELL_BORDER)) {
 				list.add(stack.popLast(2));
+				stack = new LinkedCharArray(256);
 			}
 		}
 		return list;

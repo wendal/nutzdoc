@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 public class ZEle {
 
 	ZEle(String text) {
-		style = new ZStyle();
 		this.text = text;
 	}
 
@@ -54,6 +53,12 @@ public class ZEle {
 		return style;
 	}
 
+	public ZStyle style() {
+		if (null == style)
+			style = ZDocs.style();
+		return style;
+	}
+
 	public void setStyle(ZStyle style) {
 		this.style = style;
 	}
@@ -89,14 +94,6 @@ public class ZEle {
 
 	public boolean isImage() {
 		return null != src;
-	}
-
-	private static Pattern PTN = Pattern.compile("^[ \t]*[\r]?[\n]$");
-
-	public boolean isBr() {
-		if (null == text)
-			return false;
-		return PTN.matcher(text).find();
 	}
 
 }

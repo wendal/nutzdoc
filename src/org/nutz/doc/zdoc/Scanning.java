@@ -3,19 +3,11 @@ package org.nutz.doc.zdoc;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-
 class Scanning {
 
-	private BufferedReader reader;
-	private Line root;
-
-	Scanning(BufferedReader reader) {
-		this.reader = reader;
-		root = Line.make(null, null);
-	}
-
-	void scan() throws IOException {
+	Line scan(BufferedReader reader) throws IOException {
 		String l;
+		Line root = Line.make(null, null);
 		Line last = root;
 		while (null != (l = reader.readLine())) {
 			int depth = countTab(l);
@@ -23,6 +15,7 @@ class Scanning {
 				last = last.getParent();
 			last = Line.make(last, l);
 		}
+		return root;
 	}
 
 	private int countTab(String l) {
@@ -32,7 +25,4 @@ class Scanning {
 		return 0;
 	}
 
-	Line get() {
-		return root;
-	}
 }

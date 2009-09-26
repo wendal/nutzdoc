@@ -1,0 +1,3 @@
+A: [http://www.google.com]
+	B: {*[http://www.google.com Google]}
+		C: [http://nutz.googlecode.com <org/nutz/doc/plain/nutz.png>]

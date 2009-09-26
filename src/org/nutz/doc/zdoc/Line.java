@@ -48,10 +48,37 @@ class Line {
 			parent.children.add(this);
 			depth = parent.depth + 1;
 		}
-		this.text = Strings.trim(txt);
+		this.text = null == txt ? "" : Strings.trim(txt);
 		children = new ArrayList<Line>();
+
+		evalMode();
+	}
+
+	private void evalMode() {
+		// End by escape
+		endByEscape = (text.length() > 0) && (text.charAt(text.length() - 1) == '\\');
+		// OL
+		Matcher m = OL.matcher(text);
+		if (m.find()) {
+			type = ZType.OLI;
+			text = m.group(2);
+			return;
+		}
+		// UL
+		m = UL.matcher(text);
+		if (m.find()) {
+			type = ZType.ULI;
+			text = m.group(2);
+			return;
+		}
+		// Row
+		m = ROW.matcher(text);
+		if (m.find()) {
+			type = ZType.ROW;
+			return;
+		}
 		// Tiltle
-		Matcher m = Pattern.compile("^([#]title:)(.*)$").matcher(text);
+		m = Pattern.compile("^([#]title:)(.*)$").matcher(text);
 		if (m.find()) {
 			title = m.group(2);
 			return;
@@ -96,33 +123,6 @@ class Line {
 			codeEnd = true;
 			return;
 		}
-		evalMode();
-	}
-
-	private void evalMode() {
-		// End by escape
-		endByEscape = (text.length() > 0)
-				&& ((text.length() == 1 && text.charAt(0) == '\\') || (text.matches("^.*[^\\\\][\\\\]$")));
-		// OL
-		Matcher m = OL.matcher(text);
-		if (m.find()) {
-			type = ZType.OLI;
-			text = m.group(2);
-			return;
-		}
-		// UL
-		m = UL.matcher(text);
-		if (m.find()) {
-			type = ZType.ULI;
-			text = m.group(2);
-			return;
-		}
-		// Row
-		m = ROW.matcher(text);
-		if (m.find()) {
-			type = ZType.ROW;
-			return;
-		}
 	}
 
 	Line getParent() {
@@ -143,8 +143,15 @@ class Line {
 		return this;
 	}
 
-	Iterator<Line> it() {
-		return children.iterator();
+	List<Line> children() {
+		return children;
+	}
+
+	Line child(int... indexes) {
+		Line me = this;
+		for (int i : indexes)
+			me = me.children.get(i);
+		return me;
 	}
 
 	boolean hasChild() {
@@ -191,7 +198,7 @@ class Line {
 		return codeEnd;
 	}
 
-	boolean isEndByEscape() {
+	boolean isEndByEscaping() {
 		return endByEscape;
 	}
 
@@ -215,9 +222,9 @@ class Line {
 		return Strings.isBlank(text);
 	}
 
-	void join(Line line) {
-		if (null != line) {
-			text = text + line.text;
+	void join(String str) {
+		if (null != str) {
+			text = text + str;
 			evalMode();
 		}
 	}
@@ -227,17 +234,35 @@ class Line {
 	}
 
 	public String toString() {
-		return toString(0);
+		return toString(null != parent ? 0 : -1);
 	}
 
 	public String toString(int depth) {
 		StringBuilder sb = new StringBuilder();
-		if (codeType == null)
-			sb.append(Strings.dup('\t', depth)).append(text);
+		if (null != parent)
+			sb.append(Strings.dup('\t', depth)).append(symbol()).append(text).append('\n');
+		sb.append(getChildrenString(depth));
+		return sb.toString();
+	}
+
+	public String getChildrenString() {
+		return getChildrenString(null != parent ? 0 : -1);
+	}
+
+	public String getChildrenString(int depth) {
+		StringBuilder sb = new StringBuilder();
 		Iterator<Line> it = children.iterator();
 		while (it.hasNext())
-			sb.append(toString(depth + 1));
+			sb.append(it.next().toString(depth + 1));
 		return sb.toString();
+	}
+
+	String symbol() {
+		if (isOLI())
+			return "# ";
+		if (isULI())
+			return "* ";
+		return "";
 	}
 
 }

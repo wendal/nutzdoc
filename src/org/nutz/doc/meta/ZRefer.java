@@ -10,7 +10,7 @@ public class ZRefer {
 
 	private String path;
 
-	ZRefer() {
+	ZRefer(String path) {
 		if (Strings.isBlank(path))
 			throw Lang.makeThrow("Path can not be null!!!");
 		this.path = path.replace('\\', '/');

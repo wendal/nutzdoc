@@ -1,6 +1,8 @@
 package org.nutz.doc.meta;
 
 import java.util.ArrayList;
+
+import java.util.Iterator;
 import java.util.List;
 
 import org.nutz.doc.EleSet;
@@ -38,7 +40,6 @@ public class ZBlock implements EleSet {
 	public ZBlock add(ZBlock p) {
 		p.setParent(this);
 		children.add(p);
-		doc.setLast(p);
 		return this;
 	}
 
@@ -205,4 +206,38 @@ public class ZBlock implements EleSet {
 		return children.size();
 	}
 
+	public String toString() {
+		return toString(null != parent ? 0 : -1);
+	}
+
+	public String toString(int depth) {
+		StringBuilder sb = new StringBuilder();
+		if (null != parent)
+			sb.append(Strings.dup('\t', depth)).append(symbol()).append(getText()).append('\n');
+		sb.append(getChildrenString(depth));
+		return sb.toString();
+	}
+
+	public String getChildrenString() {
+		return getChildrenString(null != parent ? 0 : -1);
+	}
+
+	public String getChildrenString(int depth) {
+		StringBuilder sb = new StringBuilder();
+		Iterator<ZBlock> it = children.iterator();
+		while (it.hasNext())
+			sb.append(it.next().toString(depth + 1));
+		return sb.toString();
+	}
+
+	String symbol() {
+		if (ZType.OL == type || ZType.UL == type) {
+			return String.format("%s - %d items", type.name(), children.size());
+		}
+		if (ZType.OLI == type)
+			return " # ";
+		if (ZType.ULI == type)
+			return " * ";
+		return "";
+	}
 }

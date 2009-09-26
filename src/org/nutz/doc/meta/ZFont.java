@@ -9,15 +9,13 @@ public class ZFont {
 	public static final int BOLD = 1;
 	public static final int ITALIC = 1 << 1;
 	public static final int STRIKE = 1 << 2;
-
-	private static enum TYPE {
-		NORMAL, SUB, SUP
-	}
+	public static final int UNDERLINE = 1 << 3;
+	public static final int SUB = 1 << 4;
+	public static final int SUP = 1 << 5;
 
 	ZFont() {}
 
 	private int style;
-	private TYPE type;
 	private ZColor color;
 
 	public boolean hasColor() {
@@ -48,16 +46,6 @@ public class ZFont {
 		return this;
 	}
 
-	public ZFont setAsSub() {
-		type = TYPE.SUB;
-		return this;
-	}
-
-	public ZFont setAsSup() {
-		type = TYPE.SUP;
-		return this;
-	}
-
 	public boolean isBold() {
 		return Maths.isMask(style, BOLD);
 	}
@@ -66,20 +54,24 @@ public class ZFont {
 		return Maths.isMask(style, ITALIC);
 	}
 
+	public boolean isUnderline() {
+		return Maths.isMask(style, UNDERLINE);
+	}
+
 	public boolean isStrike() {
 		return Maths.isMask(style, STRIKE);
 	}
 
 	public boolean isSub() {
-		return type == TYPE.SUB;
+		return Maths.isMask(style, SUB);
 	}
 
 	public boolean isSup() {
-		return type == TYPE.SUP;
+		return Maths.isMask(style, SUP);
 	}
 
 	public boolean isNormal() {
-		return type == TYPE.NORMAL;
+		return Maths.isNoMask(style, SUB | SUP);
 	}
 
 	public boolean is(int style) {

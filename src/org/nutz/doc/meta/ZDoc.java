@@ -10,7 +10,6 @@ public class ZDoc {
 
 	public ZDoc() {
 		root = new ZBlock().setDoc(this);
-		last = root;
 		authors = new LinkedList<Author>();
 		verifiers = new LinkedList<Author>();
 	}
@@ -19,7 +18,6 @@ public class ZDoc {
 	private List<Author> verifiers;
 	private File source;
 	private ZBlock root;
-	private ZBlock last;
 
 	public String getTitle() {
 		return root.getText();
@@ -41,14 +39,6 @@ public class ZDoc {
 
 	public ZBlock root() {
 		return root;
-	}
-
-	public ZBlock last() {
-		return last;
-	}
-
-	public void setLast(ZBlock last) {
-		this.last = last;
 	}
 
 	public ZDoc addAuthor(Author author) {

@@ -7,6 +7,10 @@ public class ZStyle {
 	private ZFont font;
 
 	public ZFont getFont() {
+		return font;
+	}
+
+	public ZFont font() {
 		if (null == font)
 			font = new ZFont();
 		return font;

@@ -1,0 +1,13 @@
+This is the example java code:
+{{{<JAVA>
+public class Abc{
+	private int num;
+		// tt
+}
+}}}
+Child:
+	{{{<SQL>
+	DROP TABLE t_abc;
+			/*t*/
+}}}
+-The end-
