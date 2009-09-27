@@ -34,7 +34,7 @@ public class BlockMakerTest {
 	public void test_simple_image() {
 		ZBlock p = p("<b.png>");
 		assertTrue(p.ele(0).isImage());
-		assertEquals("b.png", p.ele(0).getSrc().getPath());
+		assertEquals("b.png", p.ele(0).getSrc().value());
 
 	}
 
@@ -42,25 +42,25 @@ public class BlockMakerTest {
 	public void test_image_sizing() {
 		ZBlock p = p("<3x5:b.png>");
 		assertTrue(p.ele(0).isImage());
-		assertEquals("b.png", p.ele(0).getSrc().getPath());
+		assertEquals("b.png", p.ele(0).getSrc().value());
 		assertEquals(3, p.ele(0).getWidth());
 		assertEquals(5, p.ele(0).getHeight());
 
 		p = p("<3X5:b.png>");
 		assertTrue(p.ele(0).isImage());
-		assertEquals("b.png", p.ele(0).getSrc().getPath());
+		assertEquals("b.png", p.ele(0).getSrc().value());
 		assertEquals(3, p.ele(0).getWidth());
 		assertEquals(5, p.ele(0).getHeight());
 
 		p = p("<x5:b.png>");
 		assertTrue(p.ele(0).isImage());
-		assertEquals("b.png", p.ele(0).getSrc().getPath());
+		assertEquals("b.png", p.ele(0).getSrc().value());
 		assertEquals(0, p.ele(0).getWidth());
 		assertEquals(5, p.ele(0).getHeight());
 
 		p = p("<3x:b.png>");
 		assertTrue(p.ele(0).isImage());
-		assertEquals("b.png", p.ele(0).getSrc().getPath());
+		assertEquals("b.png", p.ele(0).getSrc().value());
 		assertEquals(3, p.ele(0).getWidth());
 		assertEquals(0, p.ele(0).getHeight());
 	}
@@ -69,21 +69,21 @@ public class BlockMakerTest {
 	public void test_simple_link() {
 		ZBlock p = p("[a.html]");
 		assertEquals("a.html", p.ele(0).getText());
-		assertEquals("a.html", p.ele(0).getHref().getPath());
+		assertEquals("a.html", p.ele(0).getHref().value());
 	}
 
 	@Test
 	public void test_text_link() {
 		ZBlock p = p("[a.html A B]");
 		assertEquals("A B", p.ele(0).getText());
-		assertEquals("a.html", p.ele(0).getHref().getPath());
+		assertEquals("a.html", p.ele(0).getHref().value());
 	}
 
 	@Test
 	public void test_link_in_style() {
 		ZBlock p = p("{*/[A]}B");
 		assertEquals("A", p.ele(0).getText());
-		assertEquals("A", p.ele(0).getHref().getPath());
+		assertEquals("A", p.ele(0).getHref().value());
 		assertTrue(p.ele(0).getStyle().getFont().isBold());
 		assertTrue(p.ele(0).getStyle().getFont().isItalic());
 
@@ -93,7 +93,7 @@ public class BlockMakerTest {
 	@Test
 	public void test_style_in_link(){
 		ZBlock p = p("[b.html {*/A}]B");
-		assertEquals("b.html", p.ele(0).getHref().getPath());
+		assertEquals("b.html", p.ele(0).getHref().value());
 		assertEquals("A", p.ele(0).getText());
 		assertTrue(p.ele(0).getStyle().getFont().isBold());
 		assertTrue(p.ele(0).getStyle().getFont().isItalic());
@@ -104,7 +104,7 @@ public class BlockMakerTest {
 	@Test
 	public void test_style_in_link_partly(){
 		ZBlock p = p("[b.html {*/A}T]B");
-		assertEquals("b.html", p.ele(0).getHref().getPath());
+		assertEquals("b.html", p.ele(0).getHref().value());
 		assertEquals("AT", p.ele(0).getText());
 		assertTrue(p.ele(0).getStyle().getFont().isBold());
 		assertTrue(p.ele(0).getStyle().getFont().isItalic());
@@ -115,7 +115,7 @@ public class BlockMakerTest {
 	@Test
 	public void test_link_in_style_partly(){
 		ZBlock p = p("{*/A[b.html T]}B");
-		assertEquals("b.html", p.ele(0).getHref().getPath());
+		assertEquals("b.html", p.ele(0).getHref().value());
 		assertEquals("AT", p.ele(0).getText());
 		assertTrue(p.ele(0).getStyle().getFont().isBold());
 		assertTrue(p.ele(0).getStyle().getFont().isItalic());

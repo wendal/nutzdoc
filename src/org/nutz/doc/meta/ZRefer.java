@@ -3,58 +3,110 @@ package org.nutz.doc.meta;
 import java.io.File;
 
 import org.nutz.lang.Files;
-import org.nutz.lang.Lang;
-import org.nutz.lang.Strings;
 
 public class ZRefer {
 
+	private enum TYPE {
+		HTTP, HTTPS, BOOKMARK, INNER, FILE, RELATIVE
+	}
+
+	private String value;
 	private String path;
+	private ZEle ele;
+	private TYPE type;
 
 	ZRefer(String path) {
-		if (Strings.isBlank(path))
-			throw Lang.makeThrow("Path can not be null!!!");
-		this.path = path.replace('\\', '/');
+		if (null != path) {
+			path = path.replace('\\', '/');
+			path = path.toLowerCase();
+			if (path.startsWith("http://")) {
+				type = TYPE.HTTP;
+				value = path.substring(7);
+			} else if (path.startsWith("https://")) {
+				type = TYPE.HTTPS;
+				value = path.substring(8);
+			} else if (path.startsWith("file:///")) {
+				type = TYPE.FILE;
+				value = path.substring(8);
+			} else if (path.length() > 0) {
+				char c = path.charAt(0);
+				if (c == '$') {
+					type = TYPE.BOOKMARK;
+					value = path.substring(1);
+				} else if (c == '#') {
+					type = TYPE.INNER;
+					value = path.substring(1);
+				} else {
+					type = TYPE.RELATIVE;
+					value = path;
+				}
+			}
+		}
+	}
+
+	public ZEle getEle() {
+		return ele;
+	}
+
+	public ZRefer setEle(ZEle ele) {
+		this.ele = ele;
+		return this;
 	}
 
 	public boolean isInner() {
-		return path.startsWith("#");
+		return type == TYPE.INNER;
+	}
+
+	public boolean isBookmark() {
+		return type == TYPE.BOOKMARK;
+	}
+
+	public boolean isFile() {
+		return type == TYPE.FILE;
 	}
 
 	public boolean isHttp() {
-		return path.startsWith("http://") || path.startsWith("https://");
+		return type == TYPE.HTTP;
+	}
+
+	public boolean isHttps() {
+		return type == TYPE.HTTP;
+	}
+
+	public boolean isWWW() {
+		return type == TYPE.HTTP || type == TYPE.HTTPS;
 	}
 
 	public boolean isRelative() {
-		return path.matches("^([\\w.]+[/])*([\\w.]+)$");
+		return type == TYPE.RELATIVE;
 	}
 
-	public boolean isLocal(ZEle ele) {
-		return null != getFile(ele);
+	public boolean isAvailable() {
+		return null == type;
 	}
 
-	public String getBasePath(ZEle ele) {
-		return ele.getParagraph().getDoc().getSource().getAbsolutePath();
+	public boolean isLocal() {
+		return null != getFile();
 	}
 
-	public File getFile(ZEle ele) {
-		if (isHttp() || isInner())
-			return null;
-		if (!isRelative())
-			return new File(path);
-		File f = Files.findFile(path);
-		if (null != f)
-			return f;
-		File bf = new File(getBasePath(ele));
-		String fp = bf.isFile() ? bf.getParent() + "/" + path : bf.getAbsolutePath() + "/" + path;
-		return Files.findFile(fp);
+	public ZDoc getDoc() {
+		if (null != ele)
+			return ele.getDoc();
+		return null;
 	}
 
-	public String getPath() {
-		return path;
+	public File getFile() {
+		if (isFile()) {
+			return Files.findFile(value);
+		} else if (isRelative() && null != getDoc()) {
+			String p = getDoc().getSource().getParent();
+			return Files.findFile(p + "/" + value);
+		}
+		return null;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
+	public String value() {
+		return value;
 	}
 
 	@Override

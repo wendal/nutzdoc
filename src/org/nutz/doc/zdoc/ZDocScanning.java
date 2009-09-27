@@ -3,7 +3,7 @@ package org.nutz.doc.zdoc;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-class Scanning {
+class ZDocScanning {
 
 	Line scan(BufferedReader reader) throws IOException {
 		String l;

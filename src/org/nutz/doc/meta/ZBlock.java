@@ -5,11 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.nutz.doc.EleSet;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.IntRange;
 
-public class ZBlock implements EleSet {
+public class ZBlock {
 
 	private ZType type;
 	private String title;
@@ -24,8 +23,8 @@ public class ZBlock implements EleSet {
 		this.children = new ArrayList<ZBlock>();
 	}
 
-	public EleSet append(ZEle ele) {
-		eles.add(ele.setParagraph(this));
+	public ZBlock append(ZEle ele) {
+		eles.add(ele.setBlock(this));
 		return this;
 	}
 
@@ -47,11 +46,15 @@ public class ZBlock implements EleSet {
 		return children.toArray(new ZBlock[children.size()]);
 	}
 
-	public ZBlock child(int... indexes) {
+	public ZBlock desc(int... indexes) {
 		ZBlock re = this;
 		for (int i : indexes)
-			re = re.children.get(i);
+			re = re.child(i);
 		return re;
+	}
+
+	public ZBlock child(int index) {
+		return children.get(index);
 	}
 
 	public int countMyTypeInAncestors() {

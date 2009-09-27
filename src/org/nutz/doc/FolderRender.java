@@ -7,6 +7,6 @@ import org.nutz.doc.meta.ZFolder;
 
 public interface FolderRender {
 
-	void render(File dir, ZFolder folder) throws IOException;
+	void render(File dest, ZFolder folder) throws IOException;
 	
 }

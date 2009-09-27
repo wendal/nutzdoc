@@ -1,7 +1,5 @@
 package org.nutz.doc.meta;
 
-import java.util.regex.Pattern;
-
 public class ZEle {
 
 	ZEle(String text) {
@@ -16,8 +14,9 @@ public class ZEle {
 		return src;
 	}
 
-	public void setSrc(ZRefer src) {
-		this.src = src;
+	public ZEle setSrc(ZRefer src) {
+		this.src = src.setEle(this);
+		return this;
 	}
 
 	public int getHeight() {
@@ -36,14 +35,20 @@ public class ZEle {
 		this.width = width;
 	}
 
-	private ZBlock paragraph;
+	private ZBlock block;
 
-	public ZBlock getParagraph() {
-		return paragraph;
+	public ZBlock getBlock() {
+		return block;
 	}
 
-	public ZEle setParagraph(ZBlock paragraph) {
-		this.paragraph = paragraph;
+	public ZDoc getDoc() {
+		if (null != block)
+			return block.getDoc();
+		return null;
+	}
+
+	public ZEle setBlock(ZBlock paragraph) {
+		this.block = paragraph;
 		return this;
 	}
 
@@ -74,7 +79,7 @@ public class ZEle {
 	}
 
 	public ZEle setHref(ZRefer refer) {
-		this.href = refer;
+		this.href = refer.setEle(this);
 		return this;
 	}
 

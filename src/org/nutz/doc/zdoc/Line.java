@@ -230,7 +230,7 @@ class Line {
 	}
 
 	ZBlock toBlock() {
-		return Parsing.toBlock(text.toCharArray());
+		return ZDocParsing.toBlock(text.toCharArray());
 	}
 
 	public String toString() {

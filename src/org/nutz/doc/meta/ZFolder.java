@@ -5,12 +5,25 @@ import java.util.List;
 
 public class ZFolder {
 
+	public static ZFolder create() {
+		return new ZFolder();
+	}
+
+	private ZDoc folderDoc;
 	private List<ZDoc> docs;
 	private List<ZFolder> children;
 
-	ZFolder() {
+	private ZFolder() {
 		docs = new LinkedList<ZDoc>();
 		children = new LinkedList<ZFolder>();
+	}
+
+	public ZDoc getFolderDoc() {
+		return folderDoc;
+	}
+
+	public void setFolderDoc(ZDoc folderDoc) {
+		this.folderDoc = folderDoc;
 	}
 
 	public ZFolder append(ZDoc doc) {
@@ -18,9 +31,9 @@ public class ZFolder {
 		return this;
 	}
 
-	public ZFolder addChildren(ZFolder folder) {
+	public ZFolder add(ZFolder folder) {
 		children.add(folder);
-		return this;
+		return this; 
 	}
 
 	public ZFolder[] children() {

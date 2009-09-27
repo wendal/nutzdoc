@@ -9,11 +9,11 @@ import org.junit.Test;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
-public class ScanningTest {
+public class ZDocScanningTest {
 
 	private static Line scan(String s) {
 		try {
-			return new Scanning().scan(new BufferedReader(Lang.inr(s)));
+			return new ZDocScanning().scan(new BufferedReader(Lang.inr(s)));
 		} catch (IOException e) {
 			throw Lang.wrapThrow(e);
 		}

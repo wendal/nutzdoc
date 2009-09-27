@@ -12,23 +12,20 @@ import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.lang.util.LinkedCharArray;
 
-class Parsing {
+class ZDocParsing {
 
 	private ZDoc doc;
 	private BufferedReader reader;
 
-	Parsing(BufferedReader reader) {
+	ZDocParsing(BufferedReader reader) {
 		this.doc = new ZDoc();
 		this.reader = reader;
 	}
 
-	ZDoc getDoc() {
-		return doc;
-	}
-
-	void parse() throws IOException {
-		Line root = new Scanning().scan(reader);
+	ZDoc parse() throws IOException {
+		Line root = new ZDocScanning().scan(reader);
 		transform(doc.root(), root);
+		return doc;
 	}
 
 	private void transform(ZBlock p, Line line) {

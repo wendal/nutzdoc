@@ -28,7 +28,7 @@ class EleHolder {
 			ele.setText(sb.toString());
 			block.append(ele);
 		} else if (ele.hasHref()) {
-			ele.setText(ele.getHref().getPath());
+			ele.setText(ele.getHref().value());
 			block.append(ele);
 		}
 	}
