@@ -13,8 +13,8 @@ public class ZBlock {
 	private ZType type;
 	private String title;
 	private ZDoc doc;
-	private List<ZEle> eles;
-	private List<ZBlock> children;
+	List<ZEle> eles;
+	List<ZBlock> children;
 	private ZBlock parent;
 	private IntRange indexRange;
 
@@ -111,6 +111,13 @@ public class ZBlock {
 		StringBuilder sb = new StringBuilder();
 		for (ZEle ele : eles)
 			sb.append(ele.getText());
+		return sb.toString();
+	}
+
+	public String getString() {
+		StringBuilder sb = new StringBuilder();
+		for (ZEle ele : eles)
+			sb.append(ele.toString());
 		return sb.toString();
 	}
 
@@ -213,19 +220,19 @@ public class ZBlock {
 		return toString(null != parent ? 0 : -1);
 	}
 
-	public String toString(int depth) {
+	String toString(int depth) {
 		StringBuilder sb = new StringBuilder();
 		if (null != parent)
-			sb.append(Strings.dup('\t', depth)).append(symbol()).append(getText()).append('\n');
+			sb.append(Strings.dup('\t', depth)).append(symbol()).append(getString()).append('\n');
 		sb.append(getChildrenString(depth));
 		return sb.toString();
 	}
 
-	public String getChildrenString() {
+	String getChildrenString() {
 		return getChildrenString(null != parent ? 0 : -1);
 	}
 
-	public String getChildrenString(int depth) {
+	String getChildrenString(int depth) {
 		StringBuilder sb = new StringBuilder();
 		Iterator<ZBlock> it = children.iterator();
 		while (it.hasNext())
@@ -242,5 +249,54 @@ public class ZBlock {
 		if (ZType.ULI == type)
 			return " * ";
 		return "";
+	}
+
+	public Iterator<ZBlock> iterator() {
+		return new ZDocIterator(this);
+	}
+
+	public ZBlock buildIndex(IntRange range) {
+		ZBlock re = ZDocs.p();
+		_buildIndex(re, range, this);
+		return re;
+	}
+
+	private static void _buildIndex(ZBlock re, IntRange range, ZBlock me) {
+		int lvl = me.depth() - 1;
+		ZBlock myre = ZDocs.p(me.getText());
+		if (range.inon(lvl)) {
+			re.add(myre);
+		}
+		if (!range.lt(lvl)) {
+			for (ZBlock p : me.children())
+				_buildIndex(myre, range, p);
+		}
+
+	}
+
+	public List<ZEle> getImages() {
+		List<ZEle> list = new ArrayList<ZEle>();
+		Iterator<ZBlock> it = iterator();
+		while (it.hasNext()) {
+			ZBlock p = it.next();
+			for (ZEle ele : p.eles) {
+				if (ele.isImage())
+					list.add(ele);
+			}
+		}
+		return list;
+	}
+
+	public List<ZEle> getLinks() {
+		List<ZEle> list = new ArrayList<ZEle>();
+		Iterator<ZBlock> it = iterator();
+		while (it.hasNext()) {
+			ZBlock p = it.next();
+			for (ZEle ele : p.eles) {
+				if (ele.hasHref())
+					list.add(ele);
+			}
+		}
+		return list;
 	}
 }

@@ -1,14 +1,15 @@
 package org.nutz.doc.zdoc;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Test;
 import org.nutz.doc.DocParser;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
+import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.plain.PlainParserTest;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -21,14 +22,10 @@ public class ZDocFileParserTest {
 	}
 
 	private static ZBlock root(String s) {
-		try {
-			DocParser parser = new ZDocFileParser();
-			ZDoc doc = parser.parse(s);
-			ZBlock root = doc.root();
-			return root;
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
-		}
+		DocParser parser = new ZDocFileParser();
+		ZDoc doc = parser.parse(s);
+		ZBlock root = doc.root();
+		return root;
 	}
 
 	@Test
@@ -94,5 +91,80 @@ public class ZDocFileParserTest {
 		assertEquals("b", cellD.ele(1).getText());
 		assertEquals("a", cellD.ele(1).getHref().value());
 		assertEquals("E", cellD.ele(2).getText());
+	}
+	
+	@Test
+	public void test_simple_iterator1() {
+		String s = "A";
+		s = s + "\n\tB";
+		
+		ZBlock root = root(s);
+		Iterator<ZBlock> it = root.iterator();
+		assertEquals("A", it.next().getText());
+		assertEquals("B", it.next().getText());
+		assertNull(it.next());
+		assertFalse(it.hasNext());
+	}
+
+	@Test
+	public void test_simple_iterator2() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n";
+		s = s + "\n\tC";
+		s = s + "\n\t\tD";
+		s = s + "\n";
+		s = s + "\n\t\tE";
+		s = s + "\nF";
+
+		ZBlock root = root(s);
+
+		Iterator<ZBlock> it = root.iterator();
+		assertEquals("A", it.next().getText());
+		assertEquals("B", it.next().getText());
+		assertEquals("C", it.next().getText());
+		assertEquals("D", it.next().getText());
+		assertEquals("E", it.next().getText());
+		assertEquals("F", it.next().getText());
+		assertNull(it.next());
+		assertFalse(it.hasNext());
+	}
+
+	@Test
+	public void test_get_root_images() {
+		String s = "A";
+		s = s + "\n\tB<a.png>";
+		s = s + "\n";
+		s = s + "\n\tC<b.png>ddd<c.png>";
+		s = s + "\n\t\tD";
+		s = s + "\n";
+		s = s + "\n\t\tE";
+		s = s + "\nF";
+
+		ZBlock root = root(s);
+		List<ZEle> images = root.getImages();
+		assertEquals(3, images.size());
+		assertEquals("a.png", images.get(0).getSrc().value());
+		assertEquals("b.png", images.get(1).getSrc().value());
+		assertEquals("c.png", images.get(2).getSrc().value());
+	}
+	
+	@Test
+	public void test_get_root_links() {
+		String s = "A";
+		s = s + "\n\tB[a.png]";
+		s = s + "\n";
+		s = s + "\n\tC[b.png]ddd[c.png]";
+		s = s + "\n\t\tD";
+		s = s + "\n";
+		s = s + "\n\t\tE";
+		s = s + "\nF";
+
+		ZBlock root = root(s);
+		List<ZEle> images = root.getLinks();
+		assertEquals(3, images.size());
+		assertEquals("a.png", images.get(0).getHref().value());
+		assertEquals("b.png", images.get(1).getHref().value());
+		assertEquals("c.png", images.get(2).getHref().value());
 	}
 }

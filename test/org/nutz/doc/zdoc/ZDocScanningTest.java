@@ -3,7 +3,6 @@ package org.nutz.doc.zdoc;
 import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 
 import org.junit.Test;
 import org.nutz.lang.Lang;
@@ -12,11 +11,7 @@ import org.nutz.lang.Strings;
 public class ZDocScanningTest {
 
 	private static Line scan(String s) {
-		try {
-			return new ZDocScanning().scan(new BufferedReader(Lang.inr(s)));
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
-		}
+		return new ZDocScanning().scan(new BufferedReader(Lang.inr(s)));
 	}
 
 	@Test
@@ -203,5 +198,27 @@ public class ZDocScanningTest {
 		assertFalse(line.child(3).isEndByEscaping());
 		assertEquals("D`\\`", line.child(3).getText());
 
+	}
+
+	@Test
+	public void test_blank_line() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n";
+		s = s + "\n\tC";
+		s = s + "\n\t\tD";
+		s = s + "\n";
+		s = s + "\n\t\tE";
+		s = s + "\nF";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0).getText());
+		assertEquals("B", line.child(0, 0).getText());
+		assertEquals("", line.child(0, 1).getText());
+		assertEquals("C", line.child(0, 2).getText());
+		assertEquals("D", line.child(0, 2, 0).getText());
+		assertEquals("", line.child(0, 2, 1).getText());
+		assertEquals("E", line.child(0, 2, 2).getText());
+		assertEquals("F", line.child(1).getText());
 	}
 }

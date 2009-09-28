@@ -1,5 +1,7 @@
 package org.nutz.doc.meta;
 
+import org.nutz.lang.Strings;
+
 public class ZEle {
 
 	ZEle(String text) {
@@ -99,6 +101,17 @@ public class ZEle {
 
 	public boolean isImage() {
 		return null != src;
+	}
+
+	public String toString() {
+		if (isImage()) {
+			return String.format("<%s>", src.value());
+		} else if (hasHref()) {
+			if (Strings.isBlank(text))
+				return String.format("[%s]", href.value());
+			return String.format("[%s %s]", href.value(), text);
+		}
+		return text;
 	}
 
 }

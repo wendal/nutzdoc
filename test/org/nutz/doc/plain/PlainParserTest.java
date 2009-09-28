@@ -20,16 +20,11 @@ public class PlainParserTest {
 	}
 
 	private static ZBlock root(String s) {
-		try {
-			DocParser parser = new ZDocFileParser();
-			ZDoc doc = parser.parse(s);
-			ZBlock root = doc.root();
-			return root;
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
-		}
+		DocParser parser = new ZDocFileParser();
+		ZDoc doc = parser.parse(s);
+		ZBlock root = doc.root();
+		return root;
 	}
-
 
 	@Test
 	public void test_escape_in_color() {
@@ -275,13 +270,13 @@ public class PlainParserTest {
 		ZBlock root = root4file("indexTable_1.txt");
 		assertEquals("ABC", root.desc(1).getText());
 		assertEquals("F", root.desc(1).desc(0).getText());
-		ZBlock index = root.getDoc().buildIndex(IntRange.make("0,1"));
+		ZBlock index = root.buildIndex(IntRange.make("0,1"));
 		assertEquals("ABC", index.desc(0).getText());
 		assertEquals("L1", index.desc(1).getText());
 		assertEquals("L1.1", index.desc(1).desc(0).getText());
 		assertEquals("L2", index.desc(2).getText());
 		assertEquals("L2.1", index.desc(2).desc(0).getText());
-		index = root.getDoc().buildIndex(IntRange.make("1,2"));
+		index = root.buildIndex(IntRange.make("1,2"));
 		assertEquals("L1.1", index.desc(0).getText());
 		assertEquals("L1.1.1", index.desc(0).desc(0).getText());
 		assertEquals("L2.1", index.desc(1).getText());

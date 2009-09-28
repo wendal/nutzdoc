@@ -48,7 +48,7 @@ class Line {
 			parent.children.add(this);
 			depth = parent.depth + 1;
 		}
-		this.text = null == txt ? "" : Strings.trim(txt);
+		this.text = null == txt ? "" : txt;
 		children = new ArrayList<Line>();
 
 		evalMode();

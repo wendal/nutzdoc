@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.nutz.lang.util.IntRange;
-
 public class ZDoc {
 
 	public ZDoc() {
@@ -59,22 +57,4 @@ public class ZDoc {
 		return verifiers.toArray(new Author[verifiers.size()]);
 	}
 
-	public ZBlock buildIndex(IntRange range) {
-		ZBlock re = ZDocs.p();
-		_buildIndex(re, range, root);
-		return re;
-	}
-
-	private static void _buildIndex(ZBlock re, IntRange range, ZBlock me) {
-		int lvl = me.depth() - 1;
-		ZBlock myre = ZDocs.p(me.getText());
-		if (range.inon(lvl)) {
-			re.add(myre);
-		}
-		if (!range.lt(lvl)) {
-			for (ZBlock p : me.children())
-				_buildIndex(myre, range, p);
-		}
-
-	}
 }

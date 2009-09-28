@@ -3,7 +3,6 @@ package org.nutz.doc.zdoc;
 import static org.nutz.doc.meta.ZDocs.*;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +21,7 @@ class ZDocParsing {
 		this.reader = reader;
 	}
 
-	ZDoc parse() throws IOException {
+	ZDoc parse(){
 		Line root = new ZDocScanning().scan(reader);
 		transform(doc.root(), root);
 		return doc;
