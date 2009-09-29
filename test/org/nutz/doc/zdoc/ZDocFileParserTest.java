@@ -10,9 +10,12 @@ import org.nutz.doc.DocParser;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZEle;
+import org.nutz.doc.meta.ZIndex;
 import org.nutz.doc.plain.PlainParserTest;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
+import org.nutz.lang.util.IntRange;
+import org.nutz.lang.util.Node;
 
 public class ZDocFileParserTest {
 
@@ -89,15 +92,15 @@ public class ZDocFileParserTest {
 		assertEquals(3, cellD.eles().length);
 		assertEquals("F", cellD.ele(0).getText());
 		assertEquals("b", cellD.ele(1).getText());
-		assertEquals("a", cellD.ele(1).getHref().value());
+		assertEquals("a", cellD.ele(1).getHref().getValue());
 		assertEquals("E", cellD.ele(2).getText());
 	}
-	
+
 	@Test
 	public void test_simple_iterator1() {
 		String s = "A";
 		s = s + "\n\tB";
-		
+
 		ZBlock root = root(s);
 		Iterator<ZBlock> it = root.iterator();
 		assertEquals("A", it.next().getText());
@@ -144,11 +147,11 @@ public class ZDocFileParserTest {
 		ZBlock root = root(s);
 		List<ZEle> images = root.getImages();
 		assertEquals(3, images.size());
-		assertEquals("a.png", images.get(0).getSrc().value());
-		assertEquals("b.png", images.get(1).getSrc().value());
-		assertEquals("c.png", images.get(2).getSrc().value());
+		assertEquals("a.png", images.get(0).getSrc().getValue());
+		assertEquals("b.png", images.get(1).getSrc().getValue());
+		assertEquals("c.png", images.get(2).getSrc().getValue());
 	}
-	
+
 	@Test
 	public void test_get_root_links() {
 		String s = "A";
@@ -163,8 +166,132 @@ public class ZDocFileParserTest {
 		ZBlock root = root(s);
 		List<ZEle> images = root.getLinks();
 		assertEquals(3, images.size());
-		assertEquals("a.png", images.get(0).getHref().value());
-		assertEquals("b.png", images.get(1).getHref().value());
-		assertEquals("c.png", images.get(2).getHref().value());
+		assertEquals("a.png", images.get(0).getHref().getValue());
+		assertEquals("b.png", images.get(1).getHref().getValue());
+		assertEquals("c.png", images.get(2).getHref().getValue());
+	}
+
+	@Test
+	public void test_normal_ul() {
+		String s = "A";
+		s = s + "\n\t* L1";
+		s = s + "\n\t* L2";
+
+		ZBlock root = root(s);
+		ZBlock ul = root.desc(0, 0);
+		assertEquals(2, ul.size());
+		assertEquals("L1", ul.child(0).getText());
+		assertEquals("L2", ul.child(1).getText());
+	}
+
+	@Test
+	public void test_ul_with_blank() {
+		String s = "A";
+		s = s + "\n\t* L1";
+		s = s + "\n";
+		s = s + "\n\t* L2";
+
+		ZBlock root = root(s);
+		ZBlock ul = root.desc(0, 0);
+		assertEquals(2, ul.size());
+		assertEquals("L1", ul.child(0).getText());
+		assertEquals("L2", ul.child(1).getText());
+	}
+
+	@Test
+	public void test_ul_ol_nesting() {
+		String s = "A";
+		s = s + "\n\t* L1";
+		s = s + "\n\t\t # O1";
+		s = s + "\n\t\t # O2";
+		s = s + "\n\t* L2";
+
+		ZBlock root = root(s);
+		ZBlock ul = root.desc(0, 0);
+		assertEquals(2, ul.size());
+		assertEquals("L1", ul.child(0).getText());
+		assertEquals("L2", ul.child(1).getText());
+		assertEquals("O1", ul.desc(0, 0, 0).getText());
+		assertEquals("O2", ul.desc(0, 0, 1).getText());
+	}
+
+	@Test
+	public void test_simple_code() {
+		String s = "{{{<JAVA> ";
+		s = s + "\n\tA";
+		s = s + "\n\tB";
+		s = s + "\n}}}";
+
+		ZBlock root = root(s);
+		ZBlock code = root.child(0);
+		assertEquals("JAVA", code.getTitle());
+		assertEquals("\tA\n\tB\n", code.getText());
+	}
+
+	@Test
+	public void test_simple_code_ignore_tab() {
+		String s = "code:";
+		s = s + "\n\t{{{<JAVA> ";
+		s = s + "\n\tA";
+		s = s + "\n\tB";
+		s = s + "\n\t}}}";
+
+		ZBlock root = root(s);
+		ZBlock code = root.desc(0, 0);
+		assertEquals("JAVA", code.getTitle());
+		assertEquals("A\nB\n", code.getText());
+	}
+
+	@Test
+	public void test_simple_getId() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n";
+		s = s + "\n\tC";
+
+		ZBlock root = root(s);
+		assertEquals("N0", root.desc(0).getId());
+		assertEquals("N1", root.desc(0, 0).getId());
+		assertEquals("N2", root.desc(0, 1).getId());
+
+		assertEquals("N0", root.desc(0).getId());
+		assertEquals("N1", root.desc(0, 0).getId());
+		assertEquals("N2", root.desc(0, 1).getId());
+	}
+	
+	@Test
+	public void test_simple_heading_structure() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t\t111";
+		s = s + "\n";
+		s = s + "\n\tC";
+		s = s + "\n\t\t222";
+		
+		ZBlock root = root(s);
+		ZBlock a = root.child(0);
+		assertEquals("B",a.child(0).getText());
+		assertEquals("C",a.child(1).getText());
+	}
+
+	@Test
+	public void test_simple_heading_index() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t\t111";
+		s = s + "\n";
+		s = s + "\n\tC";
+		s = s + "\n\t\t222";
+
+		ZBlock root = root(s);
+		Node<ZIndex> is = root.buildIndex(IntRange.make(0, 3));
+		assertEquals("A", is.desc(0).get().getText());
+		assertEquals("1", is.desc(0).get().getNumberString());
+
+		assertEquals("B", is.desc(0, 0).get().getText());
+		assertEquals("1.1", is.desc(0, 0).get().getNumberString());
+
+		assertEquals("C", is.desc(0, 1).get().getText());
+		assertEquals("1.2", is.desc(0, 1).get().getNumberString());
 	}
 }

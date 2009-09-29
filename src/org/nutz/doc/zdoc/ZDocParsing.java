@@ -21,7 +21,7 @@ class ZDocParsing {
 		this.reader = reader;
 	}
 
-	ZDoc parse(){
+	ZDoc parse() {
 		Line root = new ZDocScanning().scan(reader);
 		transform(doc.root(), root);
 		return doc;
@@ -52,7 +52,7 @@ class ZDocParsing {
 			}
 			// #index:
 			if (null != line.getIndexRange()) {
-				p.add(index(line.getIndexRange()));
+				p.add(range(line.getIndexRange()));
 				transform(p, line);
 				continue;
 			}
@@ -80,6 +80,9 @@ class ZDocParsing {
 			}
 			// If current is blank, we will create a paragrah
 			if (line.isBlank()) {
+				// If last of stack is List item, just ignore the line
+				if (last.isOLI() || last.isULI())
+					continue;
 				// Stack is only one blank line, drop all
 				// This code also ensure: stack can not exist
 				// more than one blank line.

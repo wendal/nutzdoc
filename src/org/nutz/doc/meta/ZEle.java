@@ -105,11 +105,11 @@ public class ZEle {
 
 	public String toString() {
 		if (isImage()) {
-			return String.format("<%s>", src.value());
+			return String.format("<%s>", src.getValue());
 		} else if (hasHref()) {
 			if (Strings.isBlank(text))
-				return String.format("[%s]", href.value());
-			return String.format("[%s %s]", href.value(), text);
+				return String.format("[%s]", href.getValue());
+			return String.format("[%s %s]", href.getValue(), text);
 		}
 		return text;
 	}

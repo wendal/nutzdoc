@@ -34,7 +34,7 @@ public class ZDocs {
 		return block(ZType.UL);
 	}
 
-	public static ZBlock index(IntRange ir) {
+	public static ZBlock range(IntRange ir) {
 		return p().setIndexRange(ir);
 	}
 
@@ -73,4 +73,13 @@ public class ZDocs {
 	public static ZStyle style() {
 		return new ZStyle();
 	}
+
+	public static ZIndex index(String id, int[] numbers, String text) {
+		ZIndex zi = new ZIndex();
+		zi.setHeadingId(id);
+		zi.setNumbers(numbers);
+		zi.setText(text);
+		return zi;
+	}
+
 }

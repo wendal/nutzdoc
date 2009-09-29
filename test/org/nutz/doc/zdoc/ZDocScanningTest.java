@@ -221,4 +221,37 @@ public class ZDocScanningTest {
 		assertEquals("E", line.child(0, 2, 2).getText());
 		assertEquals("F", line.child(1).getText());
 	}
+
+	@Test
+	public void test_simple_code_ignore_tab() {
+		String s = "code:";
+		s = s + "\n\t{{{<JAVA> ";
+		s = s + "\n\tA";
+		s = s + "\n\tB";
+		s = s + "\n\t}}}";
+		Line line = scan(s);
+
+		assertEquals("code:", line.child(0).getText());
+		assertEquals("JAVA", line.child(0, 0).getCodeType());
+		assertTrue(line.child(0, 0).isCodeStart());
+		assertTrue(line.child(0, 3).isCodeEnd());
+	}
+	
+	@Test
+	public void test_simple_heading_structure() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t\t111";
+		s = s + "\n";
+		s = s + "\n\tC";
+		s = s + "\n\t\t222";
+		Line line = scan(s);
+		
+		Line a = line.child(0);
+		assertEquals("B",a.child(0).getText());
+		assertEquals("111",a.child(0,0).getText());
+		assertTrue(a.child(0,1).isBlank());
+		assertEquals("C",a.child(1).getText());
+		assertEquals("222",a.child(1,0).getText());
+	}
 }

@@ -10,20 +10,18 @@ class ZDocScanning {
 
 	Line scan(BufferedReader reader) {
 		try {
-			String l;
+			String str;
 			Line root = Line.make(null, null);
 			Line last = root;
-			while (null != (l = reader.readLine())) {
-				int depth = countTab(l);
-				l = Strings.trim(l);
-				if (last != root && last.isBlank()) {
-					last = Line.make(last.getParent(), l);
-				} else if (Strings.isEmpty(l)) {
+			while (null != (str = reader.readLine())) {
+				int depth = countTab(str);
+				str = Strings.trim(str);
+				if (Strings.isEmpty(str)) {
 					last = Line.make(last == root ? last : last.getParent(), "");
 				} else {
 					while (depth < last.depth())
 						last = last.getParent();
-					last = Line.make(last, l);
+					last = Line.make(last, str);
 				}
 			}
 			return root;

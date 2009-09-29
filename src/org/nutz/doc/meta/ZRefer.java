@@ -17,28 +17,28 @@ public class ZRefer {
 
 	ZRefer(String path) {
 		if (null != path) {
-			path = path.replace('\\', '/');
+			this.path = path.replace('\\', '/');
 			path = path.toLowerCase();
 			if (path.startsWith("http://")) {
 				type = TYPE.HTTP;
-				value = path.substring(7);
+				value = this.path.substring(7);
 			} else if (path.startsWith("https://")) {
 				type = TYPE.HTTPS;
-				value = path.substring(8);
+				value = this.path.substring(8);
 			} else if (path.startsWith("file:///")) {
 				type = TYPE.FILE;
-				value = path.substring(8);
+				value = this.path.substring(8);
 			} else if (path.length() > 0) {
 				char c = path.charAt(0);
 				if (c == '$') {
 					type = TYPE.BOOKMARK;
-					value = path.substring(1);
+					value = this.path.substring(1);
 				} else if (c == '#') {
 					type = TYPE.INNER;
-					value = path.substring(1);
+					value = this.path.substring(1);
 				} else {
 					type = TYPE.RELATIVE;
-					value = path;
+					value = this.path;
 				}
 			}
 		}
@@ -105,8 +105,12 @@ public class ZRefer {
 		return null;
 	}
 
-	public String value() {
+	public String getValue() {
 		return value;
+	}
+
+	public String getPath() {
+		return path;
 	}
 
 	@Override

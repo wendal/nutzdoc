@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.IntRange;
+import org.nutz.lang.util.LinkedIntArray;
+import org.nutz.lang.util.Node;
+import org.nutz.lang.util.Nodes;
 
 public class ZBlock {
 
@@ -159,8 +162,16 @@ public class ZBlock {
 		return ZType.OL == type;
 	}
 
+	public boolean isOLI() {
+		return ZType.OLI == type;
+	}
+
 	public boolean isUL() {
 		return ZType.UL == type;
+	}
+
+	public boolean isULI() {
+		return ZType.ULI == type;
 	}
 
 	public boolean isLI() {
@@ -212,8 +223,19 @@ public class ZBlock {
 		return Strings.isBlank(getText());
 	}
 
+	/**
+	 * Alias of childCount()
+	 */
 	public int size() {
 		return children.size();
+	}
+
+	public int childCount() {
+		return children.size();
+	}
+
+	public int eleCount() {
+		return eles.size();
 	}
 
 	public String toString() {
@@ -255,23 +277,28 @@ public class ZBlock {
 		return new ZDocIterator(this);
 	}
 
-	public ZBlock buildIndex(IntRange range) {
-		ZBlock re = ZDocs.p();
-		_buildIndex(re, range, this);
-		return re;
+	public Node<ZIndex> buildIndex(IntRange range) {
+		LinkedIntArray stack = new LinkedIntArray(20);
+		Node<ZIndex> root = Nodes.create(ZDocs.index(null, null, doc.getTitle()));
+		for (int i = 0; i < children.size(); i++) {
+			_buildIndex(stack.push(i), root, range, children.get(i));
+		}
+		return root;
 	}
 
-	private static void _buildIndex(ZBlock re, IntRange range, ZBlock me) {
-		int lvl = me.depth() - 1;
-		ZBlock myre = ZDocs.p(me.getText());
-		if (range.inon(lvl)) {
-			re.add(myre);
+	private static void _buildIndex(LinkedIntArray stack, Node<ZIndex> node, IntRange range, ZBlock me) {
+		if (me.isHeading()) {
+			int lvl = me.depth() - 1;
+			if (range.inon(lvl)) {
+				Node<ZIndex> newNode = Nodes.create(ZDocs.index(me.getId(), stack.toArray(), me.getText()));
+				node.add(newNode);
+				node = newNode;
+			}
+			if (!range.lt(lvl))
+				for (int i = 0; i < me.children.size(); i++)
+					_buildIndex(stack.push(i), node, range, me.child(i));
 		}
-		if (!range.lt(lvl)) {
-			for (ZBlock p : me.children())
-				_buildIndex(myre, range, p);
-		}
-
+		stack.popLast();
 	}
 
 	public List<ZEle> getImages() {
@@ -298,5 +325,9 @@ public class ZBlock {
 			}
 		}
 		return list;
+	}
+
+	public String getId() {
+		return "N" + doc.getId(this);
 	}
 }

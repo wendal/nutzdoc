@@ -1,0 +1,24 @@
+ zDoc Brief Help:
+
+	If you read this help, you must encountered some troubles during using zDoc.
+	
+	 * If you want to convert zdoc directory to HTML, plz run:
+		zdoc [source dir] [target dir] [.html|.htm]
+	 
+	 * If you want to convert zdoc directory to Google code wiki, plz run:
+		zdoc [source dir] [target dir] [.wiki]
+	
+	>> More help, plz acccess [http://nutzdoc.googlecode.com]
+
+
+ zDoc 简要帮助
+
+	如果你阅读到这篇文字，你在使用 zDoc 的时候一定遇到问题了。
+	
+	 * 如果你想将 zDoc 目录转换 为 HTML 目录，请运行:
+	 	zdoc [source dir] [target dir] [.html|.htm]
+	 	
+	 * 如果你想将 zDoc 目录转换 为 Google code wiki 目录，请运行:
+	 	zdoc [source dir] [target dir] [.wiki]
+	 
+	 >> 更多帮助，请访问 [http://nutzdoc.googlecode.com]
