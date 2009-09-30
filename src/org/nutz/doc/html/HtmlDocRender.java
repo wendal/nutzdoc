@@ -200,7 +200,7 @@ public class HtmlDocRender implements DocRender {
 	}
 
 	private void renderHeading(Tag parent, ZBlock block) {
-		Tag hn = tag("h" + (block.depth() + 1));
+		Tag hn = tag("h" + (block.depth()));
 		hn.add(tag("a").attr("name", block.getId()));
 		parent.add(renderToHtmlBlockElement(hn, block.eles()));
 	}
