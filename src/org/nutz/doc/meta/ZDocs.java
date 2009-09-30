@@ -74,9 +74,9 @@ public class ZDocs {
 		return new ZStyle();
 	}
 
-	public static ZIndex index(String id, int[] numbers, String text) {
+	public static ZIndex index(String href, int[] numbers, String text) {
 		ZIndex zi = new ZIndex();
-		zi.setHeadingId(id);
+		zi.setHref(href);
 		zi.setNumbers(numbers);
 		zi.setText(text);
 		return zi;

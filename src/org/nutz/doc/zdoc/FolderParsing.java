@@ -7,11 +7,14 @@ import java.util.Arrays;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.nutz.doc.DocParser;
+import org.nutz.doc.meta.Author;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZFolder;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
+import org.nutz.lang.Strings;
+import org.nutz.lang.util.LinkedArray;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Nodes;
 import org.w3c.dom.Element;
@@ -22,15 +25,21 @@ class FolderParsing {
 
 	private File home;
 	private DocParser parser;
+	private LinkedArray<Author> authors;
 
 	FolderParsing(File home) {
 		this.home = home;
-		this.parser = new ZDocFileParser();
+		this.parser = new ZDocParser();
+		authors = new LinkedArray<Author>();
 	}
 
 	Node<ZFolder> parse() throws IOException {
 		try {
-			return eval(Nodes.create(ZFolder.create().setDir(home)));
+			Node<ZFolder> root = eval(Nodes.create(ZFolder.create().setDir(home)));
+			if (Strings.isBlank(root.get().getTitle())) {
+				root.get().setTitle(home.getName());
+			}
+			return root;
 		} catch (SAXException e) {
 			throw Lang.wrapThrow(e);
 		} catch (ParserConfigurationException e) {
@@ -47,9 +56,16 @@ class FolderParsing {
 		 */
 		if (xml.exists()) {
 			Element ele = Lang.xmls().parse(xml).getDocumentElement();
+			if (ele.hasAttribute("author")) {
+				Author au = ZDocs.author(ele.getAttribute("author"));
+				if (!authors.contains(au))
+					authors.push(au);
+			}
 			// set the attributes
 			node.get().setTitle(ele.getAttribute("title"));
-			node.get().setAuthor(ZDocs.author(ele.getAttribute("author")));
+			if (ele.hasAttribute("author")) {
+				node.get().setAuthor(ZDocs.author(ele.getAttribute("author")));
+			}
 			// load children
 			NodeList nl = ele.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
@@ -68,7 +84,7 @@ class FolderParsing {
 				if (f.isDirectory()) {
 					if (f.getName().startsWith("."))
 						continue;
-					node.add(eval(Nodes.create(ZFolder.create().setDir(f))));
+					node.add(eval(Nodes.create(ZFolder.create().setDir(f).setTitle(f.getName()))));
 				} else if (f.isFile()) {
 					if (f.getName().toLowerCase().matches("^(.+[.])(man|zdoc)")) {
 						String s = Lang.readAll(Streams.fileInr(f));
@@ -92,6 +108,8 @@ class FolderParsing {
 					if (ele.hasChildNodes()) {
 						Node<ZFolder> nd = toFolderNode(dir);
 						nd.get().setFolderDoc(toZDoc(f));
+						if (ele.hasAttribute("title"))
+							nd.get().setTitle(ele.getAttribute("title"));
 						walkingOnChildren(ele, node, nd);
 					}
 					// Just append ZDoc
@@ -101,7 +119,10 @@ class FolderParsing {
 				} else if (f.isDirectory()) {
 					if (ele.hasChildNodes()) {
 						Node<ZFolder> nd = toFolderNode(f.getAbsoluteFile());
-						nd.get().setTitle(f.getName());
+						if (ele.hasAttribute("title"))
+							nd.get().setTitle(ele.getAttribute("title"));
+						else
+							nd.get().setTitle(f.getName());
 						walkingOnChildren(ele, node, nd);
 					}
 				}
@@ -116,8 +137,11 @@ class FolderParsing {
 
 	private ZDoc toZDoc(File f) {
 		String s = Lang.readAll(Streams.fileInr(f));
-		ZDoc folderDoc = parser.parse(s).setSource(f.getAbsoluteFile());
-		return folderDoc;
+		ZDoc doc = parser.parse(s).setSource(f.getAbsoluteFile());
+		if (!doc.hasAuthor() && !authors.isEmpty())
+			for (Author au : authors.toArray())
+				doc.addAuthor(au);
+		return doc;
 	}
 
 	private void walkingOnChildren(Element ele, Node<ZFolder> node, Node<ZFolder> newNode) {

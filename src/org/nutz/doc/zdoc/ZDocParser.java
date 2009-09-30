@@ -6,7 +6,7 @@ import org.nutz.doc.DocParser;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.lang.Lang;
 
-public class ZDocFileParser implements DocParser {
+public class ZDocParser implements DocParser {
 
 	public ZDoc parse(CharSequence cs) {
 		BufferedReader br = new BufferedReader(Lang.inr(cs));

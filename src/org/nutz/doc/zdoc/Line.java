@@ -23,10 +23,11 @@ class Line {
 	private static final Pattern HR = Pattern.compile("^[-]{5,}$");
 	private static final Pattern VERIFIER = Pattern.compile("^([#]verifier:)(.*)$");
 	private static final Pattern AUTHOR = Pattern.compile("^([#]author:)(.*)$");
-	private static final Pattern INDEX_RANGE = Pattern.compile("^([#]index:)([0-9]+[,:][0-9]+)([ \t]*)$");
+	private static final Pattern INDEX_RANGE = Pattern
+			.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
 
-	static Line make(Line parent, String text) {
-		return new Line(parent, text);
+	static Line make(String text) {
+		return new Line(text);
 	}
 
 	ZType type;
@@ -42,15 +43,9 @@ class Line {
 	private Author author;
 	private Author verifier;
 
-	private Line(Line parent, String txt) {
-		this.parent = parent;
-		if (null != parent) {
-			parent.children.add(this);
-			depth = parent.depth + 1;
-		}
+	private Line(String txt) {
 		this.text = null == txt ? "" : txt;
 		children = new ArrayList<Line>();
-
 		evalMode();
 	}
 
@@ -113,8 +108,8 @@ class Line {
 			String s = m.group(3);
 			if (null == s) {
 				codeType = "";
-			}
-			codeType = s.substring(1, s.length() - 1);
+			} else
+				codeType = s.substring(1, s.length() - 1);
 			return;
 		}
 		// Code end
@@ -140,6 +135,13 @@ class Line {
 
 	Line setText(String text) {
 		this.text = text;
+		return this;
+	}
+
+	Line add(Line line) {
+		line.parent = this;
+		children.add(line);
+		line.depth = depth + 1;
 		return this;
 	}
 

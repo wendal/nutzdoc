@@ -27,17 +27,17 @@ class ZDocParsing {
 		return doc;
 	}
 
-	private void transform(ZBlock p, Line line) {
-		if (line.withoutChild())
+	private void transform(ZBlock p, Line lineOfP) {
+		if (lineOfP.withoutChild())
 			return;
 
-		Iterator<Line> it = line.children().iterator();
+		Iterator<Line> it = lineOfP.children().iterator();
 		LinkedList<Line> stack = new LinkedList<Line>();
 		while (it.hasNext()) {
-			line = it.next();
+			Line line = it.next();
 			// #title:
 			if (null != line.getTitle()) {
-				p.getDoc().setTitle(line.getText());
+				p.getDoc().setTitle(line.getTitle());
 				continue;
 			}
 			// #author:
@@ -58,8 +58,9 @@ class ZDocParsing {
 			}
 			// HR
 			if (line.isHr()) {
+				if (!stack.isEmpty())
+					p.add(makeBlockAndClearStack(stack));
 				p.add(hr());
-				transform(p, line);
 				continue;
 			}
 
@@ -108,6 +109,7 @@ class ZDocParsing {
 			// else, just push line to stack.
 			if (last.type != line.type) {
 				p.add(makeBlockAndClearStack(stack));
+				stack.push(line);
 			}
 			/**
 			 * For the case:

@@ -2,6 +2,8 @@ package org.nutz.doc;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import org.nutz.doc.googlewiki.GoogleWikiFolderRender;
 import org.nutz.doc.html.HtmlFolderRender;
@@ -21,11 +23,17 @@ public class Doc {
 		Doc doc = new Doc();
 		if (args.length == 3) {
 			File src = Files.findFile(args[0]);
-			File dest = Files.findFile(args[1]);
+			if(null==src){
+				out.printf("src directory: %s didn't existed!\n",args[0]);
+			}
+			File dest = new File(args[1]);
+			if(dest.exists())
+				Files.makeDir(dest);
+			
 			String suffix = args[2];
-			if (suffix.toLowerCase().matches("^htm[l]?$")) {
+			if (suffix.toLowerCase().matches("^[.]htm[l]?$")) {
 				doc.toHtmlFolder(src, dest, suffix);
-			} else if (suffix.toLowerCase().matches("^[g]wiki$")) {
+			} else if (suffix.toLowerCase().matches("[.][g]wiki$")) {
 				doc.toGoogleWikiFolder(src, dest, suffix);
 			}
 		} else {
@@ -38,7 +46,8 @@ public class Doc {
 
 	private void toHtmlFolder(File src, File dest, String suffix) throws IOException {
 		FolderParser parser = new ZDocFolderParser();
-		FolderRender render = new HtmlFolderRender(suffix);
+		Writer writer = new OutputStreamWriter(out);
+		FolderRender render = new HtmlFolderRender(suffix, writer);
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}

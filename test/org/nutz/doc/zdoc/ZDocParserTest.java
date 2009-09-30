@@ -17,7 +17,7 @@ import org.nutz.lang.Streams;
 import org.nutz.lang.util.IntRange;
 import org.nutz.lang.util.Node;
 
-public class ZDocFileParserTest {
+public class ZDocParserTest {
 
 	static ZBlock root4file(String name) {
 		String path = PlainParserTest.class.getPackage().getName().replace('.', '/') + "/" + name;
@@ -25,7 +25,7 @@ public class ZDocFileParserTest {
 	}
 
 	private static ZBlock root(String s) {
-		DocParser parser = new ZDocFileParser();
+		DocParser parser = new ZDocParser();
 		ZDoc doc = parser.parse(s);
 		ZBlock root = doc.root();
 		return root;
@@ -258,7 +258,7 @@ public class ZDocFileParserTest {
 		assertEquals("N1", root.desc(0, 0).getId());
 		assertEquals("N2", root.desc(0, 1).getId());
 	}
-	
+
 	@Test
 	public void test_simple_heading_structure() {
 		String s = "A";
@@ -267,11 +267,11 @@ public class ZDocFileParserTest {
 		s = s + "\n";
 		s = s + "\n\tC";
 		s = s + "\n\t\t222";
-		
+
 		ZBlock root = root(s);
 		ZBlock a = root.child(0);
-		assertEquals("B",a.child(0).getText());
-		assertEquals("C",a.child(1).getText());
+		assertEquals("B", a.child(0).getText());
+		assertEquals("C", a.child(1).getText());
 	}
 
 	@Test
@@ -293,5 +293,140 @@ public class ZDocFileParserTest {
 
 		assertEquals("C", is.desc(0, 1).get().getText());
 		assertEquals("1.2", is.desc(0, 1).get().getNumberString());
+	}
+
+	@Test
+	public void test_li_after_p() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t* UL1";
+
+		ZBlock root = root(s);
+		assertTrue(root.desc(0, 1).isUL());
+		assertTrue(root.desc(0, 1, 0).isULI());
+	}
+
+	@Test
+	public void test_simple_title() {
+		String s = "#title:A";
+		s = s + "\nB";
+		s = s + "\n\t* UL1";
+
+		ZBlock root = root(s);
+		assertEquals("A", root.getDoc().getTitle());
+
+		Iterator<ZBlock> it = root.iterator();
+		ZBlock next = it.next();
+		assertEquals("B", next.getText());
+		next = it.next();
+		assertTrue(next.isUL());
+		next = it.next();
+		assertEquals("UL1", next.getText());
+		next = it.next();
+		assertNull(next);
+
+	}
+
+	@Test
+	public void test_hr_in_heading() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t\t111";
+		s = s + "\n";
+		s = s + "\n-------------";
+		s = s + "\n\t\thhh";
+		s = s + "\n\tC";
+		s = s + "\n\t\t222";
+
+		ZBlock root = root(s);
+		assertEquals("A", root.desc(0).getText());
+		assertEquals("B", root.desc(0, 0).getText());
+		assertEquals("111", root.desc(0, 0, 0).getText());
+		assertTrue(root.desc(0, 0, 1).isHr());
+		assertEquals("hhh", root.desc(0, 0, 2).getText());
+		assertEquals("C", root.desc(0, 1).getText());
+		assertEquals("222", root.desc(0, 1, 0).getText());
+	}
+
+	@Test
+	public void tet_hr_order_issue() {
+		String s = "A";
+		s = s + "\n\tA1";
+		s = s + "\n-------------";
+		s = s + "\n\t\t\tA2";
+
+		ZBlock root = root(s);
+
+		assertEquals("A", root.desc(0).getText());
+		assertEquals("A1", root.desc(0, 0).getText());
+		assertTrue(root.desc(0, 1).isHr());
+		assertEquals("A2", root.desc(0, 2).getText());
+	}
+
+	@Test
+	public void test_build_index_1() {
+		String s = "#title:Test 1";
+		s = s + "\n#index:0,1";
+		s = s + "\nA";
+		s = s + "\n\tA1";
+		s = s + "\n\t\tA11";
+		s = s + "\n-------------";
+		s = s + "\n\t\t\tXXXX";
+		s = s + "\nB";
+		s = s + "\n\tB1";
+
+		ZBlock root = root(s);
+		Node<ZIndex> is = root.buildIndex(IntRange.make(0, 1));
+		assertEquals(2, is.countChildren());
+		Iterator<Node<ZIndex>> it = is.iterator();
+		ZIndex index = it.next().get();
+		assertEquals("A", index.getText());
+		assertEquals("1", index.getNumberString());
+
+		index = it.next().get();
+		assertEquals("A1", index.getText());
+		assertEquals("1.1", index.getNumberString());
+
+		index = it.next().get();
+		assertEquals("B", index.getText());
+		assertEquals("2", index.getNumberString());
+
+		assertFalse(it.hasNext());
+		assertNull(it.next());
+	}
+	
+	@Test
+	public void test_build_index_2() {
+		String s = "#title:Test 1";
+		s = s + "\n#index:0,1";
+		s = s + "\nA";
+		s = s + "\n\tA1";
+		s = s + "\n\t\tA11";
+		s = s + "\n\t\t\tXXXX";
+		s = s + "\nB";
+		s = s + "\n\tB1";
+
+		ZBlock root = root(s);
+		Node<ZIndex> is = root.buildIndex(IntRange.make(0, 2));
+		assertEquals(2, is.countChildren());
+		Iterator<Node<ZIndex>> it = is.iterator();
+		ZIndex index = it.next().get();
+		assertEquals("A", index.getText());
+		assertEquals("1", index.getNumberString());
+
+		index = it.next().get();
+		assertEquals("A1", index.getText());
+		assertEquals("1.1", index.getNumberString());
+		
+		index = it.next().get();
+		assertEquals("A11", index.getText());
+		assertEquals("1.1.1", index.getNumberString());
+
+		index = it.next().get();
+		assertEquals("B", index.getText());
+		assertEquals("2", index.getNumberString());
+
+		assertFalse(it.hasNext());
+		assertNull(it.next());
 	}
 }

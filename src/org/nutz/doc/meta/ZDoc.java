@@ -6,8 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.nutz.lang.Lang;
-import org.nutz.lang.Strings;
+import org.nutz.lang.util.Disks;
 
 public class ZDoc {
 
@@ -98,17 +97,7 @@ public class ZDoc {
 	}
 
 	public String getRelativePath(File file) {
-		File base = this.getSource();
-		if (base.isFile())
-			base = base.getParentFile();
-		String[] bb = Strings.splitIgnoreBlank(base.getAbsolutePath(), "[\\\\/]");
-		String[] ff = Strings.splitIgnoreBlank(file.getAbsolutePath(), "[\\\\/]");
-		int pos = 0;
-		for (; pos < Math.min(bb.length, ff.length); pos++)
-			if (!bb[pos].equals(ff[pos]))
-				break;
-		String path = Strings.dup("../", bb.length - pos);
-		path += Lang.concatBy(pos, ff.length - pos, '/', ff);
-		return path;
+		return Disks.getRelativePath(this.getSource(), file);
 	}
+
 }

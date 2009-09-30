@@ -118,6 +118,11 @@ public class ZBlock {
 	}
 
 	public String getString() {
+		if (isHr())
+			return Strings.dup('-', 10);
+		if (null != getIndexRange()) {
+			return String.format("#index:%s", getIndexRange().toString());
+		}
 		StringBuilder sb = new StringBuilder();
 		for (ZEle ele : eles)
 			sb.append(ele.toString());
@@ -216,7 +221,7 @@ public class ZBlock {
 	}
 
 	public boolean isHeading() {
-		return isNormal() || children.size() > 0;
+		return isNormal() && children.size() > 0;
 	}
 
 	public boolean isBlank() {
@@ -239,13 +244,12 @@ public class ZBlock {
 	}
 
 	public String toString() {
-		return toString(null != parent ? 0 : -1);
+		return toString(0);
 	}
 
 	String toString(int depth) {
 		StringBuilder sb = new StringBuilder();
-		if (null != parent)
-			sb.append(Strings.dup('\t', depth)).append(symbol()).append(getString()).append('\n');
+		sb.append(Strings.dup('\t', depth)).append(symbol()).append(getString()).append('\n');
 		sb.append(getChildrenString(depth));
 		return sb.toString();
 	}
@@ -278,27 +282,39 @@ public class ZBlock {
 	}
 
 	public Node<ZIndex> buildIndex(IntRange range) {
-		LinkedIntArray stack = new LinkedIntArray(20);
+		LinkedIntArray nums = new LinkedIntArray(20);
 		Node<ZIndex> root = Nodes.create(ZDocs.index(null, null, doc.getTitle()));
-		for (int i = 0; i < children.size(); i++) {
-			_buildIndex(stack.push(i), root, range, children.get(i));
+		nums.push(-1);
+		for (ZBlock chd : children) {
+			if (chd.isHeading()) {
+				nums.push(nums.popLast() + 1);
+				_buildIndex(nums, root, range, chd);
+			}
 		}
 		return root;
 	}
 
-	private static void _buildIndex(LinkedIntArray stack, Node<ZIndex> node, IntRange range, ZBlock me) {
-		if (me.isHeading()) {
-			int lvl = me.depth() - 1;
-			if (range.inon(lvl)) {
-				Node<ZIndex> newNode = Nodes.create(ZDocs.index(me.getId(), stack.toArray(), me.getText()));
-				node.add(newNode);
-				node = newNode;
-			}
-			if (!range.lt(lvl))
-				for (int i = 0; i < me.children.size(); i++)
-					_buildIndex(stack.push(i), node, range, me.child(i));
+	private static void _buildIndex(LinkedIntArray nums, Node<ZIndex> node, IntRange range,
+			ZBlock me) {
+		int lvl = me.depth() - 1;
+		int depth = nums.size();
+		if (range.inon(lvl)) {
+			Node<ZIndex> newNode = Nodes.create(ZDocs.index("#" + me.getId(), nums.toArray(), me
+					.getText()));
+			node.add(newNode);
+			node = newNode;
 		}
-		stack.popLast();
+		if (!range.lt(lvl)) {
+			nums.push(-1);
+			for (ZBlock chd : me.children) {
+				if (chd.isHeading()) {
+					nums.push(nums.popLast() + 1);
+					_buildIndex(nums, node, range, chd);
+				}
+			}
+		}
+		if (nums.size() > depth)
+			nums.popLast(nums.size() - depth);
 	}
 
 	public List<ZEle> getImages() {

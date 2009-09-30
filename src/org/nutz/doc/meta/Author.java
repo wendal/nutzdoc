@@ -54,6 +54,13 @@ public class Author {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Author)
+			return name.equals(((Author) obj).name);
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		if (!hasEmail())
 			return name;

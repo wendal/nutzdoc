@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.junit.Test;
 import org.nutz.doc.DocParser;
 import org.nutz.doc.meta.*;
-import org.nutz.doc.zdoc.ZDocFileParser;
+import org.nutz.doc.zdoc.ZDocParser;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.util.IntRange;
@@ -20,7 +20,7 @@ public class PlainParserTest {
 	}
 
 	private static ZBlock root(String s) {
-		DocParser parser = new ZDocFileParser();
+		DocParser parser = new ZDocParser();
 		ZDoc doc = parser.parse(s);
 		ZBlock root = doc.root();
 		return root;

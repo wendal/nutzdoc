@@ -1,7 +1,6 @@
 package org.nutz.doc.html;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import org.nutz.doc.DocRender;
@@ -27,17 +26,19 @@ public class HtmlDocRender implements DocRender {
 				String email = au.getEmailString();
 				ele.add(Tag.tag("b").add(Tag.text(au.getName())));
 				if (!Strings.isBlank(email))
-					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(Tag.text("<" + email + ">")));
+					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(
+							Tag.text("<" + email + ">")));
 			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public CharSequence render(ZDoc doc) throws IOException {
+	public CharSequence render(ZDoc doc) {
 		Tag html = tag("html");
 		Tag head = tag("head");
 		html.add(head);
-		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT", "text/html; charset=UTF-8"));
+		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT",
+				"text/html; charset=UTF-8"));
 		if (!Strings.isBlank(doc.getTitle()))
 			head.add(tag("title").add(text(doc.getTitle())));
 		// <link rel="stylesheet" type="text/css">
@@ -45,7 +46,8 @@ public class HtmlDocRender implements DocRender {
 			List<File> csss = (List<File>) doc.getAttr("css");
 			for (File css : csss) {
 				String path = doc.getRelativePath(css);
-				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type", "text/css"));
+				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type",
+						"text/css"));
 			}
 		}
 		// <script language="javascript">
@@ -105,7 +107,9 @@ public class HtmlDocRender implements DocRender {
 		else if (block.hasIndexRange()) {
 			// parent.add(renderIndexTable(block.getDoc().buildIndex(block.getIndexRange())));
 			Node<ZIndex> indexRoot = block.getDoc().root().buildIndex(block.getIndexRange());
-			parent.add(renderIndexTable(indexRoot));
+			Tag indexTable = renderIndexTable(indexRoot);
+			if (null != indexTable)
+				parent.add(indexTable);
 		}
 		// <OL>
 		else if (block.isOL()) {
@@ -141,7 +145,14 @@ public class HtmlDocRender implements DocRender {
 	}
 
 	Tag renderIndexTable(Node<ZIndex> indexRoot) {
-		Tag tag = tag("ul").attr("class", "zdoc_index_table");
+		if (!indexRoot.hasChild())
+			return null;
+		Tag tag = null;
+		if (indexRoot.firstChild().get().hasNumbers())
+			tag = tag("ul");
+		else
+			tag = tag("ol");
+		tag.attr("class", "zdoc_index_table");
 		for (Node<ZIndex> indexNode : indexRoot.getChildren()) {
 			tag.add(renderIndex(indexNode));
 		}
@@ -150,16 +161,26 @@ public class HtmlDocRender implements DocRender {
 
 	Tag renderIndex(Node<ZIndex> node) {
 		ZIndex index = node.get();
-		Tag tag = tag("li");
-		tag.add(tag("span").attr("css", "num")).add(text(index.getNumberString()));
-		tag.add(tag("a").attr("href", "#" + index.getHeadingId()).add(text(index.getText())));
+		Tag div = tag("div");
+		Tag li = (Tag) tag("li").add(div);
+		// Nubmers
+		if (index.hasNumbers()) {
+			div.add(tag("span").attr("class", "num").add(text(index.getNumberString())));
+		}
+		// Text & Href
+		if (index.getHref() != null)
+			div.add(tag("a").attr("href", index.getHref()).add(text(index.getText())));
+		else
+			div.add(text(index.getText()));
+		// Children
 		if (node.hasChild()) {
+			div.attr("class", "zdoc_folder");
 			Tag ul = tag("ul");
 			for (Node<ZIndex> sub : node.getChildren())
 				ul.add(renderIndex(sub));
-			tag.add(ul);
+			li.add(ul);
 		}
-		return tag;
+		return li;
 	}
 
 	private static final String[] OLTYPES = { "1", "a", "i" };
@@ -175,6 +196,7 @@ public class HtmlDocRender implements DocRender {
 			for (ZBlock p : ps)
 				renderBlock(liTag, p);
 		}
+		tag.add(liTag);
 	}
 
 	private void renderHeading(Tag parent, ZBlock block) {
@@ -188,8 +210,11 @@ public class HtmlDocRender implements DocRender {
 	}
 
 	Tag renderToHtmlBlockElement(Tag tag, ZEle[] eles) {
-		for (ZEle ele : eles)
-			tag.add(renderEle(ele));
+		for (ZEle ele : eles) {
+			Tag sub = renderEle(ele);
+			if (null != sub)
+				tag.add(sub);
+		}
 		return tag;
 	}
 

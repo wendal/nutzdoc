@@ -4,6 +4,10 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.nutz.lang.util.Disks;
+import org.nutz.lang.util.Node;
+import org.nutz.lang.util.Nodes;
+
 public class ZFolder {
 
 	public static ZFolder create() {
@@ -69,6 +73,40 @@ public class ZFolder {
 
 	public ZDoc[] docs() {
 		return docs.toArray(new ZDoc[docs.size()]);
+	}
+
+	public int countDocs() {
+		return docs.size();
+	}
+
+	public boolean hasDoc() {
+		return !docs.isEmpty();
+	}
+
+	public String toString() {
+		return String.format("[%s] %d docs", getTitle(), docs.size());
+	}
+
+	public static Node<ZIndex> toIndex(Node<ZFolder> fnode) {
+		// Render Self
+		String text = fnode.get().getTitle();
+		String href = null;
+		File folderDocFile = fnode.get().getFolderDoc().getSource();
+		if (null != folderDocFile && folderDocFile.isFile()) {
+			href = Disks.getRelativePath(fnode.get().getDir(), folderDocFile);
+		}
+		Node<ZIndex> re = Nodes.create(ZDocs.index(href, null, text));
+		// Render Docs
+		for (ZDoc doc : fnode.get().docs) {
+			text = doc.getTitle();
+			href = Disks.getRelativePath(fnode.top().get().getDir(), doc.getSource());
+			re.add(Nodes.create(ZDocs.index(href, null, text)));
+		}
+		// Render sub-folders
+		for (Node<ZFolder> sub : fnode.getChildren()) {
+			re.add(toIndex(sub));
+		}
+		return re;
 	}
 
 }

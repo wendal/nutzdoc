@@ -148,10 +148,27 @@ public class ZDocScanningTest {
 
 		assertEquals("Heading", line.child(0).getText());
 
-		assertTrue(line.child(0, 0).isHr());
-		assertTrue(line.child(0, 1).isBlank());
-		assertTrue(line.child(0, 2).isBlank());
-		assertTrue(line.child(0, 3).isHr());
+		assertTrue(line.child(1).isHr());
+		assertTrue(line.child(2).isBlank());
+		assertTrue(line.child(3).isBlank());
+		assertTrue(line.child(4).isHr());
+	}
+
+	@Test
+	public void test_hr_after_p() {
+		String s = "Heading";
+		s = s + "\n\tA";
+		s = s + "\n\t\tA11";
+		s = s + "\n\t-----";
+		s = s + "\n-----";
+		s = s + "\nB";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0, 0).getText());
+		assertEquals("A11", line.child(0, 0, 0).getText());
+		assertTrue(line.child(0, 0, 1).isHr());
+		assertTrue(line.child(0, 0, 2).isHr());
+		assertEquals("B", line.child(1).getText());
 	}
 
 	@Test
@@ -178,7 +195,7 @@ public class ZDocScanningTest {
 
 	@Test
 	public void test_join() {
-		Line line = Line.make(null, "#inde");
+		Line line = Line.make("#inde");
 		assertTrue(line.isNormal());
 		line.join("x:1,6");
 		assertTrue(line.getIndexRange().in(4));
@@ -236,7 +253,7 @@ public class ZDocScanningTest {
 		assertTrue(line.child(0, 0).isCodeStart());
 		assertTrue(line.child(0, 3).isCodeEnd());
 	}
-	
+
 	@Test
 	public void test_simple_heading_structure() {
 		String s = "A";
@@ -246,12 +263,68 @@ public class ZDocScanningTest {
 		s = s + "\n\tC";
 		s = s + "\n\t\t222";
 		Line line = scan(s);
-		
+
 		Line a = line.child(0);
-		assertEquals("B",a.child(0).getText());
-		assertEquals("111",a.child(0,0).getText());
-		assertTrue(a.child(0,1).isBlank());
-		assertEquals("C",a.child(1).getText());
-		assertEquals("222",a.child(1,0).getText());
+		assertEquals("B", a.child(0).getText());
+		assertEquals("111", a.child(0, 0).getText());
+		assertTrue(a.child(0, 1).isBlank());
+		assertEquals("C", a.child(1).getText());
+		assertEquals("222", a.child(1, 0).getText());
+	}
+
+	@Test
+	public void test_li_after_p() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t* UL1";
+		Line line = scan(s);
+
+		assertEquals("B", line.child(0, 0).getText());
+		assertTrue(line.child(0, 1).isULI());
+	}
+
+	@Test
+	public void test_hr_in_heading() {
+		String s = "A";
+		s = s + "\n\tB";
+		s = s + "\n\t\t111";
+		s = s + "\n";
+		s = s + "\n-------------";
+		s = s + "\n\t\thhh";
+		s = s + "\n\tC";
+		s = s + "\n\t\t222";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0).getText());
+		assertEquals("B", line.child(0, 0).getText());
+		assertEquals("111", line.child(0, 0, 0).getText());
+		assertTrue(line.child(0, 0, 1).isBlank());
+		assertTrue(line.child(0, 0, 2).isHr());
+		assertEquals("hhh", line.child(0, 0, 3).getText());
+		assertEquals("C", line.child(0, 1).getText());
+		assertEquals("222", line.child(0, 1, 0).getText());
+	}
+
+	@Test
+	public void tet_hr_order_issue() {
+		String s = "A";
+		s = s + "\n\tA1";
+		s = s + "\n-------------";
+		s = s + "\n\t\t\tA2";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0).getText());
+		assertEquals("A1", line.child(0, 0).getText());
+		assertTrue(line.child(0, 1).isHr());
+		assertEquals("A2", line.child(0, 2).getText());
+	}
+
+	@Test
+	public void test_quick_index() {
+		String s = "#index:3";
+		Line line = scan(s);
+
+		assertEquals(0, line.child(0).getIndexRange().getLeft());
+		assertEquals(3, line.child(0).getIndexRange().getRight());
 	}
 }

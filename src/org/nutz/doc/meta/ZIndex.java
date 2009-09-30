@@ -1,17 +1,19 @@
 package org.nutz.doc.meta;
 
+import org.nutz.lang.Strings;
+
 public class ZIndex {
 
 	private String text;
 	private int[] numbers;
-	private String headingId;
+	private String href;
 
-	public String getHeadingId() {
-		return headingId;
+	public String getHref() {
+		return href;
 	}
 
-	void setHeadingId(String headingId) {
-		this.headingId = headingId;
+	public void setHref(String headingId) {
+		this.href = headingId;
 	}
 
 	public String getText() {
@@ -22,11 +24,11 @@ public class ZIndex {
 		return numbers;
 	}
 
-	void setText(String text) {
+	public void setText(String text) {
 		this.text = text;
 	}
 
-	void setNumbers(int[] numbers) {
+	public void setNumbers(int[] numbers) {
 		this.numbers = numbers;
 	}
 
@@ -44,8 +46,20 @@ public class ZIndex {
 		return sb.toString();
 	}
 
+	public boolean hasNumbers() {
+		return null != numbers && numbers.length > 0;
+	}
+
+	public boolean hasHref() {
+		return !Strings.isBlank(href);
+	}
+
+	public boolean hasText() {
+		return !Strings.isBlank(text);
+	}
+
 	public String toString() {
-		return String.format("%s - %s", getNumberString(), text);
+		return String.format("%s - %s <%s>", getNumberString(), text, href);
 	}
 
 }
