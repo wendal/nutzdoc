@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.BufferedReader;
 
 import org.junit.Test;
+import org.nutz.doc.meta.ZType;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
@@ -184,6 +185,7 @@ public class ZDocScanningTest {
 		assertEquals("Heading", line.child(0).getText());
 
 		assertEquals("JAVA", line.child(0, 0).getCodeType());
+		assertEquals(ZType.CODE, line.child(0, 0).type);
 		assertTrue(line.child(0, 0).isCodeStart());
 
 		assertEquals("A", line.child(0, 0, 0).getText());
@@ -326,5 +328,34 @@ public class ZDocScanningTest {
 
 		assertEquals(0, line.child(0).getIndexRange().getLeft());
 		assertEquals(3, line.child(0).getIndexRange().getRight());
+	}
+
+	@Test
+	public void test_escape_ul_with_child() {
+		String s = "* A\\";
+		s = s + "\nB";
+		s = s + "\n\t * A1";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0).getText());
+		assertTrue(line.child(0).isULI());
+		assertTrue(line.child(0).isEndByEscaping());
+		assertEquals("B", line.child(1).getText());
+		assertEquals("A1", line.child(1, 0).getText());
+		assertTrue(line.child(1, 0).isULI());
+	}
+
+	@Test
+	public void code_same_level_with_paragraph() {
+		String s = "A";
+		s = s + "\n{{{";
+		s = s + "\nX";
+		s = s + "\n}}}";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0).getText());
+		assertTrue(line.child(1).isCodeStart());
+		assertEquals("X", line.child(2).getText());
+		assertTrue(line.child(3).isCodeEnd());
 	}
 }

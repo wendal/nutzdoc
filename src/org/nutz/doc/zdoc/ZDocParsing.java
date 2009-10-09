@@ -102,6 +102,10 @@ class ZDocParsing {
 			}
 			// Let me considering the last element of the stack
 			if (last.isEndByEscaping()) {
+				// Append all children
+				for (Line chd : line.children())
+					last.add(chd);
+				// Join to last
 				last.join(line.getText());
 				continue;
 			}

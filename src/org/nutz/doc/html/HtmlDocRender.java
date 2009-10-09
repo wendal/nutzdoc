@@ -26,8 +26,7 @@ public class HtmlDocRender implements DocRender {
 				String email = au.getEmailString();
 				ele.add(Tag.tag("b").add(Tag.text(au.getName())));
 				if (!Strings.isBlank(email))
-					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(
-							Tag.text("<" + email + ">")));
+					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(Tag.text("<" + email + ">")));
 			}
 		}
 	}
@@ -37,8 +36,7 @@ public class HtmlDocRender implements DocRender {
 		Tag html = tag("html");
 		Tag head = tag("head");
 		html.add(head);
-		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT",
-				"text/html; charset=UTF-8"));
+		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT", "text/html; charset=UTF-8"));
 		if (!Strings.isBlank(doc.getTitle()))
 			head.add(tag("title").add(text(doc.getTitle())));
 		// <link rel="stylesheet" type="text/css">
@@ -46,8 +44,7 @@ public class HtmlDocRender implements DocRender {
 			List<File> csss = (List<File>) doc.getAttr("css");
 			for (File css : csss) {
 				String path = doc.getRelativePath(css);
-				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type",
-						"text/css"));
+				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type", "text/css"));
 			}
 		}
 		// <script language="javascript">
@@ -231,12 +228,12 @@ public class HtmlDocRender implements DocRender {
 			tag = text(ele.getText());
 			if (ele.hasStyle() && ele.getStyle().hasFont()) {
 				ZFont font = ele.getStyle().getFont();
-				wrapFont(tag, "b", font.isBold());
-				wrapFont(tag, "i", font.isItalic());
-				wrapFont(tag, "s", font.isStrike());
-				wrapFont(tag, "sub", font.isSub());
-				wrapFont(tag, "sup", font.isSup());
-				wrapFontColor(tag, font);
+				tag = wrapFont(tag, "b", font.isBold());
+				tag = wrapFont(tag, "i", font.isItalic());
+				tag = wrapFont(tag, "s", font.isStrike());
+				tag = wrapFont(tag, "sub", font.isSub());
+				tag = wrapFont(tag, "sup", font.isSup());
+				tag = wrapFontColor(tag, font);
 			}
 		}
 		if (null == tag) {
@@ -251,13 +248,15 @@ public class HtmlDocRender implements DocRender {
 		return tag;
 	}
 
-	private static void wrapFont(Tag tag, String tagName, boolean yes) {
+	private static Tag wrapFont(Tag tag, String tagName, boolean yes) {
 		if (yes)
-			tag(tagName).add(tag);
+			return (Tag) tag(tagName).add(tag);
+		return tag;
 	}
 
-	private static void wrapFontColor(Tag tag, ZFont font) {
+	private static Tag wrapFontColor(Tag tag, ZFont font) {
 		if (font.hasColor())
-			tag("span").attr("style", "color:" + font.getColor() + ";").add(tag);
+			return (Tag) tag("span").attr("style", "color:" + font.getColor() + ";").add(tag);
+		return tag;
 	}
 }

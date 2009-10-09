@@ -23,8 +23,7 @@ class Line {
 	private static final Pattern HR = Pattern.compile("^[-]{5,}$");
 	private static final Pattern VERIFIER = Pattern.compile("^([#]verifier:)(.*)$");
 	private static final Pattern AUTHOR = Pattern.compile("^([#]author:)(.*)$");
-	private static final Pattern INDEX_RANGE = Pattern
-			.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
+	private static final Pattern INDEX_RANGE = Pattern.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
 
 	static Line make(String text) {
 		return new Line(text);
@@ -52,6 +51,9 @@ class Line {
 	private void evalMode() {
 		// End by escape
 		endByEscape = (text.length() > 0) && (text.charAt(text.length() - 1) == '\\');
+		if (endByEscape) {
+			text = text.substring(0, text.length() - 1);
+		}
 		// OL
 		Matcher m = OL.matcher(text);
 		if (m.find()) {
@@ -110,6 +112,7 @@ class Line {
 				codeType = "";
 			} else
 				codeType = s.substring(1, s.length() - 1);
+			type = ZType.CODE;
 			return;
 		}
 		// Code end

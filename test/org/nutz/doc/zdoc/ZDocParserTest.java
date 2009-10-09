@@ -11,18 +11,10 @@ import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.meta.ZIndex;
-import org.nutz.doc.plain.PlainParserTest;
-import org.nutz.lang.Lang;
-import org.nutz.lang.Streams;
 import org.nutz.lang.util.IntRange;
 import org.nutz.lang.util.Node;
 
 public class ZDocParserTest {
-
-	static ZBlock root4file(String name) {
-		String path = PlainParserTest.class.getPackage().getName().replace('.', '/') + "/" + name;
-		return root(Lang.readAll(Streams.fileInr(path)));
-	}
 
 	private static ZBlock root(String s) {
 		DocParser parser = new ZDocParser();
@@ -394,7 +386,7 @@ public class ZDocParserTest {
 		assertFalse(it.hasNext());
 		assertNull(it.next());
 	}
-	
+
 	@Test
 	public void test_build_index_2() {
 		String s = "#title:Test 1";
@@ -417,7 +409,7 @@ public class ZDocParserTest {
 		index = it.next().get();
 		assertEquals("A1", index.getText());
 		assertEquals("1.1", index.getNumberString());
-		
+
 		index = it.next().get();
 		assertEquals("A11", index.getText());
 		assertEquals("1.1.1", index.getNumberString());
@@ -428,5 +420,31 @@ public class ZDocParserTest {
 
 		assertFalse(it.hasNext());
 		assertNull(it.next());
+	}
+
+	@Test
+	public void test_escape_ul_with_child() {
+		String s = "* A\\";
+		s = s + "\nB";
+		s = s + "\n\t * A1";
+
+		ZBlock root = root(s);
+		assertEquals("AB", root.desc(0, 0).getText());
+		assertTrue(root.desc(0, 0).isULI());
+		assertEquals("A1", root.desc(0, 0, 0, 0).getText());
+		assertTrue(root.desc(0, 0, 0, 0).isULI());
+	}
+
+	@Test
+	public void code_same_level_with_paragraph() {
+		String s = "A";
+		s = s + "\n{{{";
+		s = s + "\nX";
+		s = s + "\n}}}";
+
+		ZBlock root = root(s);
+		assertEquals("A", root.desc(0).getText());
+		assertEquals("X\n", root.desc(1).getText());
+		assertTrue(root.desc(1).isCode());
 	}
 }
