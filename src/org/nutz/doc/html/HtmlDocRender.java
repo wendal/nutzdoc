@@ -26,7 +26,8 @@ public class HtmlDocRender implements DocRender {
 				String email = au.getEmailString();
 				ele.add(Tag.tag("b").add(Tag.text(au.getName())));
 				if (!Strings.isBlank(email))
-					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(Tag.text("<" + email + ">")));
+					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(
+							Tag.text("<" + email + ">")));
 			}
 		}
 	}
@@ -36,7 +37,8 @@ public class HtmlDocRender implements DocRender {
 		Tag html = tag("html");
 		Tag head = tag("head");
 		html.add(head);
-		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT", "text/html; charset=UTF-8"));
+		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT",
+				"text/html; charset=UTF-8"));
 		if (!Strings.isBlank(doc.getTitle()))
 			head.add(tag("title").add(text(doc.getTitle())));
 		// <link rel="stylesheet" type="text/css">
@@ -44,7 +46,8 @@ public class HtmlDocRender implements DocRender {
 			List<File> csss = (List<File>) doc.getAttr("css");
 			for (File css : csss) {
 				String path = doc.getRelativePath(css);
-				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type", "text/css"));
+				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type",
+						"text/css"));
 			}
 		}
 		// <script language="javascript">
@@ -223,6 +226,8 @@ public class HtmlDocRender implements DocRender {
 				tag.attr("width", ele.getWidth());
 			if (ele.getHeight() > 0)
 				tag.attr("height", ele.getHeight());
+			if (ele.hasHref() && !ele.getHref().isBookmark())
+				tag = (Tag) tag("a").attr("href", ele.getHref().getPath()).add(tag);
 			return tag;
 		} else if (!Strings.isEmpty(ele.getText())) {
 			tag = text(ele.getText());
