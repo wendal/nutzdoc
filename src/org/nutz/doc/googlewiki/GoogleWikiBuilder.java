@@ -91,6 +91,7 @@ public final class GoogleWikiBuilder {
 	}
 	
 	public GoogleWikiBuilder appendHeading(String text,int level){
+		nextLine();
 		sb.append(makeHeading(text, level));
 		nextLine();
 		return this;
@@ -100,7 +101,7 @@ public final class GoogleWikiBuilder {
 		if(level < 1) level = 1;
 		if(level > 6) level = 6;
 		String str = "";
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < level; i++) {
 			str += "=";
 		}
 		str = str + text + str;

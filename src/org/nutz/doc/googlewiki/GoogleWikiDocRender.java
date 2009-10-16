@@ -117,6 +117,7 @@ public class GoogleWikiDocRender implements DocRender {
 //		}else{
 //			
 //		}
+		wikiBuilder.nextLine();
 		wikiBuilder.appendRaw(GoogleWikiBuilder.makeListItem(parseEles(li.eles()),liDeep)).nextLine();
 		if (li.hasChildren()) {
 			ZBlock[] ps = li.children();
