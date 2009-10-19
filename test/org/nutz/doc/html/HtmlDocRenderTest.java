@@ -57,4 +57,15 @@ public class HtmlDocRenderTest {
 		assertEquals(expect, tag.toString());
 	}
 
+	@Test
+	public void test_relative_link() {
+		HtmlDocRender render = new HtmlDocRender();
+		String expect = "<a href=\"abc.html\">ABC</a>";
+		String s = "[abc.html ABC]";
+		ZBlock root = root(s);
+
+		Tag tag = render.renderEle(root.child(0).ele(0));
+		assertEquals(expect, tag.toString());
+
+	}
 }

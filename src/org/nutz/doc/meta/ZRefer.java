@@ -82,7 +82,7 @@ public class ZRefer {
 	}
 
 	public boolean isAvailable() {
-		return null == type;
+		return null != type;
 	}
 
 	public boolean isLocal() {
