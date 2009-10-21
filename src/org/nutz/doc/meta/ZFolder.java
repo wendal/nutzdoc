@@ -42,10 +42,6 @@ public class ZFolder {
 		return this;
 	}
 
-	public File getSource() {
-		return folderDoc.getSource();
-	}
-
 	public Author getAuthor() {
 		return author;
 	}

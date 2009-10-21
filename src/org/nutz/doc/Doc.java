@@ -21,27 +21,33 @@ public class Doc {
 
 	public static void main(String[] args) throws IOException {
 		Doc doc = new Doc();
-		if (args.length == 3) {
+		if (args.length > 2) {
 			File src = Files.findFile(args[0]);
-			if(null==src){
-				out.printf("src directory: %s didn't existed!\n",args[0]);
+			if (null == src) {
+				out.printf("src directory: %s didn't existed!\n", args[0]);
 			}
 			File dest = new File(args[1]);
-			if(dest.exists())
+			if (dest.exists())
 				Files.makeDir(dest);
-			
-			String suffix = args[2];
-			if (suffix.toLowerCase().matches("^[.]htm[l]?$")) {
-				doc.toHtmlFolder(src, dest, suffix);
-			} else if (suffix.toLowerCase().matches("[.][g]wiki$")) {
-				doc.toGoogleWikiFolder(src, dest, suffix);
+
+			if (args.length == 3) {
+				String suffix = args[2];
+				if (suffix.toLowerCase().matches("^[.]htm[l]?$")) {
+					doc.toHtmlFolder(src, dest, suffix);
+					return;
+				}
+			} else if (args.length == 4) {
+				String indexName = args[2];
+				String imgAddress = args[3];
+				doc.toGoogleWikiFolder(src, dest, indexName, imgAddress);
+			} else {
+
 			}
-		} else {
-			out.println("Wrong parameters!!!");
-			out.println(Strings.dup('-', 80));
-			out.println(Lang.readAll(Streams.fileInr("org/nutz/doc/hlp.man")));
-			out.println(Strings.dup('-', 80));
 		}
+		out.println("Wrong parameters!!!");
+		out.println(Strings.dup('-', 80));
+		out.println(Lang.readAll(Streams.fileInr("org/nutz/doc/hlp.man")));
+		out.println(Strings.dup('-', 80));
 	}
 
 	private void toHtmlFolder(File src, File dest, String suffix) throws IOException {
@@ -52,9 +58,10 @@ public class Doc {
 		render.render(dest, folder);
 	}
 
-	private void toGoogleWikiFolder(File src, File dest, String suffix) throws IOException {
+	private void toGoogleWikiFolder(File src, File dest, String indexName, String imgAddress)
+			throws IOException {
 		FolderParser parser = new ZDocFolderParser();
-		FolderRender render = new GoogleWikiFolderRender(suffix);
+		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress);
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}

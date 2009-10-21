@@ -61,8 +61,10 @@ public class HtmlFolderRender implements FolderRender {
 		log(Strings.dup(' ', 12) + fmt, args);
 	}
 
-	private void copyResourceFiles(final File dest, File src, final List<File> csss,
-			final List<File> jss) throws IOException {
+	private void copyResourceFiles(	final File dest,
+									File src,
+									final List<File> csss,
+									final List<File> jss) throws IOException {
 		log2("Check : %s", dest);
 		if (Files.makeDir(dest))
 			log2("[OK] It don't existed, create it!");
