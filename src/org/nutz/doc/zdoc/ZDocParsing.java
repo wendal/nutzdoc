@@ -190,7 +190,7 @@ class ZDocParsing {
 			StringBuilder sb = new StringBuilder();
 			Iterator<Line> it = stack.iterator();
 			while (it.hasNext())
-				sb.append(it.next().getText());
+				sb.append(it.next().getText()).append(' ');
 			re = toBlock(sb.toString().toCharArray());
 			if (stack.getLast().hasChild())
 				transform(re, stack.getLast());

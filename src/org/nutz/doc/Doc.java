@@ -40,8 +40,7 @@ public class Doc {
 				String indexName = args[2];
 				String imgAddress = args[3];
 				doc.toGoogleWikiFolder(src, dest, indexName, imgAddress);
-			} else {
-
+				return;
 			}
 		}
 		out.println("Wrong parameters!!!");

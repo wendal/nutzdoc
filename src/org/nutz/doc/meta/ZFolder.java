@@ -51,10 +51,18 @@ public class ZFolder {
 	}
 
 	public boolean hasFolderDoc() {
-		return null != folderDoc;
+		if (null == folderDoc)
+			return false;
+		if (folderDoc.getSource() == null)
+			return false;
+		if (!folderDoc.getSource().isFile())
+			return false;
+		return true;
 	}
 
 	public ZDoc getFolderDoc() {
+		if (!hasFolderDoc())
+			return null;
 		return folderDoc;
 	}
 
