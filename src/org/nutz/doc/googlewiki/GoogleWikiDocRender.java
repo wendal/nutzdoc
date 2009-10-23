@@ -3,6 +3,7 @@ package org.nutz.doc.googlewiki;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.DocRender;
+import org.nutz.doc.meta.Author;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZEle;
@@ -24,12 +25,36 @@ public class GoogleWikiDocRender implements DocRender {
 	public CharSequence render(ZDoc doc) {
 		sb = new StringBuilder();
 		// Render title
-		// Render authors
+		sb.append("#summary ").append(doc.getTitle()).append('\n');
+		// append Authors
+		appendAuthors("By", doc.authors());
+		appendAuthors("Verify By", doc.verifiers());
+		sb.append('\n');
+		
+		// Body title
+		sb.append("<p align=\"center\"><font size=6>* ").append(doc.getTitle()).append(" *</font></p>\n");
+		appendHr();
 		// Render each block
 		for (ZBlock block : doc.root().children()) {
 			appendBlock(block);
 		}
 		return sb;
+	}
+
+	private void appendAuthors(String prefix, Author[] authors) {
+		if (authors.length > 0) {
+			sb.append("<p align=\"right\">");
+			sb.append(format(" <font color=\"#AAA\" size=\"1\"> * %s * </font>  ", prefix));
+			for (Author au : authors) {
+				sb.append("  ");
+				if (au.getEmail() != null)
+					sb.append(format("*%s* (<font color=\"#080\"> %s </font>)", au.getName(), au
+							.getEmail().toString()));
+				else
+					sb.append(format("*%s*", au.getName()));
+			}
+			sb.append("</p>");
+		}
 	}
 
 	private void indent(int lvl) {
@@ -45,12 +70,13 @@ public class GoogleWikiDocRender implements DocRender {
 					appendBlockContent(cell);
 					sb.append("||");
 				}
-				sb.append('\n');
+				sb.append("\n");
 			}
+			sb.append("\n");
 		}
 		// <HR>
 		else if (block.isHr()) {
-			sb.append("----\n");
+			appendHr();
 		}
 		// #index:
 		else if (block.hasIndexRange()) {
@@ -62,7 +88,7 @@ public class GoogleWikiDocRender implements DocRender {
 		else if (block.isCode()) {
 			sb.append("{{{\n");
 			sb.append(block.getText());
-			sb.append("}}}\n");
+			sb.append("}}}\n\n");
 		}
 		// <OL>
 		else if (block.isOL() || block.isUL()) {
@@ -98,6 +124,10 @@ public class GoogleWikiDocRender implements DocRender {
 
 	}
 
+	private void appendHr() {
+		sb.append("----\n");
+	}
+
 	private void appendBlockContent(ZBlock block) {
 		for (ZEle ele : block.eles())
 			sb.append(ele2String(ele));
@@ -107,7 +137,7 @@ public class GoogleWikiDocRender implements DocRender {
 		return wrapper + text + wrapper;
 	}
 
-	private static final Pattern TKN = Pattern.compile("[_*<>]|\\x5B|\\x5D|,,|~~|[|][|]");
+	private static final Pattern TKN = Pattern.compile("[_*<>{}]|\\x5B|\\x5D|,,|~~|[|][|]");
 
 	private static String ele2String(ZEle ele) {
 		String text = ele.getText();

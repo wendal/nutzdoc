@@ -3,7 +3,6 @@ package org.nutz.doc;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 
 import org.nutz.doc.googlewiki.GoogleWikiFolderRender;
 import org.nutz.doc.html.HtmlFolderRender;
@@ -49,10 +48,13 @@ public class Doc {
 		out.println(Strings.dup('-', 80));
 	}
 
+	private RenderLogger logger() {
+		return new RenderLogger(new OutputStreamWriter(out));
+	}
+
 	private void toHtmlFolder(File src, File dest, String suffix) throws IOException {
 		FolderParser parser = new ZDocFolderParser();
-		Writer writer = new OutputStreamWriter(out);
-		FolderRender render = new HtmlFolderRender(suffix, writer);
+		FolderRender render = new HtmlFolderRender(suffix, logger());
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}
@@ -60,7 +62,7 @@ public class Doc {
 	private void toGoogleWikiFolder(File src, File dest, String indexName, String imgAddress)
 			throws IOException {
 		FolderParser parser = new ZDocFolderParser();
-		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress);
+		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress, logger());
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}
