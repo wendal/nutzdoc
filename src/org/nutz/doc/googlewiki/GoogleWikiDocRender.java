@@ -1,5 +1,7 @@
 package org.nutz.doc.googlewiki;
 
+import java.util.regex.Pattern;
+
 import org.nutz.doc.DocRender;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
@@ -105,8 +107,15 @@ public class GoogleWikiDocRender implements DocRender {
 		return wrapper + text + wrapper;
 	}
 
+	private static final Pattern TKN = Pattern.compile("[_*<>]|\\x5B|\\x5D|,,|~~|[|][|]");
+
 	private static String ele2String(ZEle ele) {
 		String text = ele.getText();
+		if (text.indexOf('`') >= 0) {
+			text = "{{{" + text + "}}}";
+		} else if (TKN.matcher(text).find()) {
+			text = "`" + text + "`";
+		}
 		if (ele.isImage()) {
 			if (ele.hasHref()) {
 				return format("[%s %s]", ele.getHref().getPath(), ele.getSrc().getPath());
@@ -114,7 +123,7 @@ public class GoogleWikiDocRender implements DocRender {
 			return ele.getSrc().getPath();
 		}
 		if (ele.hasHref()) {
-			return format("[%s %s]", ele.getHref().getPath(), ele.getText());
+			return format("[%s %s]", ele.getHref().getPath(), text);
 		}
 		if (ele.hasStyle() && ele.getStyle().hasFont()) {
 			ZFont font = ele.getStyle().getFont();
