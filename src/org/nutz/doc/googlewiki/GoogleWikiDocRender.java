@@ -28,13 +28,14 @@ public class GoogleWikiDocRender implements DocRender {
 		sb.append("#summary ").append(doc.getTitle()).append('\n');
 
 		// Body title
-		sb.append("<p align=\"center\"><font size=6><b>").append(doc.getTitle()).append(
-				"</b></font></p>\n");
+		sb.append("<p align=\"center\"><font size=6>* ").append(doc.getTitle()).append(
+				" *</font></p>\n");
 		appendHr();
 		// append Authors
+		sb.append("<p align=\"right\">");
 		appendAuthors("By", doc.authors());
-		appendAuthors("Verify By", doc.verifiers());
-		sb.append('\n');
+		appendAuthors("<br/>Verify By", doc.verifiers());
+		sb.append("</p>\n");
 
 		// Render each block
 		for (ZBlock block : doc.root().children()) {
@@ -45,7 +46,6 @@ public class GoogleWikiDocRender implements DocRender {
 
 	private void appendAuthors(String prefix, Author[] authors) {
 		if (authors.length > 0) {
-			sb.append("<p align=\"right\">");
 			sb.append(format(" <font color=\"#AAA\" size=\"1\"> * %s * </font>  ", prefix));
 			for (Author au : authors) {
 				sb.append("  ");
@@ -55,7 +55,6 @@ public class GoogleWikiDocRender implements DocRender {
 				else
 					sb.append(format("*%s*", au.getName()));
 			}
-			sb.append("</p>");
 		}
 	}
 
@@ -142,7 +141,7 @@ public class GoogleWikiDocRender implements DocRender {
 	private static final Pattern TKN = Pattern.compile("[_*<>{}]|\\x5B|\\x5D|,,|~~|[|][|]");
 
 	private static String ele2String(ZEle ele) {
-		String text = ele.getText();
+		String text = " " + ele.getText() + " ";
 		if (text.indexOf('`') >= 0) {
 			text = "{{{" + text + "}}}";
 		} else if (TKN.matcher(text).find()) {
