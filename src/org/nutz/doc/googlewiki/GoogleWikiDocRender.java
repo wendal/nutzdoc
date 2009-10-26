@@ -26,14 +26,16 @@ public class GoogleWikiDocRender implements DocRender {
 		sb = new StringBuilder();
 		// Render title
 		sb.append("#summary ").append(doc.getTitle()).append('\n');
+
+		// Body title
+		sb.append("<p align=\"center\"><font size=6><b>").append(doc.getTitle()).append(
+				"</b></font></p>\n");
+		appendHr();
 		// append Authors
 		appendAuthors("By", doc.authors());
 		appendAuthors("Verify By", doc.verifiers());
 		sb.append('\n');
-		
-		// Body title
-		sb.append("<p align=\"center\"><font size=6>* ").append(doc.getTitle()).append(" *</font></p>\n");
-		appendHr();
+
 		// Render each block
 		for (ZBlock block : doc.root().children()) {
 			appendBlock(block);
