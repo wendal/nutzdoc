@@ -358,4 +358,15 @@ public class ZDocScanningTest {
 		assertEquals("X", line.child(2).getText());
 		assertTrue(line.child(3).isCodeEnd());
 	}
+
+	@Test
+	public void heading_with_blank_child() {
+		String s = "A";
+		s = s + "\n";
+		s = s + "\n\tB";
+		Line line = scan(s);
+
+		assertEquals("A", line.child(0).getText());
+		assertEquals("B", line.child(0, 0).getText());
+	}
 }

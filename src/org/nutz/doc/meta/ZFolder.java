@@ -23,6 +23,15 @@ public class ZFolder {
 	private ZDoc folderDoc;
 	private File dir;
 	private List<ZDoc> docs;
+	private boolean virtual;
+
+	public boolean isVirtual() {
+		return virtual;
+	}
+
+	public void setVirtual(boolean virtual) {
+		this.virtual = virtual;
+	}
 
 	public String getTitle() {
 		return folderDoc.getTitle();
@@ -95,9 +104,11 @@ public class ZFolder {
 		// Render Self
 		String text = fnode.get().getTitle();
 		String href = null;
-		File folderDocFile = fnode.get().getFolderDoc().getSource();
+		File folderDocFile = null;
+		if (fnode.get().hasFolderDoc())
+			folderDocFile = fnode.get().getFolderDoc().getSource();
 		if (null != folderDocFile && folderDocFile.isFile()) {
-			href = Disks.getRelativePath(fnode.get().getDir(), folderDocFile);
+			href = Disks.getRelativePath(fnode.top().get().getDir(), folderDocFile);
 		}
 		Node<ZIndex> re = Nodes.create(ZDocs.index(href, null, text));
 		// Render Docs

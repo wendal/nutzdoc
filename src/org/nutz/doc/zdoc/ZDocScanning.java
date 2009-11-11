@@ -17,10 +17,11 @@ class ZDocScanning {
 				int depth = countTab(str);
 				str = Strings.trim(str);
 				Line line = Line.make(str);
+
 				/*
-				 * When HR | Blank line
+				 * When HR or Blank
 				 */
-				if (line.isBlank() || line.isHr()) {
+				if (line.isHr() || line.isBlank()) {
 					if (last == root) {
 						last.add(line);
 					} else {

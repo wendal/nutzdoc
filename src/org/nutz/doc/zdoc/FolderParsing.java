@@ -108,6 +108,7 @@ class FolderParsing {
 					if (ele.hasChildNodes()) {
 						Node<ZFolder> nd = toFolderNode(dir);
 						nd.get().setFolderDoc(toZDoc(f));
+						nd.get().setVirtual(true);
 						if (ele.hasAttribute("title"))
 							nd.get().setTitle(ele.getAttribute("title"));
 						walkingOnChildren(ele, node, nd);

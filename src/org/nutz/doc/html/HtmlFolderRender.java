@@ -152,52 +152,65 @@ public class HtmlFolderRender implements FolderRender {
 			L.log2("Empty!");
 			return;
 		}
-		File f;
+		// Render Folder doc
+		if (node.get().hasFolderDoc()) {
+			L.log2("[Folder Doc: '%s']", node.get().getFolderDoc().getSource().getName());
+			renderDoc(dest, csss, jss, node.get().getFolderDoc());
+		}
 		// Rendering all ZDoc under current folder
 		for (ZDoc doc : node.get().docs()) {
 			L.log2("[Doc: '%s']", doc.getSource().getName());
-			doc.setAttr("css", csss);
-			doc.setAttr("js", jss);
-			File src = doc.getSource();
-			int pos = src.getAbsolutePath().length() + 1;
-			// Replace links
-			List<ZEle> links = doc.root().getLinks();
-			L.log3("Found %d links", links.size());
-			for (ZEle link : links) {
-				f = link.getHref().getFile();
-				if (null != f)
-					if (f.getAbsolutePath().length() > pos) {
-						String path = f.getAbsolutePath().substring(pos);
-						String newPath = Files.renameSuffix(path, suffix);
-						L.log4(" %s => %s", path, newPath);
-						link.setHref(ZDocs.refer(newPath));
-					}
-			}
-			// Write HTML to file
-			L.log3("write HTML");
-			String s = render.render(doc).toString();
-			String name = Files.renameSuffix(src, suffix).getName();
-			File newDocFile = new File(dest.getAbsolutePath() + "/" + name);
-			Lang.writeAll(Streams.fileOutw(newDocFile), s);
-			// Copy Images && change the image to new path
-			List<ZEle> images = doc.root().getImages();
-			L.log3("Found %d images", images.size());
-			for (ZEle img : images) {
-				f = img.getSrc().getFile();
-				if (null != f) {
-					String path = doc.getRelativePath(f);
-					File newImg = new File(newDocFile.getParent() + "/" + path);
-					L.log4("Copy: %s => %s", f, newImg);
-					Files.copyFile(f, newImg);
-					img.setSrc(ZDocs.refer(doc.getRelativePath(f)));
-					L.log4("update src to: %s", img.getSrc().toString());
-				}
-			}
+			renderDoc(dest, csss, jss, doc);
 		}
 		// Recuring sub-folders
 		for (Node<ZFolder> sub : node.getChildren()) {
-			File dir = new File(dest.getAbsolutePath() + "/" + sub.get().getDir().getName());
+			File dir = dest;
+			if (!sub.get().isVirtual())
+				dir = new File(dest.getAbsolutePath() + "/" + sub.get().getDir().getName());
 			renderFolderNode(dir, sub, csss, jss);
+		}
+	}
+
+	private void renderDoc(File dest, List<File> csss, List<File> jss, ZDoc doc) throws IOException {
+		File f;
+		doc.setAttr("css", csss);
+		doc.setAttr("js", jss);
+		File src = doc.getSource();
+		int pos = src.getAbsolutePath().length() + 1;
+		// Replace links
+		List<ZEle> links = doc.root().getLinks();
+		L.log3("Found %d links", links.size());
+		for (ZEle link : links) {
+			f = link.getHref().getFile();
+			if (null != f)
+				if (f.getAbsolutePath().length() > pos) {
+					String path = f.getAbsolutePath().substring(pos);
+					String newPath = Files.renameSuffix(path, suffix);
+					L.log4(" %s => %s", path, newPath);
+					link.setHref(ZDocs.refer(newPath));
+				}
+		}
+		// Write HTML to file
+		L.log3("write HTML");
+		String s = render.render(doc).toString();
+		String name = Files.renameSuffix(src, suffix).getName();
+		File newDocFile = new File(dest.getAbsolutePath() + "/" + name);
+		if (!newDocFile.exists())
+			Files.createNewFile(newDocFile);
+		Lang.writeAll(Streams.fileOutw(newDocFile), s);
+		// Copy Images && change the image to new path
+		List<ZEle> images = doc.root().getImages();
+		L.log3("Found %d images", images.size());
+		for (ZEle img : images) {
+			f = img.getSrc().getFile();
+			if (null != f) {
+				String path = doc.getRelativePath(f);
+				File newImg = new File(newDocFile.getParent() + "/" + path);
+				L.log4("Copy: %s => %s", f, newImg);
+				Files.copyFile(f, newImg);
+				img.setSrc(ZDocs.refer(doc.getRelativePath(f)));
+				L.log4("update src to: %s", img.getSrc().toString());
+			}
 		}
 	}
 }

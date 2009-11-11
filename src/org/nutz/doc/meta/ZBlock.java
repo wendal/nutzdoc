@@ -114,7 +114,9 @@ public class ZBlock {
 		StringBuilder sb = new StringBuilder();
 		for (ZEle ele : eles)
 			sb.append(ele.getText());
-		return sb.toString();
+		if(this.isCode())
+			return sb.toString();
+		return Strings.trim(sb);
 	}
 
 	public String getString() {

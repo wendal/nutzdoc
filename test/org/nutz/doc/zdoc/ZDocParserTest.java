@@ -36,8 +36,8 @@ public class ZDocParserTest {
 		ZBlock[] children = root.children();
 		assertEquals("A", children[0].getText());
 		assertEquals("B", children[1].getText());
-		assertEquals("C", children[1].desc(0).ele(0).getText());
-		assertEquals("D", children[1].desc(0).desc(0).ele(0).getText());
+		assertEquals("C ", children[1].desc(0).ele(0).getText());
+		assertEquals("D ", children[1].desc(0).desc(0).ele(0).getText());
 		assertEquals("E", children[2].getText());
 	}
 
@@ -447,4 +447,5 @@ public class ZDocParserTest {
 		assertEquals("X\n", root.desc(1).getText());
 		assertTrue(root.desc(1).isCode());
 	}
+
 }
