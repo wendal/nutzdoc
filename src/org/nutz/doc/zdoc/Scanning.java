@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
-class ZDocScanning {
+class Scanning {
 
 	Line scan(BufferedReader reader) {
 		try {
@@ -31,8 +31,14 @@ class ZDocScanning {
 					while (depth < last.depth())
 						last = last.getParent();
 					if (null != last.getParent())
-						if (last.isBlank() || last.isHr())
+						if (last.isHr())
 							last = last.getParent();
+					while (last.isBlank() && last != root) {
+						if (last.getPrev() == null)
+							last = last.getParent();
+						else
+							last = last.getPrev();
+					}
 					last.add(line);
 				}
 				last = line;

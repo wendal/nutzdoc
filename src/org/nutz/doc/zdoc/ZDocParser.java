@@ -10,7 +10,7 @@ public class ZDocParser implements DocParser {
 
 	public ZDoc parse(CharSequence cs) {
 		BufferedReader br = new BufferedReader(Lang.inr(cs));
-		ZDocParsing parsing = new ZDocParsing(br);
+		Parsing parsing = new Parsing(br);
 		ZDoc doc = parsing.parse();
 		try {
 			br.close();

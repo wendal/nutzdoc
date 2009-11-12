@@ -12,7 +12,7 @@ import org.nutz.lang.Strings;
 public class ZDocScanningTest {
 
 	private static Line scan(String s) {
-		return new ZDocScanning().scan(new BufferedReader(Lang.inr(s)));
+		return new Scanning().scan(new BufferedReader(Lang.inr(s)));
 	}
 
 	@Test

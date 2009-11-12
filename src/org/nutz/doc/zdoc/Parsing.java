@@ -11,18 +11,18 @@ import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.lang.util.LinkedCharArray;
 
-class ZDocParsing {
+class Parsing {
 
 	private ZDoc doc;
 	private BufferedReader reader;
 
-	ZDocParsing(BufferedReader reader) {
+	Parsing(BufferedReader reader) {
 		this.doc = new ZDoc();
 		this.reader = reader;
 	}
 
 	ZDoc parse() {
-		Line root = new ZDocScanning().scan(reader);
+		Line root = new Scanning().scan(reader);
 		transform(doc.root(), root);
 		return doc;
 	}

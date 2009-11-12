@@ -23,7 +23,8 @@ class Line {
 	private static final Pattern HR = Pattern.compile("^[-]{5,}$");
 	private static final Pattern VERIFIER = Pattern.compile("^([#]verifier:)(.*)$");
 	private static final Pattern AUTHOR = Pattern.compile("^([#]author:)(.*)$");
-	private static final Pattern INDEX_RANGE = Pattern.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
+	private static final Pattern INDEX_RANGE = Pattern
+			.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
 
 	static Line make(String text) {
 		return new Line(text);
@@ -32,6 +33,7 @@ class Line {
 	ZType type;
 	private String codeType;
 	private Line parent;
+	private Line prev;
 	private String text;
 	private List<Line> children;
 	private int depth;
@@ -127,9 +129,8 @@ class Line {
 		return parent;
 	}
 
-	Line setParent(Line parent) {
-		this.parent = parent;
-		return this;
+	Line getPrev() {
+		return prev;
 	}
 
 	String getText() {
@@ -143,6 +144,9 @@ class Line {
 
 	Line add(Line line) {
 		line.parent = this;
+		if (children.size() > 0) {
+			line.prev = children.get(children.size() - 1);
+		}
 		children.add(line);
 		line.depth = depth + 1;
 		return this;
@@ -235,7 +239,7 @@ class Line {
 	}
 
 	ZBlock toBlock() {
-		return ZDocParsing.toBlock(text.toCharArray());
+		return Parsing.toBlock(text.toCharArray());
 	}
 
 	public String toString() {
