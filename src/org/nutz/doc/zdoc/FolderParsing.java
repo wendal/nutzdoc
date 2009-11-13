@@ -117,7 +117,6 @@ class FolderParsing {
 						Node<ZFolder> me = toFolderNode(dir);
 						me.get().setFolderDoc(toZDoc(f));
 						me.get().setVirtual(true);
-						updateMyTitle(ele, f, me);
 						walkingOnChildren(ele, parent, me);
 					}
 					// Just append ZDoc
