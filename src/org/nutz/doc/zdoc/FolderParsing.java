@@ -97,43 +97,53 @@ class FolderParsing {
 		return node;
 	}
 
-	private void evalWithElement(Element ele, Node<ZFolder> node) {
+	private void evalWithElement(Element ele, Node<ZFolder> parent) {
 		String path = ele.getAttribute("path");
-		if (null != path) {
-			File dir = node.get().getDir();
+		// Without @path
+		if (Strings.isBlank(path)) {
+			Node<ZFolder> me = toFolderNode(parent.get().getDir());
+			me.get().setVirtual(true);
+			updateMyTitle(ele, me.get().getDir(), me);
+			walkingOnChildren(ele, parent, me);
+		}
+		// Define a @path
+		else {
+			File dir = parent.get().getDir();
 			File f = new File(dir.getAbsolutePath() + "/" + path);
 			if (f.exists()) {
 				if (f.isFile()) {
 					// Virtual Folder
 					if (ele.hasChildNodes()) {
-						Node<ZFolder> nd = toFolderNode(dir);
-						nd.get().setFolderDoc(toZDoc(f));
-						nd.get().setVirtual(true);
-						if (ele.hasAttribute("title"))
-							nd.get().setTitle(ele.getAttribute("title"));
-						walkingOnChildren(ele, node, nd);
+						Node<ZFolder> me = toFolderNode(dir);
+						me.get().setFolderDoc(toZDoc(f));
+						me.get().setVirtual(true);
+						updateMyTitle(ele, f, me);
+						walkingOnChildren(ele, parent, me);
 					}
 					// Just append ZDoc
 					else {
-						node.get().append(toZDoc(f));
+						parent.get().append(toZDoc(f));
 					}
 				} else if (f.isDirectory()) {
 					if (ele.hasChildNodes()) {
-						Node<ZFolder> nd = toFolderNode(f.getAbsoluteFile());
-						if (ele.hasAttribute("title"))
-							nd.get().setTitle(ele.getAttribute("title"));
-						else
-							nd.get().setTitle(f.getName());
-						walkingOnChildren(ele, node, nd);
+						Node<ZFolder> me = toFolderNode(f.getAbsoluteFile());
+						updateMyTitle(ele, f, me);
+						walkingOnChildren(ele, parent, me);
 					}
 				}
 			}
 		}
 	}
 
+	private void updateMyTitle(Element ele, File f, Node<ZFolder> me) {
+		if (ele.hasAttribute("title"))
+			me.get().setTitle(ele.getAttribute("title"));
+		else
+			me.get().setTitle(f.getName());
+	}
+
 	private Node<ZFolder> toFolderNode(File dir) {
-		Node<ZFolder> nd = Nodes.create(ZFolder.create().setDir(dir));
-		return nd;
+		return Nodes.create(ZFolder.create().setDir(dir));
 	}
 
 	private ZDoc toZDoc(File f) {

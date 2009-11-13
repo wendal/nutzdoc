@@ -176,7 +176,7 @@ public class HtmlFolderRender implements FolderRender {
 		doc.setAttr("css", csss);
 		doc.setAttr("js", jss);
 		File src = doc.getSource();
-		int pos = src.getAbsolutePath().length() + 1;
+		int pos = src.getParent().length() + 1;
 		// Replace links
 		List<ZEle> links = doc.root().getLinks();
 		L.log3("Found %d links", links.size());
