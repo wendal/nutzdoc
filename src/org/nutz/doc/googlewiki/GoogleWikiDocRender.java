@@ -109,9 +109,9 @@ public class GoogleWikiDocRender implements DocRender {
 		else if (block.isHeading()) {
 			int depth = block.depth();
 			String ss = Strings.dup('=', depth);
-			sb.append(ss);
+			sb.append(ss).append('`');
 			sb.append(block.getText());
-			sb.append(ss);
+			sb.append('`').append(ss);
 			sb.append('\n');
 			for (ZBlock child : block.children())
 				appendBlock(child);
