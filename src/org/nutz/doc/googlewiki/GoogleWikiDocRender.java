@@ -141,7 +141,7 @@ public class GoogleWikiDocRender implements DocRender {
 	private static final Pattern TKN = Pattern.compile("[_*<>{}]|\\x5B|\\x5D|,,|~~|[|][|]");
 
 	private static String ele2String(ZEle ele) {
-		String text = " " + ele.getText() + " ";
+		String text = ele.getText() + " ";
 		if (text.indexOf('`') >= 0) {
 			text = "{{{" + text + "}}}";
 		} else if (TKN.matcher(text).find()) {
