@@ -101,6 +101,7 @@ class Parsing {
 				continue;
 			}
 			// Let me considering the last element of the stack
+			/*
 			if (last.isEndByEscaping()) {
 				// Append all children
 				for (Line chd : line.children())
@@ -108,7 +109,7 @@ class Parsing {
 				// Join to last
 				last.join(line.getText());
 				continue;
-			}
+			}*/
 			// If line type changed, that's mean we need make a block
 			// else, just push line to stack.
 			if (last.type != line.type) {
@@ -200,7 +201,7 @@ class Parsing {
 		return re;
 	}
 
-	private static final char[] CELL_BORDER = { '|', '|' };
+	private static final char[] CELL_BORDER = {'|', '|'};
 
 	private List<LinkedCharArray> findCells(char[] cs) {
 		List<LinkedCharArray> list = new LinkedList<LinkedCharArray>();

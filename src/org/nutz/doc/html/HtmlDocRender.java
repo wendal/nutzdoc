@@ -164,9 +164,10 @@ public class HtmlDocRender implements DocRender {
 		Tag div = tag("div");
 		Tag li = (Tag) tag("li").add(div);
 		// Nubmers
+		/*
 		if (index.hasNumbers()) {
 			div.add(tag("span").attr("class", "num").add(text(index.getNumberString())));
-		}
+		}*/
 		// Text & Href
 		if (index.getHref() != null)
 			div.add(tag("a").attr("href", index.getHref()).add(text(index.getText())));

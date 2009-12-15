@@ -429,7 +429,7 @@ public class ZDocParserTest {
 		s = s + "\n\t * A1";
 
 		ZBlock root = root(s);
-		assertEquals("AB", root.desc(0, 0).getText());
+		assertEquals("A B", root.desc(0, 0).getText());
 		assertTrue(root.desc(0, 0).isULI());
 		assertEquals("A1", root.desc(0, 0, 0, 0).getText());
 		assertTrue(root.desc(0, 0, 0, 0).isULI());
@@ -446,6 +446,52 @@ public class ZDocParserTest {
 		assertEquals("A", root.desc(0).getText());
 		assertEquals("X\n", root.desc(1).getText());
 		assertTrue(root.desc(1).isCode());
+	}
+
+	@Test
+	public void item_end_by_escaping_with_indent_child() {
+		String s = "* A\\";
+		s = s + "\n\t\tB";
+
+		ZBlock root = root(s);
+		assertEquals("A B", root.desc(0, 0).getText());
+		assertFalse(root.desc(0, 0).hasChildren());
+	}
+
+	@Test
+	public void item_end_by_escaping_with_indent_child2() {
+		String s = " * A\\";
+		s = s + "\n\t\t B\\";
+		s = s + "\n\t\t C";
+		s = s + "\n\t\t D";
+
+		ZBlock root = root(s);
+		assertEquals("A B C", root.desc(0, 0).getText());
+		assertTrue(root.desc(0, 0).hasChildren());
+		assertEquals("D", root.desc(0, 0, 0).getText());
+	}
+
+	@Test
+	public void text_end_by_escaping_with_indent_child() {
+		String s = "A\\";
+		s = s + "\n\t\t B";
+
+		ZBlock root = root(s);
+		assertEquals("A B", root.desc(0).getText());
+		assertFalse(root.desc(0).hasChildren());
+	}
+
+	@Test
+	public void text_end_by_escaping_with_indent_child2() {
+		String s = "A\\";
+		s = s + "\n\t\t B\\";
+		s = s + "\n\t\t C";
+		s = s + "\n\t\t D";
+
+		ZBlock root = root(s);
+		assertEquals("A B C", root.desc(0).getText());
+		assertTrue(root.desc(0).hasChildren());
+		assertEquals("D", root.desc(0, 0).getText());
 	}
 
 }

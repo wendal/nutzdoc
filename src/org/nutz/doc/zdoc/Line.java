@@ -44,6 +44,10 @@ class Line {
 	private Author author;
 	private Author verifier;
 
+	boolean endByEscape() {
+		return endByEscape;
+	}
+
 	private Line(String txt) {
 		this.text = null == txt ? "" : txt;
 		children = new ArrayList<Line>();
@@ -137,11 +141,6 @@ class Line {
 		return text;
 	}
 
-	Line setText(String text) {
-		this.text = text;
-		return this;
-	}
-
 	Line add(Line line) {
 		line.parent = this;
 		if (children.size() > 0) {
@@ -207,10 +206,6 @@ class Line {
 		return codeEnd;
 	}
 
-	boolean isEndByEscaping() {
-		return endByEscape;
-	}
-
 	IntRange getIndexRange() {
 		return indexRange;
 	}
@@ -249,7 +244,8 @@ class Line {
 	public String toString(int depth) {
 		StringBuilder sb = new StringBuilder();
 		if (null != parent)
-			sb.append(Strings.dup('\t', depth)).append(symbol()).append(text).append('\n');
+			sb.append(Strings.dup('\t', depth));
+		sb.append(symbol()).append(text).append('\n');
 		sb.append(getChildrenString(depth));
 		return sb.toString();
 	}

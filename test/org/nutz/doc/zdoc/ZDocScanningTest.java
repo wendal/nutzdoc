@@ -206,16 +206,12 @@ public class ZDocScanningTest {
 	@Test
 	public void test_end_by_escaping() {
 		String s = "A\\";
-		s = s + "\nB\\\\";
+		s = s + "\n B\\\\";
 		s = s + "\nC\\ \t ";
 		s = s + "\nD`\\`";
 		Line line = scan(s);
 
-		assertTrue(line.child(0).isEndByEscaping());
-		assertTrue(line.child(1).isEndByEscaping());
-		assertTrue(line.child(2).isEndByEscaping());
-		assertFalse(line.child(3).isEndByEscaping());
-		assertEquals("D`\\`", line.child(3).getText());
+		assertEquals("A B\\ C D`\\`", line.child(0).getText());
 
 	}
 
@@ -337,12 +333,10 @@ public class ZDocScanningTest {
 		s = s + "\n\t * A1";
 		Line line = scan(s);
 
-		assertEquals("A", line.child(0).getText());
+		assertEquals("A B", line.child(0).getText());
 		assertTrue(line.child(0).isULI());
-		assertTrue(line.child(0).isEndByEscaping());
-		assertEquals("B", line.child(1).getText());
-		assertEquals("A1", line.child(1, 0).getText());
-		assertTrue(line.child(1, 0).isULI());
+		assertEquals("A1", line.child(0, 0).getText());
+		assertTrue(line.child(0, 0).isULI());
 	}
 
 	@Test
@@ -369,4 +363,5 @@ public class ZDocScanningTest {
 		assertEquals("A", line.child(0).getText());
 		assertEquals("B", line.child(0, 0).getText());
 	}
+	
 }

@@ -17,7 +17,19 @@ class Scanning {
 				int depth = countTab(str);
 				str = Strings.trim(str);
 				Line line = Line.make(str);
-
+				// Read escaping
+				if (line.endByEscape()) {
+					StringBuilder sb = new StringBuilder();
+					sb.append(line.symbol());
+					sb.append(line.getText());
+					Line nextLine = line;
+					while (nextLine.endByEscape()) {
+						String next = Strings.trim(reader.readLine());
+						nextLine = Line.make(next);
+						sb.append(' ').append(nextLine.symbol()).append(nextLine.getText());
+					}
+					line = Line.make(sb.toString());
+				}
 				/*
 				 * When HR or Blank
 				 */
