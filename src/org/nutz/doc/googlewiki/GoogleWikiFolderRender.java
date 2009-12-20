@@ -15,6 +15,7 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Stopwatch;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
+import org.nutz.lang.util.Disks;
 import org.nutz.lang.util.Node;
 
 import static java.lang.String.*;
@@ -44,6 +45,7 @@ public class GoogleWikiFolderRender implements FolderRender {
 	private String indexName;
 	private File imgDir;
 	StringBuilder indexStr;
+	private File rootDir;
 
 	private static final String INDEX_PTN = "%s * [%s %s]\n";
 	private static final String INDEX_PTN_TXT = "%s * %s\n";
@@ -51,6 +53,8 @@ public class GoogleWikiFolderRender implements FolderRender {
 	public void render(File dest, Node<ZFolder> root) throws IOException {
 		L.log1("Generate wiki => %s", dest);
 		L.log2("from: %s", root.get().getDir());
+
+		this.rootDir = root.get().getDir();
 
 		Stopwatch sw = new Stopwatch();
 		sw.start();
@@ -90,20 +94,20 @@ public class GoogleWikiFolderRender implements FolderRender {
 			renderDoc(dest, folder.getFolderDoc());
 		}
 		for (ZDoc doc : folder.docs()) {
-			renderDoc(dest, doc);
-			indexStr.append(format(INDEX_PTN, Strings.dup(INDENT, depth), Files.getMajorName(doc
-					.getSource()), doc.getTitle()));
+			String wikiName = renderDoc(dest, doc);
+			indexStr
+					.append(format(INDEX_PTN, Strings.dup(INDENT, depth), wikiName, doc.getTitle()));
 		}
 	}
 
 	private void renderDirIndex(File dest, ZFolder folder, int depth) throws IOException {
 		// Render folder doc
 		if (folder.hasFolderDoc()) {
-			String folderDocName = folder.getFolderDoc().getSource().getName();
-			folderDocName = Files.getMajorName(folderDocName);
+			File folderDoc = folder.getFolderDoc().getSource();
+			String folderDocPath = getDocWikiFileName(folderDoc);
 			renderDoc(dest, folder.getFolderDoc());
 			// Generate String
-			indexStr.append(format(INDEX_PTN, Strings.dup(INDENT, depth - 1), folderDocName, folder
+			indexStr.append(format(INDEX_PTN, Strings.dup(INDENT, depth - 1), folderDocPath, folder
 					.getTitle()));
 		} else {
 			indexStr
@@ -111,7 +115,7 @@ public class GoogleWikiFolderRender implements FolderRender {
 		}
 	}
 
-	private void renderDoc(File dest, ZDoc doc) throws IOException {
+	private String renderDoc(File dest, ZDoc doc) throws IOException {
 		L.log3(" %s", Files.getMajorName(doc.getSource()));
 		/*
 		 * copy all availiable image to it change all image refer, to the new
@@ -132,16 +136,26 @@ public class GoogleWikiFolderRender implements FolderRender {
 		for (ZEle ele : doc.root().getLinks()) {
 			File f = ele.getHref().getFile();
 			if (null != f && f.exists()) {
-				ele.setHref(ZDocs.refer(Files.getMajorName(f)));
+				ele.setHref(ZDocs.refer(getDocWikiFileName(f)));
 			}
 		}
 		// render doc
+		String wikiName = getDocWikiFileName(doc.getSource());
 		GoogleWikiDocRender docRender = new GoogleWikiDocRender();
-		String wiki = docRender.render(doc).toString();
-		String docName = Files.getMajorName(doc.getSource());
-		File wikiFile = Files.getFile(dest, docName + ".wiki");
+		String wikiContent = docRender.render(doc).toString();
+		File wikiFile = Files.getFile(dest, wikiName + ".wiki");
 		if (!wikiFile.exists())
 			Files.createNewFile(wikiFile);
-		Lang.writeAll(Streams.fileOutw(wikiFile), wiki);
+		Lang.writeAll(Streams.fileOutw(wikiFile), wikiContent);
+		// Return the name
+		return wikiName;
+	}
+
+	private String getDocWikiFileName(File f) {
+		String name = Disks.getRelativePath(rootDir, f);
+		int pos = name.lastIndexOf('.');
+		if (pos > 0)
+			name = name.substring(0, pos);
+		return name.replace('/', '_');
 	}
 }
