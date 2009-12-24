@@ -60,6 +60,7 @@ public class HtmlDocRender implements DocRender {
 		}
 		Tag body = tag("body");
 		// Add doc header
+		body.add(tag("a").attr("name", "top"));
 		body.add(Tag.tag("div").attr("class", "zdoc_header").add(Tag.text(doc.getTitle())));
 		// Add author
 		if (doc.hasAuthor())
@@ -165,9 +166,9 @@ public class HtmlDocRender implements DocRender {
 		Tag li = (Tag) tag("li").add(div);
 		// Nubmers
 		/*
-		if (index.hasNumbers()) {
-			div.add(tag("span").attr("class", "num").add(text(index.getNumberString())));
-		}*/
+		 * if (index.hasNumbers()) { div.add(tag("span").attr("class",
+		 * "num").add(text(index.getNumberString()))); }
+		 */
 		// Text & Href
 		if (index.getHref() != null)
 			div.add(tag("a").attr("href", index.getHref()).add(text(index.getText())));
@@ -184,8 +185,8 @@ public class HtmlDocRender implements DocRender {
 		return li;
 	}
 
-	private static final String[] OLTYPES = { "1", "a", "i" };
-	private static final String[] ULTYPES = { "disc", "circle", "square" };
+	private static final String[] OLTYPES = {"1", "a", "i"};
+	private static final String[] ULTYPES = {"disc", "circle", "square"};
 
 	private void renderListItem(Tag tag, ZBlock li) {
 		int liDeep = li.countMyTypeInAncestors();
@@ -204,6 +205,9 @@ public class HtmlDocRender implements DocRender {
 		Tag hn = tag("h" + (block.depth()));
 		hn.add(tag("a").attr("name", block.getId()));
 		parent.add(renderToHtmlBlockElement(hn, block.eles()));
+		Tag div = tag("div").attr("style", "float:right;");
+		div.add(tag("a").attr("href", "#top").add(text("Back to top")));
+		parent.add(div);
 	}
 
 	Tag renderParagraph(ZBlock p) {

@@ -26,8 +26,8 @@ public class GoogleWikiDocRender implements DocRender {
 		sb = new StringBuilder();
 		// Render title
 		sb.append("#summary ").append(doc.getTitle()).append('\n');
-
 		// Body title
+		sb.append("=Top=");
 		sb.append("<p align=\"center\"><font size=6>* ").append(doc.getTitle()).append(
 				" *</font></p>\n");
 		appendHr();
@@ -107,6 +107,7 @@ public class GoogleWikiDocRender implements DocRender {
 		}
 		// <H1~6>
 		else if (block.isHeading()) {
+			sb.append("\n<p align=\"right\">[#Top]</p>\n");
 			int depth = block.depth();
 			String ss = Strings.dup('=', depth);
 			sb.append(ss).append('`');
