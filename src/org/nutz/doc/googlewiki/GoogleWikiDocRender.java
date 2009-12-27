@@ -27,7 +27,7 @@ public class GoogleWikiDocRender implements DocRender {
 		// Render title
 		sb.append("#summary ").append(doc.getTitle()).append('\n');
 		// Body title
-		sb.append("=Top=");
+		sb.append("=Top=\n");
 		sb.append("<p align=\"center\"><font size=6>* ").append(doc.getTitle()).append(
 				" *</font></p>\n");
 		appendHr();
