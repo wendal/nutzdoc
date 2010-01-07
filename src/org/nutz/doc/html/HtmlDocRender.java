@@ -206,7 +206,7 @@ public class HtmlDocRender implements DocRender {
 		hn.add(tag("a").attr("name", block.getId()));
 		parent.add(renderToHtmlBlockElement(hn, block.eles()));
 		Tag div = tag("div").attr("style", "float:right;");
-		div.add(tag("a").attr("href", "#top").add(text("Back to top")));
+		div.add(tag("a").attr("href", "#top").add(text("Top")));
 		parent.add(div);
 	}
 
