@@ -114,7 +114,7 @@ class Parsing {
 			// else, just push line to stack.
 			if (last.type != line.type) {
 				p.add(makeBlockAndClearStack(stack));
-				stack.push(line);
+				stack.addFirst(line);
 			}
 			/**
 			 * For the case:
@@ -129,7 +129,7 @@ class Parsing {
 			 */
 			else if (last.hasChild() && last.isNormal()) {
 				p.add(makeBlockAndClearStack(stack));
-				stack.push(line);
+				stack.addFirst(line);
 			} else {
 				stack.add(line);
 			}
