@@ -132,7 +132,7 @@ public class GoogleWikiDocRender implements DocRender {
 
 	private void appendBlockContent(ZBlock block) {
 		for (ZEle ele : block.eles())
-			sb.append(ele2String(ele));
+			sb.append(Strings.trim(ele2String(ele)));
 	}
 
 	private static String wrapBy(String text, String wrapper) {
