@@ -226,7 +226,12 @@ public class HtmlDocRender implements DocRender {
 	Tag renderEle(ZEle ele) {
 		Tag tag = null;
 		if (ele.isImage()) {
-			tag = tag("img").attr("src", ele.getSrc().getValue());
+			String src;
+			if (ele.getSrc().isWWW())
+				src = ele.getSrc().getPath();
+			else
+				src = ele.getSrc().getValue();
+			tag = tag("img").attr("src", src);
 			if (ele.getWidth() > 0)
 				tag.attr("width", ele.getWidth());
 			if (ele.getHeight() > 0)

@@ -67,6 +67,23 @@ public class BlockMakerTest {
 	}
 
 	@Test
+	public void test_image_remote() {
+		ZBlock p = p("<http://a.com/a.gif>");
+		ZEle img = p.ele(0);
+		assertEquals("http://a.com/a.gif", img.getSrc().getPath());
+		assertTrue(img.getSrc().isHttp());
+	}
+	
+	@Test
+	public void teset_image_in_link_remote(){
+		ZBlock p = p("[http://abc.com <http://a.com/a.gif>]");
+		ZEle img = p.ele(0);
+		assertEquals("http://abc.com",img.getHref().getPath());
+		assertEquals("http://a.com/a.gif", img.getSrc().getPath());
+		assertTrue(img.getSrc().isHttp());
+	}
+
+	@Test
 	public void test_simple_link() {
 		ZBlock p = p("[a.html]");
 		assertEquals("a.html", p.ele(0).getText());
@@ -90,32 +107,32 @@ public class BlockMakerTest {
 
 		assertEquals("B", p.ele(1).getText());
 	}
-	
+
 	@Test
-	public void test_link_refer_path_and_value(){
+	public void test_link_refer_path_and_value() {
 		ZRefer href = p("[A]").ele(0).getHref();
-		assertEquals("A",href.getPath());
-		assertEquals("A",href.getValue());
-		assertEquals("A",href.toString());
-		
+		assertEquals("A", href.getPath());
+		assertEquals("A", href.getValue());
+		assertEquals("A", href.toString());
+
 		href = p("[$A]").ele(0).getHref();
-		assertEquals("$A",href.getPath());
-		assertEquals("A",href.getValue());
-		assertEquals("$A",href.toString());
-		
+		assertEquals("$A", href.getPath());
+		assertEquals("A", href.getValue());
+		assertEquals("$A", href.toString());
+
 		href = p("[#A]").ele(0).getHref();
-		assertEquals("#A",href.getPath());
-		assertEquals("A",href.getValue());
-		assertEquals("#A",href.toString());
-		
+		assertEquals("#A", href.getPath());
+		assertEquals("A", href.getValue());
+		assertEquals("#A", href.toString());
+
 		href = p("[file:///A]").ele(0).getHref();
-		assertEquals("file:///A",href.getPath());
-		assertEquals("A",href.getValue());
-		assertEquals("file:///A",href.toString());
+		assertEquals("file:///A", href.getPath());
+		assertEquals("A", href.getValue());
+		assertEquals("file:///A", href.toString());
 	}
 
 	@Test
-	public void test_style_in_link(){
+	public void test_style_in_link() {
 		ZBlock p = p("[b.html {*/A}]B");
 		assertEquals("b.html", p.ele(0).getHref().getValue());
 		assertEquals("A", p.ele(0).getText());
@@ -124,9 +141,9 @@ public class BlockMakerTest {
 
 		assertEquals("B", p.ele(1).getText());
 	}
-	
+
 	@Test
-	public void test_style_in_link_partly(){
+	public void test_style_in_link_partly() {
 		ZBlock p = p("[b.html {*/A}T]B");
 		assertEquals("b.html", p.ele(0).getHref().getValue());
 		assertEquals("AT", p.ele(0).getText());
@@ -135,9 +152,9 @@ public class BlockMakerTest {
 
 		assertEquals("B", p.ele(1).getText());
 	}
-	
+
 	@Test
-	public void test_link_in_style_partly(){
+	public void test_link_in_style_partly() {
 		ZBlock p = p("{*/A[b.html T]}B");
 		assertEquals("b.html", p.ele(0).getHref().getValue());
 		assertEquals("AT", p.ele(0).getText());
