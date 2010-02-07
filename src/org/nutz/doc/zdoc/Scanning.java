@@ -39,26 +39,59 @@ class Scanning {
 					} else {
 						last.getParent().add(line);
 					}
-				} else {
-					while (depth < last.depth())
-						last = last.getParent();
-					if (null != last.getParent())
-						if (last.isHr())
-							last = last.getParent();
-					while (last.isBlank() && last != root) {
-						if (last.getPrev() == null)
-							last = last.getParent();
-						else
-							last = last.getPrev();
-					}
-					last.add(line);
 				}
+				/*
+				 * When Code {{{<...> Read to }}}, and save all text to line
+				 */
+				else if (line.isCodeStart()) {
+					StringBuilder sb = new StringBuilder();
+					while (null != (str = reader.readLine())) {
+						if ("}}}".equals(Strings.trim(str)))
+							break;
+						/*
+						 * Read each line, delete the '\t', keep the same level
+						 * blank char
+						 */
+						int i;
+						for (i = 0; i < str.length(); i++) {
+							char c = str.charAt(i);
+							if (c != '\t' || i >= depth)
+								break;
+						}
+						sb.append(str.substring(i)).append('\n');
+					}
+					line.setText(sb.toString());
+					
+					appendToLast(root, last, line, depth);
+				}
+				/*
+				 * Other Type
+				 */
+				else {
+					appendToLast(root, last, line, depth);
+				}
+				// Store the last
 				last = line;
 			}
 			return root;
 		} catch (IOException e) {
 			throw Lang.wrapThrow(e);
 		}
+	}
+
+	private void appendToLast(Line root, Line last, Line line, int depth) {
+		while (depth < last.depth())
+			last = last.getParent();
+		if (null != last.getParent())
+			if (last.isHr() || last.isCodeStart())
+				last = last.getParent();
+		while (last.isBlank() && last != root) {
+			if (last.getPrev() == null)
+				last = last.getParent();
+			else
+				last = last.getPrev();
+		}
+		last.add(line);
 	}
 
 	private int countTab(String l) {

@@ -63,22 +63,25 @@ class Parsing {
 				p.add(hr());
 				continue;
 			}
+			// Code
+			if (line.isCodeStart()) {
+				if (!stack.isEmpty())
+					p.add(makeBlockAndClearStack(stack));
+				p.add(code(line.getCodeType(), line.getText()));
+				continue;
+			}
 
 			// Push line to stack
 			if (stack.isEmpty()) {
 				stack.add(line);
 				continue;
 			}
-			// If is code, loop for the code end
+
+			/*
+			 * Then let's do check more complex cases...
+			 */
 			Line last = stack.getLast();
-			if (last.isCodeStart()) {
-				while (!line.isCodeEnd()) {
-					stack.add(line);
-					line = it.next();
-				}
-				p.add(makeBlockAndClearStack(stack));
-				continue;
-			}
+
 			// If current is blank, we will create a paragrah
 			if (line.isBlank()) {
 				// If last of stack is List item, just ignore the line
@@ -102,14 +105,10 @@ class Parsing {
 			}
 			// Let me considering the last element of the stack
 			/*
-			if (last.isEndByEscaping()) {
-				// Append all children
-				for (Line chd : line.children())
-					last.add(chd);
-				// Join to last
-				last.join(line.getText());
-				continue;
-			}*/
+			 * if (last.isEndByEscaping()) { // Append all children for (Line
+			 * chd : line.children()) last.add(chd); // Join to last
+			 * last.join(line.getText()); continue; }
+			 */
 			// If line type changed, that's mean we need make a block
 			// else, just push line to stack.
 			if (last.type != line.type) {
@@ -170,21 +169,6 @@ class Parsing {
 				}
 				re.add(row);
 			}
-		}
-		// Code
-		else if (first.isCodeStart()) {
-			re = code();
-			re.setTitle(first.getCodeType());
-			Iterator<Line> it = stack.iterator();
-			StringBuilder sb = new StringBuilder();
-			while (it.hasNext()) {
-				Line line = it.next();
-				if (line.isCodeStart())
-					sb.append(line.getChildrenString());
-				else
-					sb.append(line.toString());
-			}
-			re.setText(sb.toString());
 		}
 		// Normal
 		else {

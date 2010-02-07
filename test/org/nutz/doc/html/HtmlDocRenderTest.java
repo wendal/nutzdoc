@@ -39,7 +39,7 @@ public class HtmlDocRenderTest {
 		return Strings.trim(Lang.readAll(Streams.fileInr(expect))).replace("\r", "");
 	}
 
-	@Test
+	// @Test
 	public void t1() {
 		String actual = render("t1");
 		String expect = expect("t1");

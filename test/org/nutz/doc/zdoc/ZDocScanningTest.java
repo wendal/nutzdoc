@@ -178,21 +178,18 @@ public class ZDocScanningTest {
 		s = s + "\n\t{{{<JAVA>";
 		s = s + "\n\t\tA";
 		s = s + "\n\t\tB";
-		s = s + "\n\tC";
+		s = s + "\n\t  C";
 		s = s + "\n\t}}}";
 		Line line = scan(s);
 
 		assertEquals("Heading", line.child(0).getText());
 
-		assertEquals("JAVA", line.child(0, 0).getCodeType());
-		assertEquals(ZType.CODE, line.child(0, 0).type);
-		assertTrue(line.child(0, 0).isCodeStart());
+		Line code = line.child(0, 0);
+		assertEquals("JAVA", code.getCodeType());
+		assertEquals(ZType.CODE, code.type);
+		assertTrue(code.isCodeStart());
 
-		assertEquals("A", line.child(0, 0, 0).getText());
-		assertEquals("B", line.child(0, 0, 1).getText());
-		assertEquals("C", line.child(0, 1).getText());
-
-		assertTrue(line.child(0, 2).isCodeEnd());
+		assertEquals("\tA\n\tB\n  C\n", code.getText());
 	}
 
 	@Test
@@ -249,7 +246,6 @@ public class ZDocScanningTest {
 		assertEquals("code:", line.child(0).getText());
 		assertEquals("JAVA", line.child(0, 0).getCodeType());
 		assertTrue(line.child(0, 0).isCodeStart());
-		assertTrue(line.child(0, 3).isCodeEnd());
 	}
 
 	@Test
@@ -349,8 +345,24 @@ public class ZDocScanningTest {
 
 		assertEquals("A", line.child(0).getText());
 		assertTrue(line.child(1).isCodeStart());
-		assertEquals("X", line.child(2).getText());
-		assertTrue(line.child(3).isCodeEnd());
+		assertEquals("X\n", line.child(1).getText());
+		assertEquals(2, line.children().size());
+	}
+
+	@Test
+	public void code_with_child_indent() {
+		String s = "Heading";
+		s = s + "\n\t{{{<SQL>";
+		s = s + "\n\tDDD";
+		s = s + "\n\t}}}";
+		s = s + "\n\t\tTT";
+		Line line = scan(s);
+
+		assertEquals("Heading", line.child(0).getText());
+		assertEquals("SQL", line.child(0, 0).getCodeType());
+		assertEquals("DDD\n", line.child(0, 0).getText());
+		assertEquals("TT", line.child(0, 1).getText());
+
 	}
 
 	@Test
@@ -363,5 +375,5 @@ public class ZDocScanningTest {
 		assertEquals("A", line.child(0).getText());
 		assertEquals("B", line.child(0, 0).getText());
 	}
-	
+
 }

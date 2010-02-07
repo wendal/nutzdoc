@@ -22,8 +22,11 @@ public class ZDocs {
 		return new ZBlock().setType(type);
 	}
 
-	public static ZBlock code() {
-		return block(ZType.CODE);
+	public static ZBlock code(String type, String content) {
+		ZBlock code = block(ZType.CODE);
+		code.setTitle(type);
+		code.setText(content);
+		return code;
 	}
 
 	public static ZBlock ol() {

@@ -16,7 +16,6 @@ import org.nutz.lang.util.IntRange;
 class Line {
 
 	private static final Pattern CODE_START = Pattern.compile("^([{]{3})([ \t]*)(<.*>)?([ \t]*)$");
-	private static final Pattern CODE_END = Pattern.compile("^[}]{3}$");
 	private static final Pattern ROW = Pattern.compile("^[|][|].+[|][|]$");
 	private static final Pattern UL = Pattern.compile("^([*][ ])(.*)$");
 	private static final Pattern OL = Pattern.compile("^([#][ ])(.*)$");
@@ -37,7 +36,6 @@ class Line {
 	private String text;
 	private List<Line> children;
 	private int depth;
-	private boolean codeEnd;
 	private boolean endByEscape;
 	private IntRange indexRange;
 	private String title;
@@ -121,12 +119,6 @@ class Line {
 			type = ZType.CODE;
 			return;
 		}
-		// Code end
-		m = CODE_END.matcher(text);
-		if (m.find()) {
-			codeEnd = true;
-			return;
-		}
 	}
 
 	Line getParent() {
@@ -139,6 +131,10 @@ class Line {
 
 	String getText() {
 		return text;
+	}
+
+	void setText(String text) {
+		this.text = text;
 	}
 
 	Line add(Line line) {
@@ -200,10 +196,6 @@ class Line {
 
 	String getCodeType() {
 		return codeType;
-	}
-
-	boolean isCodeEnd() {
-		return codeEnd;
 	}
 
 	IntRange getIndexRange() {
