@@ -29,16 +29,35 @@ public class Doc {
 			if (dest.exists())
 				Files.makeDir(dest);
 
+			// zdoc /zdoc /html .html index.xml
 			if (args.length == 3) {
 				String suffix = args[2];
 				if (suffix.toLowerCase().matches("^[.]htm[l]?$")) {
-					doc.toHtmlFolder(src, dest, suffix);
+					doc.toHtmlFolder(src, dest, suffix, "index.xml");
 					return;
 				}
-			} else if (args.length == 4) {
+			}
+			// zdoc /zdoc /wiki IndexTable http://dtri.com/img
+			// or
+			// zdoc /zdoc /html .html index.xml
+			else if (args.length == 4) {
 				String indexName = args[2];
 				String imgAddress = args[3];
-				doc.toGoogleWikiFolder(src, dest, indexName, imgAddress);
+				// To HTML
+				if (imgAddress.endsWith(".xml")) {
+					doc.toHtmlFolder(src, dest, indexName, imgAddress);
+				}
+				// To WIKI
+				else {
+					doc.toGoogleWikiFolder(src, dest, indexName, imgAddress, "index.xml");
+				}
+				return;
+			}
+			// zdoc /zdoc /wiki IndexTable http://dtri.com/img index.xml
+			else if (args.length == 5) {
+				String indexName = args[2];
+				String imgAddress = args[3];
+				doc.toGoogleWikiFolder(src, dest, indexName, imgAddress, args[4]);
 				return;
 			}
 		}
@@ -52,16 +71,20 @@ public class Doc {
 		return new RenderLogger(new OutputStreamWriter(out));
 	}
 
-	private void toHtmlFolder(File src, File dest, String suffix) throws IOException {
-		FolderParser parser = new ZDocFolderParser();
+	private void toHtmlFolder(File src, File dest, String suffix, String indexXml)
+			throws IOException {
+		FolderParser parser = new ZDocFolderParser(indexXml);
 		FolderRender render = new HtmlFolderRender(suffix, logger());
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}
 
-	private void toGoogleWikiFolder(File src, File dest, String indexName, String imgAddress)
-			throws IOException {
-		FolderParser parser = new ZDocFolderParser();
+	private void toGoogleWikiFolder(File src,
+									File dest,
+									String indexName,
+									String imgAddress,
+									String indexXml) throws IOException {
+		FolderParser parser = new ZDocFolderParser(indexXml);
 		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress, logger());
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);

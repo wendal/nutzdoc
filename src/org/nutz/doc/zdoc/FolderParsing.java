@@ -26,11 +26,13 @@ class FolderParsing {
 	private File home;
 	private DocParser parser;
 	private LinkedArray<Author> authors;
+	private String indexXml;
 
-	FolderParsing(File home) {
+	FolderParsing(File home, String indexXml) {
 		this.home = home;
 		this.parser = new ZDocParser();
-		authors = new LinkedArray<Author>();
+		this.authors = new LinkedArray<Author>();
+		this.indexXml = indexXml;
 	}
 
 	Node<ZFolder> parse() throws IOException {
@@ -49,7 +51,7 @@ class FolderParsing {
 
 	private Node<ZFolder> eval(Node<ZFolder> node) throws SAXException, IOException,
 			ParserConfigurationException {
-		File xml = new File(node.get().getDir().getAbsolutePath() + "/index.xml");
+		File xml = new File(node.get().getDir().getAbsolutePath() + "/" + indexXml);
 		/*
 		 * Current folder had index.xml, we need parse the folder under it's
 		 * configuration
