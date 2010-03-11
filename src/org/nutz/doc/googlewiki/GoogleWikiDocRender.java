@@ -139,6 +139,10 @@ public class GoogleWikiDocRender implements DocRender {
 		return wrapper + text + wrapper;
 	}
 
+	private static String wrapByElement(String text, String eleName) {
+		return String.format("<%s>%s</%s>", eleName, text, eleName);
+	}
+
 	private static final Pattern TKN = Pattern.compile("[_*<>{}]|\\x5B|\\x5D|,,|~~|[|][|]");
 
 	private static String ele2String(ZEle ele) {
@@ -160,9 +164,11 @@ public class GoogleWikiDocRender implements DocRender {
 		if (ele.hasStyle() && ele.getStyle().hasFont()) {
 			ZFont font = ele.getStyle().getFont();
 			if (font.isBold())
-				text = wrapBy(text, "*");
+				text = wrapByElement(text, "b");
 			if (font.isItalic())
-				text = wrapBy(text, "_");
+				text = wrapByElement(text, "i");
+			if (font.isUnderline())
+				text = wrapByElement(text, "u");
 			if (font.isSup())
 				text = wrapBy(text, "^");
 			if (font.isSub())
