@@ -2,7 +2,6 @@ package org.nutz.doc;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 import org.nutz.doc.googlewiki.GoogleWikiFolderRender;
 import org.nutz.doc.html.HtmlFolderRender;
@@ -13,18 +12,23 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.Node;
-
-import static java.lang.System.*;
+import org.nutz.log.Log;
+import org.nutz.log.Logs;
 
 public class Doc {
+	
+	private static final Log LOG = Logs.getLog(Doc.class);
 
 	public static void main(String[] args) throws IOException {
+		if (args != null && args.length == 1 && "help".equals(args[0])) {
+			LOG.info(Lang.readAll(Streams.fileInr("org/nutz/doc/hlp.man")));
+			return;
+		}
 		Doc doc = new Doc();
 		if (args.length > 2) {
 			File src = Files.findFile(args[0]);
-			if (null == src) {
-				out.printf("src directory: %s didn't existed!\n", args[0]);
-			}
+			if (null == src)
+				LOG.warnf("src directory: %s didn't existed!\n", args[0]);
 			File dest = new File(args[1]);
 			if (dest.exists())
 				Files.makeDir(dest);
@@ -44,13 +48,11 @@ public class Doc {
 				String indexName = args[2];
 				String imgAddress = args[3];
 				// To HTML
-				if (imgAddress.endsWith(".xml")) {
+				if (imgAddress.endsWith(".xml"))
 					doc.toHtmlFolder(src, dest, indexName, imgAddress);
-				}
 				// To WIKI
-				else {
+				else
 					doc.toGoogleWikiFolder(src, dest, indexName, imgAddress, "index.xml");
-				}
 				return;
 			}
 			// zdoc /zdoc /wiki IndexTable http://dtri.com/img index.xml
@@ -61,20 +63,16 @@ public class Doc {
 				return;
 			}
 		}
-		out.println("Wrong parameters!!!");
-		out.println(Strings.dup('-', 80));
-		out.println(Lang.readAll(Streams.fileInr("org/nutz/doc/hlp.man")));
-		out.println(Strings.dup('-', 80));
-	}
-
-	private RenderLogger logger() {
-		return new RenderLogger(new OutputStreamWriter(out));
+		LOG.warnf("Wrong parameters!!!");
+		LOG.warnf(Strings.dup('-', 80));
+		LOG.warnf(Lang.readAll(Streams.fileInr("org/nutz/doc/hlp.man")));
+		LOG.warnf(Strings.dup('-', 80));
 	}
 
 	private void toHtmlFolder(File src, File dest, String suffix, String indexXml)
 			throws IOException {
 		FolderParser parser = new ZDocFolderParser(indexXml);
-		FolderRender render = new HtmlFolderRender(suffix, logger());
+		FolderRender render = new HtmlFolderRender(suffix, new RenderLogger());
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}
@@ -85,7 +83,7 @@ public class Doc {
 									String imgAddress,
 									String indexXml) throws IOException {
 		FolderParser parser = new ZDocFolderParser(indexXml);
-		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress, logger());
+		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress, new RenderLogger());
 		Node<ZFolder> folder = parser.parse(src);
 		render.render(dest, folder);
 	}

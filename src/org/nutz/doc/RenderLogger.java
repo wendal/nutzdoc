@@ -1,26 +1,15 @@
 package org.nutz.doc;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
+import org.nutz.log.Log;
+import org.nutz.log.Logs;
 
 public class RenderLogger {
-
-	public RenderLogger(Writer writer) {
-		this.writer = writer;
-	}
-
-	private Writer writer;
+	
+	Log log = Logs.getLog(getClass());
 
 	private void log(String fmt, Object... args) {
-		try {
-			writer.append(String.format(fmt, args)).append('\n');
-			writer.flush();
-		} catch (IOException e) {
-			throw Lang.wrapThrow(e);
-		}
+		log.infof(fmt, args);
 	}
 
 	public void log1(String fmt, Object... args) {
