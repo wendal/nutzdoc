@@ -20,7 +20,7 @@ public class Doc {
 	private static final Log LOG = Logs.getLog(Doc.class);
 
 	public static void main(String[] args) throws IOException {
-		if (args != null && args.length == 1 && "help".equals(args[0])) {
+		if (args == null || (args.length == 1 && "help".equals(args[0]))) {
 			LOG.info(Lang.readAll(Streams.fileInr("org/nutz/doc/hlp.man")));
 			return;
 		}
