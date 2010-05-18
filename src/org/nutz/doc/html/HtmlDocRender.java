@@ -12,6 +12,8 @@ import org.nutz.lang.util.Tag;
 import static org.nutz.lang.util.Tag.*;
 
 public class HtmlDocRender implements DocRender {
+	
+	public static final String COMMON_INFO = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
 	private static Tag appendAuthorTag(ZDoc doc, Tag ele) {
 		appendAuthors(ele, "By:", doc.authors());
@@ -81,7 +83,7 @@ public class HtmlDocRender implements DocRender {
 		/*
 		 * At last, we render HTML as string
 		 */
-		return html.toString();
+		return new StringBuilder().append(COMMON_INFO).append("\n").append(html.toString());
 	}
 
 	void renderBlock(Tag parent, ZBlock block) {
