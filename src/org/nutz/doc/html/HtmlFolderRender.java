@@ -113,9 +113,10 @@ public class HtmlFolderRender implements FolderRender {
 
 	private void renderIndexHtml(File dest, Node<ZFolder> root) {
 		// And then, let's check index.html existed in the source directory root
-		Segment indexHtml = findIndexHtml(dest);
+		File indexHtmlFile = findIndexHtml(dest);
+		Segment indexHtml = new CharSegment(Files.read(indexHtmlFile));
 		// If has indexHtml, then try to fill it's ${html} by root folder node
-		if (null != indexHtml && indexHtml.contains("html")) {
+		if (null != indexHtml) {
 			L.log1("Rendering index.html ... ");
 			Node<ZIndex> node = ZFolder.toIndex(root);
 			// Update all links, make the extenstion to suffix
@@ -129,18 +130,24 @@ public class HtmlFolderRender implements FolderRender {
 			// rendering tags
 			Tag tag = render.renderIndexTable(node);
 			indexHtml.set("html", tag);
-			File f = new File(dest.getAbsolutePath() + "/index.html");
+			File f = new File(dest.getAbsolutePath() + "/" + indexHtmlFile.getName());
 			Lang.writeAll(Streams.fileOutw(f), indexHtml.toString());
 		} else {
 			L.log1("Without index.html !");
 		}
 	}
 
-	private Segment findIndexHtml(File dest) {
-		File f = new File(dest.getAbsolutePath() + "/index.html");
-		if (f.exists()) {
+	private File findIndexHtml(File dest) {
+		File[] htmls = dest.listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.getName().endsWith(".htm") || pathname.getName().endsWith(".html");
+			}
+		});
+		for (File f : htmls) {
 			String s = Lang.readAll(Streams.fileInr(f));
-			return new CharSegment(s);
+			CharSegment re = new CharSegment(s);
+			if (re.contains("html"))
+				return f;
 		}
 		return null;
 	}
