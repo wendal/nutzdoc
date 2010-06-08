@@ -99,7 +99,7 @@ public class ZRefer {
 		if (isFile()) {
 			return Files.findFile(value);
 		} else if (isRelative() && null != getDoc()) {
-			String p = getDoc().getSource().getParent();
+			String p = Files.findFile(getDoc().getSource()).getParent();
 			return Files.findFile(p + "/" + value);
 		}
 		return null;

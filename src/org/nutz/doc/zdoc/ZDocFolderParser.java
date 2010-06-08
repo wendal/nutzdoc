@@ -31,18 +31,32 @@ import org.nutz.lang.Lang;
  */
 public class ZDocFolderParser implements FolderParser {
 
-	private String indexXml;
-	
-	private String suffix;
+	private String indexmlPath;
 
-	public ZDocFolderParser(String indexXml) {
-		this.indexXml = indexXml;
+	public ZDocFolderParser(String indexmlPath) {
+		this.indexmlPath = indexmlPath;
 	}
-	
-	public ZDocSet parse(String srcPath) throws IOException {
-		File dir = Files.findFile(srcPath);
 
-		throw Lang.noImplement();
+	public ZDocSet parse(String src) throws IOException {
+		File dir = Files.findFile(src);
+		if (null == dir)
+			throw Lang.makeThrow("Source '%s' not exists!", src);
+		if (!dir.isDirectory())
+			throw Lang.makeThrow("Source '%s' must be a directory!", src);
+
+		File indexml = Files.getFile(dir, indexmlPath);
+		ZDocSet set = new ZDocSet(dir.getName()).setSrc(src);
+		try {
+			if (indexml.exists())
+				(new IndexXmlSetParing(indexml, dir)).doParse(set);
+			else
+				(new NoIndexSetParsing(dir, "^(.+[.])(zdoc|man)$")).doParse(set);
+		}
+		catch (Exception e) {
+			throw Lang.wrapThrow(e);
+		}
+
+		return set;
 	}
 
 }

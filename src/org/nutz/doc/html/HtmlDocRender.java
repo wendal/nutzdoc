@@ -12,7 +12,7 @@ import org.nutz.lang.util.Tag;
 import static org.nutz.lang.util.Tag.*;
 
 public class HtmlDocRender implements DocRender<StringBuilder> {
-	
+
 	public static final String COMMON_INFO = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
 	private static Tag appendAuthorTag(ZDoc doc, Tag ele) {
@@ -28,8 +28,9 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 				String email = au.getEmailString();
 				ele.add(Tag.tag("b").add(Tag.text(au.getName())));
 				if (!Strings.isBlank(email))
-					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(
-							Tag.text("<" + email + ">")));
+					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(Tag.text("<"
+																						+ email
+																						+ ">")));
 			}
 		}
 	}
@@ -39,24 +40,26 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 		Tag html = tag("html");
 		Tag head = tag("head");
 		html.add(head);
-		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr("CONTENT",
-				"text/html; charset=UTF-8"));
+		head.add(tag("meta").attr("HTTP-EQUIV", "Content-Type").attr(	"CONTENT",
+																		"text/html; charset=UTF-8"));
 		if (!Strings.isBlank(doc.getTitle()))
 			head.add(tag("title").add(text(doc.getTitle())));
 		// <link rel="stylesheet" type="text/css">
 		if (doc.hasAttr("css")) {
 			List<File> csss = (List<File>) doc.getAttr("css");
 			for (File css : csss) {
-				String path = doc.getRelativePath(css);
-				head.add(Tag.tag("link").attr("href", path).attr("rel", "stylesheet").attr("type",
-						"text/css"));
+				String path = doc.getRelativePath(css.getAbsolutePath());
+				head.add(Tag.tag("link")
+							.attr("href", path)
+							.attr("rel", "stylesheet")
+							.attr("type", "text/css"));
 			}
 		}
 		// <script language="javascript">
 		if (doc.hasAttr("js")) {
 			List<File> jss = (List<File>) doc.getAttr("js");
 			for (File js : jss) {
-				String path = doc.getRelativePath(js);
+				String path = doc.getRelativePath(js.getAbsolutePath());
 				head.add(Tag.tag("script").attr("src", path).attr("language", "Javascript"));
 			}
 		}
@@ -167,10 +170,10 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 		Tag div = tag("div");
 		Tag li = (Tag) tag("li").add(div);
 		// Nubmers
-		/*
-		 * if (index.hasNumbers()) { div.add(tag("span").attr("class",
-		 * "num").add(text(index.getNumberString()))); }
-		 */
+		if (index.hasNumbers()) {
+			div.add(tag("span").attr("class", "num").add(text(index.getNumberString())));
+		}
+
 		// Text & Href
 		if (index.getHref() != null)
 			div.add(tag("a").attr("href", index.getHref()).add(text(index.getText())));

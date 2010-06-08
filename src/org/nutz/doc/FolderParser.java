@@ -17,6 +17,6 @@ import org.nutz.doc.meta.ZDocSet;
  */
 public interface FolderParser {
 
-	ZDocSet parse(String srcPath) throws IOException;
+	ZDocSet parse(String src) throws IOException;
 
 }

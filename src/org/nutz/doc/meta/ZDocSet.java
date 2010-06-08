@@ -1,5 +1,11 @@
 package org.nutz.doc.meta;
 
+import java.io.File;
+
+import org.nutz.lang.Files;
+import org.nutz.lang.Lang;
+import org.nutz.lang.util.Disks;
+import org.nutz.lang.util.LinkedIntArray;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Nodes;
 
@@ -11,8 +17,8 @@ public class ZDocSet {
 
 	private String src;
 
-	public ZDocSet() {
-		root = Nodes.create(new ZItem());
+	public ZDocSet(String name) {
+		root = Nodes.create((ZItem) new ZFolder(name));
 		cursor = root;
 	}
 
@@ -45,8 +51,44 @@ public class ZDocSet {
 		return src;
 	}
 
-	public void setSrc(String src) {
+	public ZDocSet setSrc(String src) {
 		this.src = src;
+		return this;
 	}
 
+	public File checkSrcDir() {
+		File dir = Files.findFile(src);
+		if (null == dir)
+			throw Lang.makeThrow("Fail to find '%s'", src);
+		if (!dir.isDirectory())
+			throw Lang.makeThrow("'%s' should be directory", src);
+		return dir;
+	}
+
+	public Node<ZIndex> createIndexTable() {
+		LinkedIntArray numbers = new LinkedIntArray(10);
+		return _createIndexTable(numbers, checkSrcDir(), root);
+	}
+
+	private static Node<ZIndex> _createIndexTable(	LinkedIntArray numbers,
+													File rootDir,
+													Node<ZItem> root) {
+		// Render Self
+		ZItem zi = root.get();
+		String text = zi.getTitle();
+		String href = null;
+		if (zi instanceof ZDoc)
+			href = Disks.getRelativePath(rootDir.getAbsolutePath(), ((ZDoc) zi).getSource());
+
+		Node<ZIndex> re = Nodes.create(ZDocs.index(href, numbers.toArray(), text));
+
+		// Render Children Nodes
+		numbers.push(0);
+		for (Node<ZItem> child : root.getChildren()) {
+			re.add(_createIndexTable(numbers, rootDir, child));
+			numbers.set(numbers.size() - 1, numbers.last() + 1);
+		}
+		numbers.popLast();
+		return re;
+	}
 }

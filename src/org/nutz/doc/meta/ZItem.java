@@ -3,7 +3,7 @@ package org.nutz.doc.meta;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ZItem {
+public abstract class ZItem {
 
 	protected List<Author> authors;
 	protected List<Author> verifiers;
@@ -49,5 +49,7 @@ public class ZItem {
 	public Author[] verifiers() {
 		return verifiers.toArray(new Author[verifiers.size()]);
 	}
+	
+	public abstract String getName();
 
 }

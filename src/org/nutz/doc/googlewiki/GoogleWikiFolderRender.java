@@ -7,9 +7,10 @@ import java.util.Iterator;
 import org.nutz.doc.FolderRender;
 import org.nutz.doc.RenderLogger;
 import org.nutz.doc.meta.ZDoc;
+import org.nutz.doc.meta.ZDocSet;
 import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZEle;
-import org.nutz.doc.meta.ZFolder;
+import org.nutz.doc.meta.ZItem;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Stopwatch;
@@ -50,11 +51,11 @@ public class GoogleWikiFolderRender implements FolderRender {
 	private static final String INDEX_PTN = "%s * [%s %s]\n";
 	private static final String INDEX_PTN_TXT = "%s * %s\n";
 
-	public void render(File dest, Node<ZFolder> root) throws IOException {
+	public void render(File dest, ZDocSet set) throws IOException {
 		L.log1("Generate wiki => %s", dest);
-		L.log2("from: %s", root.get().getDir());
+		L.log2("from: %s", set.getSrc());
 
-		this.rootDir = root.get().getDir();
+		this.rootDir = set.checkSrcDir();
 
 		Stopwatch sw = new Stopwatch();
 		sw.start();
@@ -66,15 +67,14 @@ public class GoogleWikiFolderRender implements FolderRender {
 		// Looping each folder to geneate wiki doc, and make index
 		indexStr = new StringBuilder();
 
-		renderFolder(dest, root.get(), 0);
-
-		Iterator<Node<ZFolder>> it = root.iterator();
+		Iterator<Node<ZItem>> it = set.root().iterator();
 		while (it.hasNext()) {
-			Node<ZFolder> node = it.next();
-			ZFolder folder = node.get();
+			Node<ZItem> node = it.next();
+			ZItem item = node.get();
 			int depth = node.depth();
-			renderDirIndex(dest, folder, depth);
-			renderFolder(dest, folder, depth);
+			renderDirIndex(dest, item, depth);
+			if (item instanceof ZDoc)
+				renderDoc(dest, (ZDoc) item);
 		}
 
 		// generate the index wiki page
@@ -87,31 +87,18 @@ public class GoogleWikiFolderRender implements FolderRender {
 		L.log1("Done : %s", sw.toString());
 	}
 
-	private void renderFolder(File dest, ZFolder folder, int depth) throws IOException {
-		L.log2("[%s] : %s", folder.getDir().getName(), folder.getDir().getParent());
-		if (folder.hasFolderDoc()) {
-			L.log3("=> Folder doc: ", folder.getFolderDoc().getSource());
-			renderDoc(dest, folder.getFolderDoc());
-		}
-		for (ZDoc doc : folder.docs()) {
-			String wikiName = renderDoc(dest, doc);
-			indexStr
-					.append(format(INDEX_PTN, Strings.dup(INDENT, depth), wikiName, doc.getTitle()));
-		}
-	}
-
-	private void renderDirIndex(File dest, ZFolder folder, int depth) throws IOException {
+	private void renderDirIndex(File dest, ZItem zi, int depth) throws IOException {
 		// Render folder doc
-		if (folder.hasFolderDoc()) {
-			File folderDoc = folder.getFolderDoc().getSource();
-			String folderDocPath = getDocWikiFileName(folderDoc);
-			renderDoc(dest, folder.getFolderDoc());
+		if (zi instanceof ZDoc) {
+			String folderDocPath = getDocWikiFileName(((ZDoc) zi).getSource());
+			renderDoc(dest, (ZDoc) zi);
 			// Generate String
-			indexStr.append(format(INDEX_PTN, Strings.dup(INDENT, depth - 1), folderDocPath, folder
-					.getTitle()));
+			indexStr.append(format(	INDEX_PTN,
+									Strings.dup(INDENT, depth - 1),
+									folderDocPath,
+									zi.getTitle()));
 		} else {
-			indexStr
-					.append(format(INDEX_PTN_TXT, Strings.dup(INDENT, depth - 1), folder.getTitle()));
+			indexStr.append(format(INDEX_PTN_TXT, Strings.dup(INDENT, depth - 1), zi.getTitle()));
 		}
 	}
 
@@ -136,7 +123,7 @@ public class GoogleWikiFolderRender implements FolderRender {
 		for (ZEle ele : doc.root().getLinks()) {
 			File f = ele.getHref().getFile();
 			if (null != f && f.exists()) {
-				ele.setHref(ZDocs.refer(getDocWikiFileName(f)));
+				ele.setHref(ZDocs.refer(getDocWikiFileName(f.getAbsolutePath())));
 			}
 		}
 		// render doc
@@ -151,8 +138,8 @@ public class GoogleWikiFolderRender implements FolderRender {
 		return wikiName;
 	}
 
-	private String getDocWikiFileName(File f) {
-		String name = Disks.getRelativePath(rootDir, f);
+	private String getDocWikiFileName(String filePath) {
+		String name = Disks.getRelativePath(rootDir, Files.findFile(filePath));
 		int pos = name.lastIndexOf('.');
 		if (pos > 0)
 			name = name.substring(0, pos);

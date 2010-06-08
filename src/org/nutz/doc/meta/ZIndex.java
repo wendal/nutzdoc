@@ -37,7 +37,7 @@ public class ZIndex {
 	}
 
 	public String getNumberString(int base, char c) {
-		if (null == numbers)
+		if (!hasNumbers())
 			return "";
 		StringBuilder sb = new StringBuilder();
 		for (int i : numbers)
@@ -59,7 +59,7 @@ public class ZIndex {
 	}
 
 	public String toString() {
-		return String.format("%s - %s <%s>", getNumberString(), text, href);
+		return String.format("%s - [%s] <%s>", getNumberString(), text, href);
 	}
 
 }

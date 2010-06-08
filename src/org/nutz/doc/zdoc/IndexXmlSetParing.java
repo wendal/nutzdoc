@@ -3,6 +3,7 @@ package org.nutz.doc.zdoc;
 import java.io.File;
 
 import org.nutz.doc.meta.ZDocSet;
+import org.nutz.doc.meta.ZFolder;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
@@ -22,7 +23,7 @@ class IndexXmlSetParing {
 	public IndexXmlSetParing(File indexml, File root) {
 		this.indexml = indexml;
 		this.root = root;
-		docParser = new ZDocParser();
+		this.docParser = new ZDocParser();
 	}
 
 	public void doParse(ZDocSet set) throws Exception {
@@ -35,6 +36,34 @@ class IndexXmlSetParing {
 
 		// 解析
 		parseChildren(rootEle, node);
+	}
+
+	/**
+	 * 根据一个 <b>doc</b> 解析其所有子元素
+	 * 
+	 * @param ele
+	 * @param parentNode
+	 */
+	private void parseChildren(Element ele, Node<ZItem> parentNode) {
+		NodeList children = ele.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			org.w3c.dom.Node childEle = children.item(i);
+			if (childEle instanceof Element) {
+				if (("doc".equalsIgnoreCase(((Element) childEle).getTagName()))) {
+					// 记住就的工作目录，以便恢复
+					File oldWorkDir = workDir;
+					ZItem zi = parse((Element) childEle);
+					Node<ZItem> node = null == zi ? null : Nodes.create(zi);
+					// 解析字节点
+					parseChildren((Element) childEle, null == node ? parentNode : node);
+
+					// 恢复旧的工作目录
+					workDir = oldWorkDir;
+					if (null != node)
+						parentNode.add(node);
+				}
+			}
+		}
 	}
 
 	/**
@@ -61,43 +90,22 @@ class IndexXmlSetParing {
 
 		// 嗯，这是目录
 		if (f.isDirectory()) {
+			workDir = f;
 			// 仅仅跳过
 			if ("true".equalsIgnoreCase(ele.getAttribute("skip"))) {
 				re = null;
 			}
 			// 生成节点
 			else {
-				re = new ZItem();
-				re.setTitle(Strings.sNull(ele.getAttribute("title"), f.getName()));
+				re = new ZFolder(f.getName());
+				re.setTitle(Strings.sBlank(ele.getAttribute("title"), f.getName()));
 			}
 		}
 		// 这是文件，解析成 ZDoc
 		else {
-			re = this.docParser.parse(Files.read(f));
+			re = this.docParser.parse(Files.read(f)).setSource(f.getAbsolutePath());
 		}
 		return re;
-	}
-
-	private void parseChildren(Element ele, Node<ZItem> parentNode) {
-		NodeList children = ele.getChildNodes();
-		for (int i = 0; i < children.getLength(); i++) {
-			org.w3c.dom.Node childEle = children.item(i);
-			if (childEle instanceof Element) {
-				if (("doc".equalsIgnoreCase(((Element) childEle).getTagName()))) {
-					// 记住就的工作目录，以便恢复
-					File oldWorkDir = workDir;
-					ZItem zi = parse((Element) childEle);
-					Node<ZItem> node = null == zi ? null : Nodes.create(zi);
-					// 解析字节点
-					parseChildren((Element) childEle, null == node ? parentNode : node);
-
-					// 恢复旧的工作目录
-					workDir = oldWorkDir;
-					if (null != node)
-						parentNode.add(node);
-				}
-			}
-		}
 	}
 
 }

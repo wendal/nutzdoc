@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.nutz.doc.FolderRender;
-import org.nutz.doc.meta.ZFolder;
+import org.nutz.doc.meta.ZDocSet;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
-import org.nutz.lang.util.Node;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -22,7 +21,7 @@ import com.lowagie.text.pdf.PdfWriter;
 public class PdfFolderRender implements FolderRender {
 
 	@Override
-	public void render(File dest, Node<ZFolder> root) throws IOException {
+	public void render(File dest, ZDocSet set) throws IOException {
 		if (!dest.exists())
 			Files.createNewFile(dest);
 

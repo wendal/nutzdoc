@@ -1,127 +1,16 @@
 package org.nutz.doc.meta;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+public class ZFolder extends ZItem {
 
-import org.nutz.lang.util.Disks;
-import org.nutz.lang.util.Node;
-import org.nutz.lang.util.Nodes;
+	private String name;
 
-public class ZFolder {
-
-	public static ZFolder create() {
-		return new ZFolder();
+	public ZFolder(String name) {
+		super();
+		this.name = name;
 	}
 
-	private ZFolder() {
-		folderDoc = new ZDoc();
-		docs = new LinkedList<ZDoc>();
-	}
-
-	private Author author;
-	private ZDoc folderDoc;
-	private File dir;
-	private List<ZDoc> docs;
-	private boolean virtual;
-
-	public boolean isVirtual() {
-		return virtual;
-	}
-
-	public void setVirtual(boolean virtual) {
-		this.virtual = virtual;
-	}
-
-	public String getTitle() {
-		return folderDoc.getTitle();
-	}
-
-	public ZFolder setTitle(String title) {
-		folderDoc.setTitle(title);
-		return this;
-	}
-
-	public File getDir() {
-		return dir;
-	}
-
-	public ZFolder setDir(File dir) {
-		this.dir = dir;
-		return this;
-	}
-
-	public Author getAuthor() {
-		return author;
-	}
-
-	public void setAuthor(Author author) {
-		this.author = author;
-	}
-
-	public boolean hasFolderDoc() {
-		if (null == folderDoc)
-			return false;
-		if (folderDoc.getSource() == null)
-			return false;
-		if (!folderDoc.getSource().isFile())
-			return false;
-		return true;
-	}
-
-	public ZDoc getFolderDoc() {
-		if (!hasFolderDoc())
-			return null;
-		return folderDoc;
-	}
-
-	public void setFolderDoc(ZDoc folderDoc) {
-		this.folderDoc = folderDoc;
-	}
-
-	public ZFolder append(ZDoc doc) {
-		docs.add(doc);
-		return this;
-	}
-
-	public ZDoc[] docs() {
-		return docs.toArray(new ZDoc[docs.size()]);
-	}
-
-	public int countDocs() {
-		return docs.size();
-	}
-
-	public boolean hasDoc() {
-		return !docs.isEmpty();
-	}
-
-	public String toString() {
-		return String.format("[%s] %d docs", getTitle(), docs.size());
-	}
-
-	public static Node<ZIndex> toIndex(Node<ZFolder> fnode) {
-		// Render Self
-		String text = fnode.get().getTitle();
-		String href = null;
-		File folderDocFile = null;
-		if (fnode.get().hasFolderDoc())
-			folderDocFile = fnode.get().getFolderDoc().getSource();
-		if (null != folderDocFile && folderDocFile.isFile()) {
-			href = Disks.getRelativePath(fnode.top().get().getDir(), folderDocFile);
-		}
-		Node<ZIndex> re = Nodes.create(ZDocs.index(href, null, text));
-		// Render Docs
-		for (ZDoc doc : fnode.get().docs) {
-			text = doc.getTitle();
-			href = Disks.getRelativePath(fnode.top().get().getDir(), doc.getSource());
-			re.add(Nodes.create(ZDocs.index(href, null, text)));
-		}
-		// Render sub-folders
-		for (Node<ZFolder> sub : fnode.getChildren()) {
-			re.add(toIndex(sub));
-		}
-		return re;
+	public String getName() {
+		return name;
 	}
 
 }

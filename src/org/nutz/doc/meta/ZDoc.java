@@ -1,9 +1,9 @@
 package org.nutz.doc.meta;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.nutz.lang.Files;
 import org.nutz.lang.util.Disks;
 
 public class ZDoc extends ZItem {
@@ -16,7 +16,7 @@ public class ZDoc extends ZItem {
 	}
 
 	private int _ID_;
-	private File source;
+	private String source;
 	private ZBlock root;
 	private Map<String, Object> attrs;
 	private Map<Object, Integer> ids;
@@ -28,6 +28,11 @@ public class ZDoc extends ZItem {
 			ids.put(key, id);
 		}
 		return id;
+	}
+
+	@Override
+	public String getName() {
+		return Files.getName(source);
 	}
 
 	public Object getAttr(String name) {
@@ -52,11 +57,11 @@ public class ZDoc extends ZItem {
 		return this;
 	}
 
-	public File getSource() {
+	public String getSource() {
 		return source;
 	}
 
-	public ZDoc setSource(File source) {
+	public ZDoc setSource(String source) {
 		this.source = source;
 		return this;
 	}
@@ -65,8 +70,8 @@ public class ZDoc extends ZItem {
 		return root;
 	}
 
-	public String getRelativePath(File file) {
-		return Disks.getRelativePath(this.getSource(), file);
+	public String getRelativePath(String filePath) {
+		return Disks.getRelativePath(source, filePath);
 	}
 
 }
