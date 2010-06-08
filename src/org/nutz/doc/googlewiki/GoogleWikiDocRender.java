@@ -18,11 +18,11 @@ import static java.lang.String.*;
  * @author wendal(wendal1985@gamil.com)
  * @author zozoh(zozohtnt@gmail.com)
  */
-public class GoogleWikiDocRender implements DocRender {
+public class GoogleWikiDocRender implements DocRender<StringBuilder> {
 
 	private StringBuilder sb;
 
-	public CharSequence render(ZDoc doc) {
+	public StringBuilder render(ZDoc doc) {
 		sb = new StringBuilder();
 		// Render title
 		sb.append("#summary ").append(doc.getTitle()).append('\n');

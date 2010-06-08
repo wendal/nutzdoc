@@ -2,8 +2,8 @@ package org.nutz.doc;
 
 import org.nutz.doc.meta.ZDoc;
 
-public interface DocRender {
+public interface DocRender<T> {
 
-	CharSequence render(ZDoc doc);
+	T render(ZDoc doc);
 
 }

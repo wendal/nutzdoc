@@ -1,0 +1,61 @@
+#title: iText 使用笔记
+#author:zozoh(zozohtnt@gmail.com)
+#index:0,1
+---------------------------------------------------------------------------------------------------------
+Jar 包
+
+	 * iText-2.1.4.jar
+	 * iTextAsian.jar
+	 * iTextAsianCmaps.jar
+	 
+---------------------------------------------------------------------------------------------------------
+例子
+
+	{{{
+	public static void main(String[] args) throws Exception {
+			StringGenerator sg = R.sg(100, 1000);
+			BaseFont bfChinese = BaseFont.createFont(	"itext/wqy-zenhei.ttf",
+														BaseFont.IDENTITY_H,
+														BaseFont.NOT_EMBEDDED);
+			Font fChinese = new Font(bfChinese, 12, Font.NORMAL);
+			
+			Font fAn = new Font(bfChinese, 12, Font.NORMAL);
+			fAn.setColor(new Color(0,0,255));
+			fAn.setStyle("underline");
+
+			File pdfFile = Files.createFileIfNoExists("~/itext/test.pdf");
+			Document doc = new Document();
+			PdfWriter.getInstance(doc, Streams.fileOut(pdfFile));
+			doc.open();
+			
+			Anchor top = new Anchor();
+			top.setName("top");
+			
+			Paragraph p = new Paragraph("AAAA");
+			p.add(top);
+			Chapter s = new Chapter(p,1);
+			Section sub = s.addSection("DDDDD");
+			Paragraph p2 = new Paragraph("BBBBB");
+			Anchor a = new Anchor("Go to Google",fAn);
+			a.setReference("http://www.google.com");
+			p2.add(a);
+			sub.add(p2);
+			sub.add(new Paragraph("啊是的罚款",fChinese));
+			sub.add(new Paragraph("EEEEEE"));
+			
+			s.addSection("EEEEE");
+			
+			doc.add(s);
+			for(int i=0;i<20;i++) {
+				doc.add(new Paragraph(sg.next()));
+			}
+			
+			a = new Anchor("回到Top",fAn);
+			a.setReference("#top");
+			doc.add(a);
+			
+			
+			doc.close();
+			System.out.println("Done!");
+		}
+	}}}

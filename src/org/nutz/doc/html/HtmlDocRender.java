@@ -11,7 +11,7 @@ import org.nutz.lang.util.Tag;
 
 import static org.nutz.lang.util.Tag.*;
 
-public class HtmlDocRender implements DocRender {
+public class HtmlDocRender implements DocRender<StringBuilder> {
 	
 	public static final String COMMON_INFO = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
@@ -35,7 +35,7 @@ public class HtmlDocRender implements DocRender {
 	}
 
 	@SuppressWarnings("unchecked")
-	public CharSequence render(ZDoc doc) {
+	public StringBuilder render(ZDoc doc) {
 		Tag html = tag("html");
 		Tag head = tag("head");
 		html.add(head);
