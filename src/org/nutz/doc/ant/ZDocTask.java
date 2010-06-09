@@ -3,13 +3,13 @@ package org.nutz.doc.ant;
 import java.io.File;
 import java.io.IOException;
 
-import org.nutz.doc.FolderParser;
-import org.nutz.doc.FolderRender;
+import org.nutz.doc.DocSetParser;
+import org.nutz.doc.DocSetRender;
 import org.nutz.doc.RenderLogger;
-import org.nutz.doc.googlewiki.GoogleWikiFolderRender;
-import org.nutz.doc.html.HtmlFolderRender;
+import org.nutz.doc.googlewiki.GoogleWikiDocSetRender;
+import org.nutz.doc.html.HtmlDocSetRender;
 import org.nutz.doc.meta.ZDocSet;
-import org.nutz.doc.zdoc.ZDocFolderParser;
+import org.nutz.doc.zdoc.ZDocSetParser;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 
@@ -37,17 +37,17 @@ public class ZDocTask {
 		if (!dest.exists())
 			Files.makeDir(dest);
 		if (suffix.equals("html") || suffix.equals("htm")) {
-			FolderParser parser = new ZDocFolderParser(indexXml);
-			FolderRender render = new HtmlFolderRender(suffix, new RenderLogger());
+			DocSetParser parser = new ZDocSetParser(indexXml);
+			DocSetRender render = new HtmlDocSetRender(suffix, new RenderLogger());
 			ZDocSet folder = parser.parse(src.getAbsolutePath());
-			render.render(dest, folder);
+			render.render(dest.getAbsolutePath(), folder);
 		} else if (suffix.equals("wiki")) {
-			FolderParser parser = new ZDocFolderParser(indexXml);
-			FolderRender render = new GoogleWikiFolderRender(	indexName,
+			DocSetParser parser = new ZDocSetParser(indexXml);
+			DocSetRender render = new GoogleWikiDocSetRender(	indexName,
 																imgAddress,
 																new RenderLogger());
 			ZDocSet folder = parser.parse(src.getAbsolutePath());
-			render.render(dest, folder);
+			render.render(dest.getAbsolutePath(), folder);
 		}
 	}
 

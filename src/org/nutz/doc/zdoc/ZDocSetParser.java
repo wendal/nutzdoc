@@ -3,7 +3,7 @@ package org.nutz.doc.zdoc;
 import java.io.File;
 import java.io.IOException;
 
-import org.nutz.doc.FolderParser;
+import org.nutz.doc.DocSetParser;
 import org.nutz.doc.meta.ZDocSet;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
@@ -17,7 +17,6 @@ import org.nutz.lang.Lang;
  * <li>path - 必需：对应路径或者文件，如果是目录，则所有子元素的相对路径将改变
  * <li>title - 可选：否则采用 文档标题或者目录名
  * <li>author - 可选： 逗号分隔，表示以下文档的默认作者
- * <li>verifier - 可选： 逗号分隔，表示以下文档的默认检查者
  * <li>skip - 可选：仅仅改变工作目录
  * </ul>
  * 
@@ -29,11 +28,11 @@ import org.nutz.lang.Lang;
  * 
  * @author zozoh(zozohtnt@gmail.com)
  */
-public class ZDocFolderParser implements FolderParser {
+public class ZDocSetParser implements DocSetParser {
 
 	private String indexmlPath;
 
-	public ZDocFolderParser(String indexmlPath) {
+	public ZDocSetParser(String indexmlPath) {
 		this.indexmlPath = indexmlPath;
 	}
 

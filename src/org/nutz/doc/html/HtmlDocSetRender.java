@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.nutz.doc.FolderRender;
+import org.nutz.doc.DocSetRender;
 import org.nutz.doc.RenderLogger;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZDocSet;
@@ -21,16 +21,17 @@ import org.nutz.lang.Stopwatch;
 import org.nutz.lang.Streams;
 import org.nutz.lang.segment.CharSegment;
 import org.nutz.lang.segment.Segment;
+import org.nutz.lang.util.Disks;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Tag;
 
-public class HtmlFolderRender implements FolderRender {
+public class HtmlDocSetRender implements DocSetRender {
 
 	private HtmlDocRender render;
 	private String suffix;
 	private RenderLogger L;
 
-	public HtmlFolderRender(String suffix, RenderLogger L) {
+	public HtmlDocSetRender(String suffix, RenderLogger L) {
 		render = new HtmlDocRender();
 		this.suffix = suffix;
 		this.L = L;
@@ -95,8 +96,11 @@ public class HtmlFolderRender implements FolderRender {
 	 * @param dest
 	 *            - show be a directory
 	 */
-	public void render(File dest, ZDocSet set) throws IOException {
-		if (dest.isFile())
+	public void render(String destPath, ZDocSet set) throws IOException {
+		File dest = new File(Disks.normalize(destPath));
+		if (!dest.exists())
+			Files.makeDir(dest);
+		else if (dest.isFile())
 			throw Lang.makeThrow("Dest: '%' should be a directory!", dest);
 		Stopwatch sw = new Stopwatch();
 		L.log1("Rending zdoc from : %s", dest);

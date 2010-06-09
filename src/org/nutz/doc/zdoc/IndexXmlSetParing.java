@@ -3,6 +3,7 @@ package org.nutz.doc.zdoc;
 import java.io.File;
 
 import org.nutz.doc.meta.ZDocSet;
+import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZFolder;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.lang.Files;
@@ -32,10 +33,8 @@ class IndexXmlSetParing {
 		set.root().get().setTitle(Strings.sNull(rootEle.getAttribute("title"), root.getName()));
 		workDir = root;
 
-		Node<ZItem> node = set.root();
-
-		// 解析
-		parseChildren(rootEle, node);
+		// 解析字节点
+		parseChildren(rootEle, set.root());
 	}
 
 	/**
@@ -86,26 +85,45 @@ class IndexXmlSetParing {
 		if (null == f)
 			throw Lang.makeThrow("Fail to find '%s'", path);
 
-		ZItem re;
+		ZItem zi;
 
 		// 嗯，这是目录
 		if (f.isDirectory()) {
 			workDir = f;
 			// 仅仅跳过
 			if ("true".equalsIgnoreCase(ele.getAttribute("skip"))) {
-				re = null;
+				zi = null;
 			}
 			// 生成节点
 			else {
-				re = new ZFolder(f.getName());
-				re.setTitle(Strings.sBlank(ele.getAttribute("title"), f.getName()));
+				zi = new ZFolder(f.getName());
+				zi.setTitle(Strings.sBlank(ele.getAttribute("title"), f.getName()));
 			}
 		}
 		// 这是文件，解析成 ZDoc
 		else {
-			re = this.docParser.parse(Files.read(f)).setSource(f.getAbsolutePath());
+			zi = this.docParser.parse(Files.read(f)).setSource(f.getAbsolutePath());
+			appendAuthors(ele, zi);
 		}
-		return re;
+		return zi;
 	}
 
+	private void appendAuthors(Element ele, ZItem zi) {
+		// 如果对象没有 Author
+		if (!zi.hasAuthor()) {
+			// 如果 <doc> 里有 author 属性
+			String authors = ele.getAttribute("author");
+			if (!Strings.isBlank(authors)) {
+				String[] authorArray = Strings.splitIgnoreBlank(authors);
+				for (String au : authorArray) {
+					zi.addAuthor(ZDocs.author(au));
+				}
+			}
+			// 如果不是根元素，递归
+			else if (ele.getOwnerDocument().getDocumentElement() != ele) {
+				appendAuthors((Element) ele.getParentNode(), zi);
+			}
+		}
+
+	}
 }

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.nutz.doc.FolderRender;
+import org.nutz.doc.DocSetRender;
 import org.nutz.doc.RenderLogger;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZDocSet;
@@ -27,9 +27,9 @@ import static java.lang.String.*;
  * @author zozoh(zozohtnt@gmail.com)
  * 
  */
-public class GoogleWikiFolderRender implements FolderRender {
+public class GoogleWikiDocSetRender implements DocSetRender {
 
-	public GoogleWikiFolderRender(String indexName, String imgAddress, RenderLogger L) {
+	public GoogleWikiDocSetRender(String indexName, String imgAddress, RenderLogger L) {
 		if (!indexName.endsWith(".wiki")) {
 			this.indexName = indexName + ".wiki";
 		} else {
@@ -51,7 +51,13 @@ public class GoogleWikiFolderRender implements FolderRender {
 	private static final String INDEX_PTN = "%s * [%s %s]\n";
 	private static final String INDEX_PTN_TXT = "%s * %s\n";
 
-	public void render(File dest, ZDocSet set) throws IOException {
+	public void render(String destPath, ZDocSet set) throws IOException {
+		File dest = new File(Disks.normalize(destPath));
+		if (!dest.exists())
+			Files.makeDir(dest);
+		else if (dest.isFile())
+			throw Lang.makeThrow("Dest: '%' should be a directory!", dest);		
+		
 		L.log1("Generate wiki => %s", dest);
 		L.log2("from: %s", set.getSrc());
 

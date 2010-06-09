@@ -3,10 +3,10 @@ package org.nutz.doc;
 import java.io.File;
 import java.io.IOException;
 
-import org.nutz.doc.googlewiki.GoogleWikiFolderRender;
-import org.nutz.doc.html.HtmlFolderRender;
+import org.nutz.doc.googlewiki.GoogleWikiDocSetRender;
+import org.nutz.doc.html.HtmlDocSetRender;
 import org.nutz.doc.meta.ZDocSet;
-import org.nutz.doc.zdoc.ZDocFolderParser;
+import org.nutz.doc.zdoc.ZDocSetParser;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -70,10 +70,10 @@ public class Doc {
 
 	private void toHtmlFolder(File src, File dest, String suffix, String indexXml)
 			throws IOException {
-		FolderParser parser = new ZDocFolderParser(indexXml);
-		FolderRender render = new HtmlFolderRender(suffix, new RenderLogger());
+		DocSetParser parser = new ZDocSetParser(indexXml);
+		DocSetRender render = new HtmlDocSetRender(suffix, new RenderLogger());
 		ZDocSet set = parser.parse(src.getAbsolutePath());
-		render.render(dest, set);
+		render.render(dest.getAbsolutePath(), set);
 	}
 
 	private void toGoogleWikiFolder(File src,
@@ -81,9 +81,9 @@ public class Doc {
 									String indexName,
 									String imgAddress,
 									String indexml) throws IOException {
-		FolderParser parser = new ZDocFolderParser(indexml);
-		FolderRender render = new GoogleWikiFolderRender(indexName, imgAddress, new RenderLogger());
+		DocSetParser parser = new ZDocSetParser(indexml);
+		DocSetRender render = new GoogleWikiDocSetRender(indexName, imgAddress, new RenderLogger());
 		ZDocSet set = parser.parse(src.getAbsolutePath());
-		render.render(dest, set);
+		render.render(dest.getAbsolutePath(), set);
 	}
 }
