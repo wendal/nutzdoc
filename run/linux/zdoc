@@ -1,9 +1,16 @@
 #!/bin/sh
-export JAVA_HOME=$JAVA_HOME
-export NUTZ_HOME=/home/zozoh/workspace/j2ee/nutz/bin
-export ZDOC_HOME=/home/zozoh/workspace/j2ee/zdoc/bin
+export JAVA_HOME=/usr/lib/jvm/java-6-sun
+export NUTZ_HOME=/home/zozoh/workspace/galaxy/nutz/bin
+export ZDOC_HOME=/home/zozoh/workspace/galaxy/nutzdoc/bin
+export ITEXT_CORE=/home/zozoh/jars/iText/iText-2.1.7.jar
+export ITEXT_Asian=/home/zozoh/jars/iText/iTextAsian.jar
+export ITEXT_FONT=/home/zozoh/jars/iText/font
 
-export CLASSPATH=.:$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/jre/rt.jar
-export CLASSPATH=$CLASSPATH:$ZDOC_HOME:$NUTZ_HOME
+export CLASSPATH=.:$JAVA_HOME\lib\tools.jar:$JAVA_HOME\lib\dt.jar:$JAVA_HOME\jre\rt.jar
+export CLASSPATH=$CLASSPATH:$ITEXT_CORE
+export CLASSPATH=$CLASSPATH:$ITEXT_Asian
+export CLASSPATH=$CLASSPATH:$ITEXT_FONT
+export CLASSPATH=$CLASSPATH:$ZDOC_HOME
+export CLASSPATH=$CLASSPATH:$NUTZ_HOME
 
-java org.nutz.doc.ZDoc $1 $2 $3 $4 $5
+java org.nutz.doc.Doc $1 $2 $3 $4 $5 $6 $7 $8 $9

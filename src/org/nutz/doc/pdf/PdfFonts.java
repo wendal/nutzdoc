@@ -34,7 +34,7 @@ public class PdfFonts {
 
 	public PdfFonts() throws DocumentException, IOException {
 		if (null != Files.findFile("pdf_font.ttf"))
-			baseFont = BaseFont.createFont(	"itext/pdf_font.ttf",
+			baseFont = BaseFont.createFont(	"pdf_font.ttf",
 											BaseFont.IDENTITY_H,
 											BaseFont.NOT_EMBEDDED);
 
@@ -71,10 +71,6 @@ public class PdfFonts {
 		Font re = new Font();
 		re.setSize(size);
 		return re;
-	}
-
-	public BaseFont getBaseFont() {
-		return baseFont;
 	}
 
 	public Font getHeadingFont(int level) {

@@ -200,6 +200,7 @@ public class HtmlDocSetRender implements DocSetRender {
 		L.log3("write HTML");
 		String s = render.render(doc).toString();
 		File newDocFile = new File(dest.getAbsolutePath()
+									+ "/"
 									+ doc.getSource().substring(srcRoot.length()));
 		newDocFile = Files.renameSuffix(newDocFile, suffix);
 
