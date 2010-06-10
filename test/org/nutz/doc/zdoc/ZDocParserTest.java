@@ -17,10 +17,24 @@ import org.nutz.lang.util.Node;
 public class ZDocParserTest {
 
 	private static ZBlock root(String s) {
-		DocParser parser = new ZDocParser();
-		ZDoc doc = parser.parse(s);
+		ZDoc doc = doc(s);
 		ZBlock root = doc.root();
 		return root;
+	}
+
+	private static ZDoc doc(String s) {
+		DocParser parser = new ZDocParser();
+		ZDoc doc = parser.parse(s);
+		return doc;
+	}
+
+	@Test
+	public void test_doc_title() {
+		String s = "#title:abc\n";
+		s = s + "ddd";
+		ZDoc doc = doc(s);
+		assertEquals("abc", doc.getTitle());
+		assertEquals("abc", doc.root().getText());
 	}
 
 	@Test
@@ -493,5 +507,5 @@ public class ZDocParserTest {
 		assertTrue(root.desc(0).hasChildren());
 		assertEquals("D", root.desc(0, 0).getText());
 	}
-	
+
 }

@@ -1,5 +1,6 @@
 package org.nutz.doc;
 
+import org.nutz.lang.Strings;
 import org.nutz.lang.util.LinkedArray;
 
 public class ConvertContext {
@@ -64,7 +65,7 @@ public class ConvertContext {
 	}
 
 	public String getIndexml() {
-		return indexml;
+		return Strings.isBlank(indexml) ? "index.xml" : indexml;
 	}
 
 	public void setIndexml(String indexml) {

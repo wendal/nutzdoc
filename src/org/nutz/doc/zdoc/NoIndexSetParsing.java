@@ -1,6 +1,7 @@
 package org.nutz.doc.zdoc;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 import org.nutz.doc.meta.ZDocSet;
 import org.nutz.doc.meta.ZFolder;
@@ -32,10 +33,14 @@ public class NoIndexSetParsing {
 		if (file.isFile())
 			return;
 
-		File[] files = file.listFiles();
+		File[] files = file.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				if (dir.isHidden())
+					return false;
+				return dir.isDirectory() || name.matches(regex);
+			}
+		});
 		for (File f : files) {
-			if (f.isHidden())
-				continue;
 			ZItem zi = parse(f);
 			if (null != zi) {
 				Node<ZItem> node = Nodes.create(zi);

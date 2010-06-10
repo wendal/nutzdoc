@@ -32,6 +32,10 @@ public class PdfFonts {
 
 	private Font normalFont;
 
+	private Font codeTypeFont;
+
+	private Font codeFont;
+
 	public PdfFonts() throws DocumentException, IOException {
 		if (null != Files.findFile("pdf_font.ttf"))
 			baseFont = BaseFont.createFont(	"pdf_font.ttf",
@@ -57,6 +61,19 @@ public class PdfFonts {
 		anchorFount = getFont(12);
 		anchorFount.setColor(new Color(0, 0, 255));
 		anchorFount.setStyle(Font.UNDERLINE);
+
+		/*
+		 * Code title
+		 */
+		codeTypeFont = getFont(12);
+		codeTypeFont.setColor(new Color(150, 150, 150));
+		codeTypeFont.setStyle(Font.ITALIC | Font.UNDERLINE);
+
+		/*
+		 * Code base
+		 */
+		codeFont = getFont(12);
+		codeFont.setColor(new Color(150, 0, 0));
 
 	}
 
@@ -87,4 +104,11 @@ public class PdfFonts {
 		return normalFont;
 	}
 
+	public Font getCodeTypeFont() {
+		return codeTypeFont;
+	}
+
+	public Font getCodeFont() {
+		return codeFont;
+	}
 }

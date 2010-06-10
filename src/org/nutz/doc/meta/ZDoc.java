@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.nutz.lang.Files;
+import org.nutz.lang.Strings;
 import org.nutz.lang.util.Disks;
 
 public class ZDoc extends ZItem {
@@ -49,7 +50,8 @@ public class ZDoc extends ZItem {
 	}
 
 	public String getTitle() {
-		return root.getText();
+		String title = root.getText();
+		return Strings.isBlank(title) ? null == source ? title : Files.getMajorName(source) : title;
 	}
 
 	public ZDoc setTitle(String title) {

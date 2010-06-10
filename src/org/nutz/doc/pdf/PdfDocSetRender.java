@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.nutz.doc.DocSetRender;
+import org.nutz.doc.RenderLogger;
 import org.nutz.doc.ZDocException;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZColor;
@@ -18,6 +19,7 @@ import org.nutz.doc.meta.ZRefer;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
+import org.nutz.lang.Strings;
 import org.nutz.lang.util.Disks;
 import org.nutz.lang.util.Node;
 
@@ -31,6 +33,7 @@ import com.lowagie.text.ListItem;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Section;
 import com.lowagie.text.Table;
+import com.lowagie.text.TextElementArray;
 import com.lowagie.text.pdf.PdfWriter;
 
 /**
@@ -38,17 +41,20 @@ import com.lowagie.text.pdf.PdfWriter;
  * 
  * @author zozoh(zozohtnt@gmail.com)
  */
-public class PdfFolderRender implements DocSetRender {
+public class PdfDocSetRender implements DocSetRender {
 
 	private PdfHelper helper;
 
 	private int maxImgWidth;
 	private int maxImgHeight;
 
-	public PdfFolderRender(int maxImgWidth, int maxImgHeight) throws ZDocException {
+	private RenderLogger L;
+
+	public PdfDocSetRender(int maxImgWidth, int maxImgHeight, RenderLogger L) throws ZDocException {
 		this.maxImgWidth = maxImgWidth;
 		this.maxImgHeight = maxImgHeight;
 		this.helper = new PdfHelper();
+		this.L = L;
 	}
 
 	@Override
@@ -62,6 +68,16 @@ public class PdfFolderRender implements DocSetRender {
 			Document doc = new Document();
 			PdfWriter.getInstance(doc, Streams.fileOut(dest));
 			doc.open();
+
+			// 创建封面
+			Paragraph p = helper.p();
+			Font font = helper.font();
+			font.setColor(new Color(0, 0, 140));
+			font.setSize(30);
+			p.add(helper.chunk(set.root().get().getTitle(), font));
+			p.setAlignment(Paragraph.ALIGN_MIDDLE | Paragraph.ALIGN_CENTER);
+			doc.add(p);
+			doc.newPage();
 
 			// 循环遍历所有的文档节点
 			int i = 1;
@@ -88,7 +104,7 @@ public class PdfFolderRender implements DocSetRender {
 	private void renderToPdf(Document pdfdoc, Node<ZItem> node, int num) throws DocumentException {
 		ZItem zi = node.get();
 		// 渲染自己
-		Section section = helper.createSection(num, zi.getTitle(), 1);
+		Section section = helper.section(num, zi.getTitle(), 1);
 		// 如果自己是一个 ZDoc，那么继续渲染这个 Doc 内部
 		if (zi instanceof ZDoc)
 			renderToSection(section, (ZDoc) zi, node.depth());
@@ -106,7 +122,17 @@ public class PdfFolderRender implements DocSetRender {
 	 * @param node
 	 */
 	private void renderToSection(Section section, Node<ZItem> node) {
-
+		ZItem zi = node.get();
+		// 一个 ZDoc 文本
+		if (zi instanceof ZDoc) {
+			renderToSection(section, (ZDoc) zi, node.depth());
+		}
+		// 一个目录
+		else {
+			Section mySection = helper.addSection(section, zi.getTitle(), node.depth());
+			for (Node<ZItem> myNode : node.getChildren())
+				renderToSection(mySection, myNode);
+		}
 	}
 
 	/**
@@ -114,10 +140,15 @@ public class PdfFolderRender implements DocSetRender {
 	 * 
 	 * @param section
 	 * @param doc
+	 * @param depth
+	 *            当前的 ZDoc 在整个在 DocSet 的深度，每一个 ZBlock 可以计算自己在 ZDoc 中的深度
 	 */
 	private void renderToSection(Section section, ZDoc doc, int depth) {
+		// 增加自己
+		Section docSection = helper.addSection(section, doc.getTitle(), depth);
+		// 增加自己的字节点
 		for (ZBlock block : doc.root().children()) {
-			renderBlockToSection(section, block, depth);
+			renderBlockToSection(docSection, block, depth);
 		}
 	}
 
@@ -131,9 +162,9 @@ public class PdfFolderRender implements DocSetRender {
 	 */
 	private void renderBlockToSection(Section section, ZBlock block, int depth) {
 		/*
-		 * 空行
+		 * 索引表
 		 */
-		if (block.isBlank()) {}
+		if (block.hasIndexRange()) {}
 		/*
 		 * 分隔线
 		 */
@@ -152,8 +183,10 @@ public class PdfFolderRender implements DocSetRender {
 		/*
 		 * 列表 | 代码块
 		 */
-		else if (block.isUL() || block.isUL() || block.isCode()) {
-			Paragraph p = helper.createP();
+		else if (block.isUL() || block.isOL() || block.isCode()) {
+			Paragraph p = helper.p();
+			p.setSpacingBefore(10);
+			p.setSpacingAfter(10);
 			renderBlockToParagraph(p, block);
 			section.add(p);
 		}
@@ -161,27 +194,33 @@ public class PdfFolderRender implements DocSetRender {
 		 * 表格
 		 */
 		else if (block.isTable()) {
-			Table table = helper.createTable(block.childCount());
-			// 循环行
-			for (ZBlock row : block.children()) {
-				// 循环单元格
-				for (ZBlock cell : row.children()) {
-					Paragraph p = helper.createP();
-					for (ZEle ele : cell.eles())
-						this.renderEleToParagraph(p, ele);
-					table.addCell(helper.createCell(p));
+			if (block.hasChildren() && block.child(0).hasChildren()) {
+				Table table = helper.table(block.child(0).childCount());
+				// 循环行
+				for (ZBlock row : block.children()) {
+					// 循环单元格
+					for (ZBlock cell : row.children()) {
+						Cell cellObj = helper.cell();
+						for (ZEle ele : cell.eles())
+							this.renderEleTo(cellObj, ele);
+						table.addCell(cellObj);
+					}
 				}
+				// 加至段落
+				section.add(table);
 			}
-			// 加至段落
-			section.add(table);
 		}
+		/*
+		 * 空行
+		 */
+		else if (block.isBlank()) {}
 		/*
 		 * 普通段落
 		 */
 		else if (block.isNormal()) {
-			Paragraph p = helper.createNormal();
+			Paragraph p = helper.normal();
 			for (ZEle ele : block.eles())
-				renderEleToParagraph(p, ele);
+				renderEleTo(p, ele);
 			section.add(p);
 		}
 	}
@@ -203,7 +242,7 @@ public class PdfFolderRender implements DocSetRender {
 		 */
 		if (block.isUL()) {
 			// 生成 UL 对象
-			List ul = helper.createUL();
+			List ul = helper.UL();
 
 			// 设置序号样式
 			int liDeep = block.countMyTypeInAncestors();
@@ -219,9 +258,9 @@ public class PdfFolderRender implements DocSetRender {
 		/*
 		 * 有序列表
 		 */
-		else if (block.isUL()) {
+		else if (block.isOL()) {
 			// 生成 OL 对象
-			List ol = helper.createOL();
+			List ol = helper.OL();
 
 			// 设置序号样式
 			int liDeep = block.countMyTypeInAncestors();
@@ -239,10 +278,28 @@ public class PdfFolderRender implements DocSetRender {
 		 * 代码块
 		 */
 		else if (block.isCode()) {
-			Table codeTable = helper.createCodeTable();
-			Cell code = helper.createCodeCell(block.getTitle());
-			// 将代码块格式化
-			// 加至段落
+			// 创建标题
+			Table codeTable = helper.codeTable();
+			Cell code = helper.codeCell(block.getTitle());
+
+			// 格式化字符串
+			String[] lines = block.getText().split("(\\r)?(\\n)");
+			for (String line : lines) {
+				// 寻找第一个不是 '\t' 的字符
+				int pos = 0;
+				for (; pos < line.length(); pos++)
+					if (line.charAt(pos) != '\t')
+						break;
+				// 执行替换
+				if (pos > 0)
+					line = Strings.dup(' ', 4 * pos) + line.substring(pos);
+
+				// 将代码块格加至段落
+				code.add(helper.codeLine(line));
+
+			}
+
+			// 加入段落
 			codeTable.addCell(code);
 			paragraph.add(codeTable);
 		}
@@ -259,25 +316,27 @@ public class PdfFolderRender implements DocSetRender {
 	 */
 	private void renderLiTo(List list, ZBlock listBlock) {
 		for (ZBlock liBlock : listBlock.children()) {
-			ListItem li = helper.createLi();
+			ListItem li = helper.LI();
 			// 渲染自己
 			for (ZEle ele : liBlock.eles())
-				renderEleToParagraph(li, ele);
+				renderEleTo(li, ele);
 			// 渲染自己的子节点
 			for (ZBlock sub : liBlock.children())
 				renderBlockToParagraph(li, sub);
+			// 加入列表
+			list.add(li);
 		}
 	}
 
 	/**
-	 * @param paragraph
+	 * @param parent
 	 *            目标段
 	 * @param ele
 	 *            要渲染的元素
 	 * @param depth
 	 *            当前的 ZDoc 在整个在 DocSet 的深度，每一个 ZBlock 可以计算自己在 ZDoc 中的深度
 	 */
-	private void renderEleToParagraph(Paragraph paragraph, ZEle ele) {
+	private void renderEleTo(TextElementArray parent, ZEle ele) {
 		/*
 		 * 图片
 		 */
@@ -289,17 +348,26 @@ public class PdfFolderRender implements DocSetRender {
 				Image img;
 				if (null != imgf) {
 					img = Image.getInstance(imgf.getAbsolutePath());
-
 				}
 				// 外部图片
 				else {
-					URL imgurl = new URL(imgsrc.getValue());
-					img = Image.getInstance(imgurl);
+					try {
+						URL imgurl = new URL(imgsrc.getValue());
+						img = Image.getInstance(imgurl);
+					}
+					catch (Exception e) {
+						L.log1("Shit!", e.getMessage());
+						return;
+					}
 				}
+				// 设置图片位置
+				// img.setAlignment(Image.LEFT | Image.ALIGN_MIDDLE);
 				// 如果图片太大，缩小图片
-				if (img.getWidth() > maxImgWidth || img.getHeight() > maxImgHeight)
+				if (ele.getWidth() > 0) {
+					img.scaleAbsolute(ele.getWidth(), ele.getHeight());
+				} else if (img.getWidth() > maxImgWidth || img.getHeight() > maxImgHeight)
 					img.scaleToFit(maxImgWidth, maxImgHeight);
-				paragraph.add(img);
+				parent.add(img);
 				return;
 			}
 			catch (Exception e) {
@@ -314,31 +382,37 @@ public class PdfFolderRender implements DocSetRender {
 		 */
 		if (ele.hasHref()) {
 			String href = ele.getHref().getPath();
-			paragraph.add(helper.createAnchor(ele.getText(), href));
+			parent.add(helper.anchor(ele.getText(), href));
 			return;
 		}
 		/*
 		 * 普通文字
 		 */
 		else {
-			font = helper.createFont();
+			font = helper.font();
 			if (ele.hasStyle() && ele.getStyle().hasFont()) {
 				ZFont zfont = ele.getStyle().getFont();
 				// 颜色
-				ZColor zcolor = zfont.getColor();
-				font.setColor(new Color(zcolor.getRed(), zcolor.getGreen(), zcolor.getBlue()));
+				if (zfont.hasColor()) {
+					ZColor zcolor = zfont.getColor();
+					font.setColor(new Color(zcolor.getRed(), zcolor.getGreen(), zcolor.getBlue()));
+				}
 				// 风格
 				int fs = 0;
-				if (font.isBold())
-					fs |= Font.BOLD;
-				if (font.isItalic())
-					fs |= Font.ITALIC;
-				if (font.isStrikethru())
-					fs |= Font.STRIKETHRU;
-				if (font.isUnderlined())
-					fs |= Font.UNDERLINE;
+				if (zfont.isBold())
+					fs = fs | Font.BOLD;
+				if (zfont.isItalic())
+					fs = fs | Font.ITALIC;
+				if (zfont.isStrike())
+					fs = fs | Font.STRIKETHRU;
+				if (zfont.isUnderline())
+					fs = fs | Font.UNDERLINE;
+				if (fs > 0)
+					font.setStyle(fs);
+				// SUB 和 SUP
+				// TODO 考虑一下
 			}
-			paragraph.add(helper.createChunk(ele.getText(), font));
+			parent.add(helper.chunk(ele.getText(), font));
 		}
 
 	}
