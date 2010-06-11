@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.nutz.doc.DocRender;
 import org.nutz.doc.meta.*;
+import org.nutz.doc.util.Funcs;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Tag;
@@ -208,7 +209,7 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 
 	private void renderHeading(Tag parent, ZBlock block) {
 		Tag hn = tag("h" + (block.depth()));
-		hn.add(tag("a").attr("name", block.getId()));
+		hn.add(tag("a").attr("name", Funcs.evalAnchorName(block.getText())));
 		parent.add(renderToHtmlBlockElement(hn, block.eles()));
 		Tag div = tag("div").attr("style", "float:right;");
 		div.add(tag("a").attr("href", "#top").add(text("Top")));
@@ -256,12 +257,13 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 				tag = wrapFontColor(tag, font);
 			}
 		}
+		//  纯书签
 		if (null == tag) {
 			if (ele.hasHref() && ele.getHref().isBookmark())
 				return tag("a").attr("name", ele.getHref().getValue());
 			return tag;
 		}
-
+		// 加链接
 		if (ele.hasHref())
 			if (ele.getHref().isAvailable())
 				tag = (Tag) tag("a").attr("href", ele.getHref().getPath()).add(tag);

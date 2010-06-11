@@ -193,6 +193,8 @@ public class HtmlDocSetRender implements DocSetRender {
 					String path = f.getAbsolutePath().substring(pos);
 					String newPath = Files.renameSuffix(path, suffix);
 					L.log4(" %s => %s", path, newPath);
+					if(link.getHref().hasInner())
+						newPath += "#"+link.getHref().getInner();
 					link.setHref(ZDocs.refer(newPath));
 				}
 		}

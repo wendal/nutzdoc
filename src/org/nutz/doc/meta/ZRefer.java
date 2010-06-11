@@ -7,13 +7,23 @@ import org.nutz.lang.Files;
 public class ZRefer {
 
 	private enum TYPE {
-		HTTP, HTTPS, BOOKMARK, INNER, FILE, RELATIVE
+		HTTP, HTTPS, BOOKMARK, FILE, RELATIVE
 	}
 
+	/**
+	 * 有效值
+	 */
 	private String value;
+	/**
+	 * 原始值
+	 */
 	private String path;
 	private ZEle ele;
 	private TYPE type;
+	/**
+	 * 业内链接名称 - 出现 #xxx
+	 */
+	private String inner;
 
 	ZRefer(String path) {
 		if (null != path) {
@@ -29,16 +39,23 @@ public class ZRefer {
 				type = TYPE.FILE;
 				value = this.path.substring(8);
 			} else if (path.length() > 0) {
-				char c = path.charAt(0);
-				if (c == '$') {
+				if (path.charAt(0) == '$') {
 					type = TYPE.BOOKMARK;
-					value = this.path.substring(1);
-				} else if (c == '#') {
-					type = TYPE.INNER;
 					value = this.path.substring(1);
 				} else {
 					type = TYPE.RELATIVE;
 					value = this.path;
+				}
+			}
+			// 解析页内链接
+			if (null != value && value.length() > 0) {
+				int pos = value.indexOf('#');
+				if (pos != -1) {
+					try {
+						inner = value.substring(pos + 1);
+						value = value.substring(0, pos);
+					}
+					catch (Exception e) {}
 				}
 			}
 		}
@@ -53,8 +70,8 @@ public class ZRefer {
 		return this;
 	}
 
-	public boolean isInner() {
-		return type == TYPE.INNER;
+	public boolean hasInner() {
+		return null != inner;
 	}
 
 	public boolean isBookmark() {
@@ -111,6 +128,10 @@ public class ZRefer {
 
 	public String getPath() {
 		return path;
+	}
+
+	public String getInner() {
+		return inner;
 	}
 
 	@Override

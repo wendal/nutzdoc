@@ -122,7 +122,7 @@ public class BlockMakerTest {
 
 		href = p("[#A]").ele(0).getHref();
 		assertEquals("#A", href.getPath());
-		assertEquals("A", href.getValue());
+		assertEquals("A", href.getInner());
 		assertEquals("#A", href.toString());
 
 		href = p("[file:///A]").ele(0).getHref();

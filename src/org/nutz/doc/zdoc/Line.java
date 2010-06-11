@@ -22,8 +22,7 @@ class Line {
 	private static final Pattern HR = Pattern.compile("^[-]{5,}$");
 	private static final Pattern VERIFIER = Pattern.compile("^([#]verifier:)(.*)$");
 	private static final Pattern AUTHOR = Pattern.compile("^([#]author:)(.*)$");
-	private static final Pattern INDEX_RANGE = Pattern
-			.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
+	private static final Pattern INDEX_RANGE = Pattern.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
 
 	static Line make(String text) {
 		return new Line(text);
@@ -79,9 +78,8 @@ class Line {
 			return;
 		}
 		// Tiltle
-		m = Pattern.compile("^([#]title:)(.*)$").matcher(text);
-		if (m.find()) {
-			title = m.group(2);
+		if (text.startsWith("#title:")) {
+			title = Strings.trim(text.substring(7));
 			return;
 		}
 		// Index Range

@@ -48,6 +48,13 @@ public class ZDocScanningTest {
 	}
 
 	@Test
+	public void test_chinese_title() {
+		String s = "﻿#title: 测试 Links \r\n";
+		Line line = scan(s);
+		assertEquals("测试 Links", line.child(0).getTitle());
+	}
+
+	@Test
 	public void test_uls() {
 		String s = "Heading";
 		s = s + "\n\t* A";

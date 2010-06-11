@@ -16,6 +16,7 @@ import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.meta.ZFont;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.doc.meta.ZRefer;
+import org.nutz.doc.util.Funcs;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -23,6 +24,7 @@ import org.nutz.lang.Strings;
 import org.nutz.lang.util.Disks;
 import org.nutz.lang.util.Node;
 
+import com.lowagie.text.Anchor;
 import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -146,6 +148,9 @@ public class PdfDocSetRender implements DocSetRender {
 	private void renderToSection(Section section, ZDoc doc, int depth) {
 		// 增加自己
 		Section docSection = helper.addSection(section, doc.getTitle(), depth);
+		// 增加锚点
+		Anchor an = helper.anchor(Funcs.evalAnchorName(Files.getMajorName(doc.getSource())));
+		docSection.add(an);
 		// 增加自己的字节点
 		for (ZBlock block : doc.root().children()) {
 			renderBlockToSection(docSection, block, depth);
@@ -174,7 +179,8 @@ public class PdfDocSetRender implements DocSetRender {
 		 */
 		else if (block.isHeading()) {
 			// 渲染自己
-			Section me = helper.addSection(section, block.getText(), block.depth() + depth);
+			String text = block.getText();
+			Section me = helper.addSection(section, text, block.depth() + depth);
 			// 渲染自己的子节点
 			for (ZBlock sub : block.children()) {
 				renderBlockToSection(me, sub, depth);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.nutz.doc.util.Funcs;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.IntRange;
 import org.nutz.lang.util.LinkedIntArray;
@@ -303,7 +304,8 @@ public class ZBlock {
 		int lvl = me.depth() - 1;
 		int depth = nums.size();
 		if (range.inon(lvl)) {
-			Node<ZIndex> newNode = Nodes.create(ZDocs.index("#" + me.getId(),
+			Node<ZIndex> newNode = Nodes.create(ZDocs.index("#"
+																	+ Funcs.evalAnchorName(me.getText()),
 															nums.toArray(),
 															me.getText()));
 			node.add(newNode);

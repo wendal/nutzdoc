@@ -12,8 +12,8 @@ public class ZIndex {
 		return href;
 	}
 
-	public void setHref(String headingId) {
-		this.href = headingId;
+	public void setHref(String href) {
+		this.href = href;
 	}
 
 	public String getText() {
