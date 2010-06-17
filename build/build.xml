@@ -14,7 +14,7 @@
 	<property name="SRC" value="${PROJECT_HOME}/src" />
 	<property name="TMP" value="${PROJECT_HOME}/temp" />
 
-	<property name="v" value="-1.8" />
+	<property name="v" value="-1.9" />
 
 	<path id="CLASSPATH">
 		<pathelement location="${NUTZ}" />
@@ -32,7 +32,7 @@
 	</target>
 
 	<target name="compile" depends="init" description="compile src file">
-		<javac srcdir="${SRC}" destdir="${TMP}" debug="true" debuglevel="lines,vars,source" deprecation="true" nowarn="false" source="1.6" target="1.6">
+		<javac srcdir="${SRC}" destdir="${TMP}" encoding="UTF-8" debug="true" debuglevel="lines,vars,source" deprecation="true" nowarn="false" source="1.6" target="1.6">
 			<classpath refid="CLASSPATH" />
 		</javac>
 	</target>
