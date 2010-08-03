@@ -126,26 +126,22 @@ public class HtmlDocSetRender implements DocSetRender {
 			return;
 		}
 		Segment indexHtml = new CharSegment(Files.read(indexHtmlFile));
-		// If has indexHtml, then try to fill it's ${html} by root folder node
-		if (null != indexHtml) {
-			L.log1("Rendering index.html ... ");
-			Node<ZIndex> node = set.createIndexTable();
-			// Update all links, make the extenstion to suffix
-			Iterator<Node<ZIndex>> it = node.iterator();
-			while (it.hasNext()) {
-				Node<ZIndex> zi = it.next();
-				if (zi.get().hasHref()) {
-					zi.get().setHref(Files.renameSuffix(zi.get().getHref(), suffix));
-				}
+
+		L.log1("Rendering index.html ... ");
+		Node<ZIndex> node = set.createIndexTable();
+		// Update all links, make the extenstion to suffix
+		Iterator<Node<ZIndex>> it = node.iterator();
+		while (it.hasNext()) {
+			Node<ZIndex> zi = it.next();
+			if (zi.get().hasHref()) {
+				zi.get().setHref(Files.renameSuffix(zi.get().getHref(), suffix));
 			}
-			// rendering tags
-			Tag tag = render.renderIndexTable(node);
-			indexHtml.set("html", tag);
-			File f = new File(dest.getAbsolutePath() + "/" + indexHtmlFile.getName());
-			Lang.writeAll(Streams.fileOutw(f), indexHtml.toString());
-		} else {
-			L.log1("Without index.html !");
 		}
+		// rendering tags
+		Tag tag = render.renderIndexTable(node);
+		indexHtml.set("html", tag);
+		File f = new File(dest.getAbsolutePath() + "/" + indexHtmlFile.getName());
+		Lang.writeAll(Streams.fileOutw(f), indexHtml.toString());
 	}
 
 	private File findIndexHtml(File dest) {
@@ -193,8 +189,8 @@ public class HtmlDocSetRender implements DocSetRender {
 					String path = f.getAbsolutePath().substring(pos);
 					String newPath = Files.renameSuffix(path, suffix);
 					L.log4(" %s => %s", path, newPath);
-					if(link.getHref().hasInner())
-						newPath += "#"+link.getHref().getInner();
+					if (link.getHref().hasInner())
+						newPath += "#" + link.getHref().getInner();
 					link.setHref(ZDocs.refer(newPath));
 				}
 		}

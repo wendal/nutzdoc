@@ -37,6 +37,8 @@ public class NoIndexSetParsing {
 			public boolean accept(File dir, String name) {
 				if (dir.isHidden())
 					return false;
+				if (name.startsWith("."))
+					return false;
 				return dir.isDirectory() || name.matches(regex);
 			}
 		});
