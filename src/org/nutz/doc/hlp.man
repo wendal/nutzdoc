@@ -36,7 +36,7 @@
 
 	如果你阅读到这篇文字，你在使用 zDoc 的时候一定遇到问题了。
 	
-	 * 如果你想将 zDoc 目录转换为 HTML 目录，请运行:
+	 * 如果你想要将 zDoc 目录转换为 HTML 目录，请运行:
 	 	{{{
 	 	zdoc html [source dir] [target dir]
 	 	}}}
@@ -45,7 +45,7 @@
 		zdoc html /home/peter/myDoc /home/peter/myHtmlDoc
 		}}}
 	 	
-	 * 如果你想将 zDoc 目录转换为 GoogleCode wiki 目录，请运行:
+	 * 如果你想要将 zDoc 目录转换为 GoogleCode wiki 目录，请运行:
 	 	{{{
 	 	zdoc gwiki [source dir] [target dir] [Index file name] [images address]
 	 	}}}
@@ -54,7 +54,7 @@
 		zdoc gwiki /home/peter/myDoc /home/peter/myWikiDoc IndextTable http://you.com/imgs
 		}}}
 	
-	 * 如果你像将 zDoc 目录转换为一个 PDF 文件，请运行
+	 * 如果你想要将 zDoc 目录转换为一个 PDF 文件，请运行
 	 	{{{
 	 	zdoc pdf [source dir] [target pdf path]
 	 	}}}
