@@ -16,7 +16,6 @@ import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.meta.ZFont;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.doc.meta.ZRefer;
-import org.nutz.doc.util.Funcs;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
@@ -24,7 +23,6 @@ import org.nutz.lang.Strings;
 import org.nutz.lang.util.Disks;
 import org.nutz.lang.util.Node;
 
-import com.lowagie.text.Anchor;
 import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -51,7 +49,7 @@ public class PdfDocSetRender implements DocSetRender {
 	private int maxImgHeight;
 
 	private RenderLogger L;
-
+	
 	public PdfDocSetRender(int maxImgWidth, int maxImgHeight, RenderLogger L) throws ZDocException {
 		this.maxImgWidth = maxImgWidth;
 		this.maxImgHeight = maxImgHeight;
@@ -70,6 +68,8 @@ public class PdfDocSetRender implements DocSetRender {
 			Document doc = new Document();
 			PdfWriter.getInstance(doc, Streams.fileOut(dest));
 			doc.open();
+			doc.addCreator("zDoc PDF render");
+			doc.addAuthor("zDoc PDF render");
 
 			// 创建封面
 			Paragraph p = helper.p();
@@ -92,7 +92,6 @@ public class PdfDocSetRender implements DocSetRender {
 		catch (DocumentException e) {
 			throw Lang.wrapThrow(e, IOException.class);
 		}
-
 	}
 
 	/**
@@ -115,6 +114,7 @@ public class PdfDocSetRender implements DocSetRender {
 			renderToSection(section, child);
 		// 添加到 PDF 文档
 		pdfdoc.add(section);
+		pdfdoc.newPage();
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class PdfDocSetRender implements DocSetRender {
 		}
 		// 一个目录
 		else {
-			Section mySection = helper.addSection(section, zi.getTitle(), node.depth());
+			Section mySection = helper.addSection(section, zi.getTitle(), node.depth(), null);
 			for (Node<ZItem> myNode : node.getChildren())
 				renderToSection(mySection, myNode);
 		}
@@ -147,10 +147,7 @@ public class PdfDocSetRender implements DocSetRender {
 	 */
 	private void renderToSection(Section section, ZDoc doc, int depth) {
 		// 增加自己
-		Section docSection = helper.addSection(section, doc.getTitle(), depth);
-		// 增加锚点
-		Anchor an = helper.anchor(Funcs.evalAnchorName(Files.getMajorName(doc.getSource())));
-		docSection.add(an);
+		Section docSection = helper.addSection(section, doc.getTitle(), depth, helper.anchor(doc, depth));
 		// 增加自己的字节点
 		for (ZBlock block : doc.root().children()) {
 			renderBlockToSection(docSection, block, depth);
@@ -180,7 +177,7 @@ public class PdfDocSetRender implements DocSetRender {
 		else if (block.isHeading()) {
 			// 渲染自己
 			String text = block.getText();
-			Section me = helper.addSection(section, text, block.depth() + depth);
+			Section me = helper.addSection(section, text, block.depth() + depth, null);
 			// 渲染自己的子节点
 			for (ZBlock sub : block.children()) {
 				renderBlockToSection(me, sub, depth);
@@ -387,8 +384,7 @@ public class PdfDocSetRender implements DocSetRender {
 		 * 链接
 		 */
 		if (ele.hasHref()) {
-			String href = ele.getHref().getPath();
-			parent.add(helper.anchor(ele.getText(), href));
+			parent.add(helper.anchor(ele));
 			return;
 		}
 		/*

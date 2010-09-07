@@ -1,8 +1,12 @@
 package org.nutz.doc.pdf;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 
 import org.nutz.doc.ZDocException;
+import org.nutz.doc.meta.ZDoc;
+import org.nutz.doc.meta.ZEle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 
@@ -37,8 +41,15 @@ public class PdfHelper {
 		return new Chapter(p, num);
 	}
 
-	public Section addSection(Section section, String title, int level) {
-		return section.addSection(new Paragraph(title, fonts.getHeadingFont(level)));
+	public Section addSection(Section section, String title, int level, Anchor anchor) {
+		Paragraph paragraph = null;
+		if (anchor != null) {
+			paragraph = new Paragraph("", fonts.getHeadingFont(level));
+			paragraph.add(anchor);
+		} else {
+			paragraph = new Paragraph(title, fonts.getHeadingFont(level));
+		}
+		return section.addSection(paragraph);
 	}
 
 	public ListItem LI() {
@@ -133,16 +144,42 @@ public class PdfHelper {
 		p.add(new Chunk(text, fonts.getCodeFont()));
 		return p;
 	}
-
-	public Anchor anchor(String text, String href) {
+	
+	public Anchor anchor(ZEle ele) {
+		String text = ele.getText();
+		String href = ele.getHref().getPath();
 		Anchor anchor = new Anchor(text, fonts.getAnchorFount());
-		anchor.setReference(href);
+		if (href.startsWith("http://") || href.startsWith("https://"))
+			anchor.setReference(href);
+		else {
+			if (new File(ele.getDoc().getSource()).exists()) {
+				File x = new File(ele.getDoc().getSource()).getAbsoluteFile().getParentFile();
+				if (href.contains("#"))
+					href = href.substring(0,href.indexOf("#"));
+				File toFile = new File(x.getAbsolutePath()+"/"+href);
+				if (toFile.exists()) {
+					anchor.setReference("#"+toX(toFile));
+				}
+			}
+		}
 		return anchor;
 	}
 
-	public Anchor anchor(String name) {
-		Anchor anchor = new Anchor();
-		anchor.setName(name);
+	public String toX(File file) {
+		try {
+			int code = file.getCanonicalPath().toString().hashCode();
+			if (code < 0)
+				return "NUTZa"+ Math.abs(code);
+			return "NUTZ"+code;
+		}
+		catch (IOException e) {
+			return ""+file.getAbsolutePath().hashCode();
+		}
+	}
+	
+	public Anchor anchor(ZDoc doc, int level) {
+		Anchor anchor = new Anchor(doc.getTitle(),fonts.getHeadingFont(level));
+		anchor.setName(toX(new File(doc.getSource())));
 		return anchor;
 	}
 
