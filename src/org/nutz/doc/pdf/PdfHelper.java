@@ -9,6 +9,7 @@ import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZEle;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
+import org.nutz.log.Logs;
 
 import com.lowagie.text.Anchor;
 import com.lowagie.text.Cell;
@@ -105,7 +106,7 @@ public class PdfHelper {
 		cell.setBorder(0);
 		cell.setBackgroundColor(new Color(240, 240, 240));
 		Paragraph t = this.p();
-		t.add(chunk("[" + (Strings.isBlank(title) ? "UNKNOWN" : title) + "]",
+		t.add(chunk("[" + (Strings.isBlank(title) ? "CODE" : title) + "]",
 					fonts.getCodeTypeFont()));
 		cell.add(t);
 		cell.add(blank());
@@ -159,7 +160,8 @@ public class PdfHelper {
 				File toFile = new File(x.getAbsolutePath()+"/"+href);
 				if (toFile.exists()) {
 					anchor.setReference("#"+toX(toFile));
-				}
+				} else
+					Logs.getLog(getClass()).infof("Refer no found : %s from %s",ele.getHref(),ele.getDoc().getSource());
 			}
 		}
 		return anchor;
@@ -169,7 +171,7 @@ public class PdfHelper {
 		try {
 			int code = file.getCanonicalPath().toString().hashCode();
 			if (code < 0)
-				return "NUTZa"+ Math.abs(code);
+				return "NUTZa"+ (code * -1);
 			return "NUTZ"+code;
 		}
 		catch (IOException e) {

@@ -70,6 +70,7 @@ public class PdfDocSetRender implements DocSetRender {
 			doc.open();
 			doc.addCreator("zDoc PDF render");
 			doc.addAuthor("zDoc PDF render");
+			doc.addTitle(set.root().get().getTitle());
 
 			// 创建封面
 			Paragraph p = helper.p();
@@ -359,7 +360,7 @@ public class PdfDocSetRender implements DocSetRender {
 						img = Image.getInstance(imgurl);
 					}
 					catch (Exception e) {
-						L.log1("Shit!", e.getMessage());
+						L.log1("Shit! %s", e.getMessage());
 						return;
 					}
 				}
