@@ -8,7 +8,7 @@ import org.nutz.doc.DocSetRender;
 import org.nutz.doc.RenderLogger;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZDocSet;
-import org.nutz.doc.meta.ZDocs;
+import org.nutz.doc.meta.ZD;
 import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.lang.Files;
@@ -120,7 +120,7 @@ public class GoogleWikiDocSetRender implements DocSetRender {
 				// Copy image to "wiki_imgs" folder
 				Files.copyFile(f, Files.getFile(imgDir, f.getName()));
 				// update src
-				ele.setSrc(ZDocs.refer(imgAddress + "/" + f.getName()));
+				ele.setSrc(ZD.refer(imgAddress + "/" + f.getName()));
 			}
 		}
 		/*
@@ -129,7 +129,7 @@ public class GoogleWikiDocSetRender implements DocSetRender {
 		for (ZEle ele : doc.root().getLinks()) {
 			File f = ele.getHref().getFile();
 			if (null != f && f.exists()) {
-				ele.setHref(ZDocs.refer(getDocWikiFileName(f.getAbsolutePath())));
+				ele.setHref(ZD.refer(getDocWikiFileName(f.getAbsolutePath())));
 			}
 		}
 		// render doc

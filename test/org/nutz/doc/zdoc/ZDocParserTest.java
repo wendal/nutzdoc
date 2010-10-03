@@ -34,7 +34,6 @@ public class ZDocParserTest {
 		s = s + "ddd";
 		ZDoc doc = doc(s);
 		assertEquals("abc", doc.getTitle());
-		assertEquals("abc", doc.root().getText());
 	}
 
 	@Test
@@ -50,8 +49,8 @@ public class ZDocParserTest {
 		ZBlock[] children = root.children();
 		assertEquals("A", children[0].getText());
 		assertEquals("B", children[1].getText());
-		assertEquals("C ", children[1].desc(0).ele(0).getText());
-		assertEquals("D ", children[1].desc(0).desc(0).ele(0).getText());
+		assertEquals("C", children[1].desc(0).ele(0).getText());
+		assertEquals("D", children[1].desc(0).desc(0).ele(0).getText());
 		assertEquals("E", children[2].getText());
 	}
 
@@ -131,8 +130,10 @@ public class ZDocParserTest {
 		Iterator<ZBlock> it = root.iterator();
 		assertEquals("A", it.next().getText());
 		assertEquals("B", it.next().getText());
+		assertTrue(it.next().isBlank());
 		assertEquals("C", it.next().getText());
 		assertEquals("D", it.next().getText());
+		assertTrue(it.next().isBlank());
 		assertEquals("E", it.next().getText());
 		assertEquals("F", it.next().getText());
 		assertNull(it.next());
@@ -249,23 +250,6 @@ public class ZDocParserTest {
 	}
 
 	@Test
-	public void test_simple_getId() {
-		String s = "A";
-		s = s + "\n\tB";
-		s = s + "\n";
-		s = s + "\n\tC";
-
-		ZBlock root = root(s);
-		assertEquals("N0", root.desc(0).getId());
-		assertEquals("N1", root.desc(0, 0).getId());
-		assertEquals("N2", root.desc(0, 1).getId());
-
-		assertEquals("N0", root.desc(0).getId());
-		assertEquals("N1", root.desc(0, 0).getId());
-		assertEquals("N2", root.desc(0, 1).getId());
-	}
-
-	@Test
 	public void test_simple_heading_structure() {
 		String s = "A";
 		s = s + "\n\tB";
@@ -348,10 +332,10 @@ public class ZDocParserTest {
 		assertEquals("A", root.desc(0).getText());
 		assertEquals("B", root.desc(0, 0).getText());
 		assertEquals("111", root.desc(0, 0, 0).getText());
-		assertTrue(root.desc(0, 0, 1).isHr());
-		assertEquals("hhh", root.desc(0, 0, 2).getText());
-		assertEquals("C", root.desc(0, 1).getText());
-		assertEquals("222", root.desc(0, 1, 0).getText());
+		assertTrue(root.desc(1).isHr());
+		assertEquals("hhh", root.desc(2).getText());
+		assertEquals("C", root.desc(2, 0).getText());
+		assertEquals("222", root.desc(2, 0, 0).getText());
 	}
 
 	@Test
@@ -365,8 +349,8 @@ public class ZDocParserTest {
 
 		assertEquals("A", root.desc(0).getText());
 		assertEquals("A1", root.desc(0, 0).getText());
-		assertTrue(root.desc(0, 1).isHr());
-		assertEquals("A2", root.desc(0, 2).getText());
+		assertTrue(root.desc(1).isHr());
+		assertEquals("A2", root.desc(2).getText());
 	}
 
 	@Test
@@ -377,7 +361,7 @@ public class ZDocParserTest {
 		s = s + "\n\tA1";
 		s = s + "\n\t\tA11";
 		s = s + "\n-------------";
-		s = s + "\n\t\t\tXXXX";
+		s = s + "\n\t\t\tXXXX  ";
 		s = s + "\nB";
 		s = s + "\n\tB1";
 
@@ -394,7 +378,7 @@ public class ZDocParserTest {
 		assertEquals("1.1", index.getNumberString());
 
 		index = it.next().get();
-		assertEquals("B", index.getText());
+		assertEquals("XXXX  B", index.getText());
 		assertEquals("2", index.getNumberString());
 
 		assertFalse(it.hasNext());
@@ -443,7 +427,7 @@ public class ZDocParserTest {
 		s = s + "\n\t * A1";
 
 		ZBlock root = root(s);
-		assertEquals("A B", root.desc(0, 0).getText());
+		assertEquals("AB", root.desc(0, 0).getText());
 		assertTrue(root.desc(0, 0).isULI());
 		assertEquals("A1", root.desc(0, 0, 0, 0).getText());
 		assertTrue(root.desc(0, 0, 0, 0).isULI());
@@ -468,19 +452,19 @@ public class ZDocParserTest {
 		s = s + "\n\t\tB";
 
 		ZBlock root = root(s);
-		assertEquals("A B", root.desc(0, 0).getText());
+		assertEquals("AB", root.desc(0, 0).getText());
 		assertFalse(root.desc(0, 0).hasChildren());
 	}
 
 	@Test
 	public void item_end_by_escaping_with_indent_child2() {
-		String s = " * A\\";
+		String s = " * A \\";
 		s = s + "\n\t\t B\\";
 		s = s + "\n\t\t C";
 		s = s + "\n\t\t D";
 
 		ZBlock root = root(s);
-		assertEquals("A B C", root.desc(0, 0).getText());
+		assertEquals("A BC", root.desc(0, 0).getText());
 		assertTrue(root.desc(0, 0).hasChildren());
 		assertEquals("D", root.desc(0, 0, 0).getText());
 	}
@@ -491,7 +475,7 @@ public class ZDocParserTest {
 		s = s + "\n\t\t B";
 
 		ZBlock root = root(s);
-		assertEquals("A B", root.desc(0).getText());
+		assertEquals("AB", root.desc(0).getText());
 		assertFalse(root.desc(0).hasChildren());
 	}
 
@@ -503,7 +487,7 @@ public class ZDocParserTest {
 		s = s + "\n\t\t D";
 
 		ZBlock root = root(s);
-		assertEquals("A B C", root.desc(0).getText());
+		assertEquals("ABC", root.desc(0).getText());
 		assertTrue(root.desc(0).hasChildren());
 		assertEquals("D", root.desc(0, 0).getText());
 	}

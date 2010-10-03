@@ -73,12 +73,12 @@ public class BlockMakerTest {
 		assertEquals("http://a.com/a.gif", img.getSrc().getPath());
 		assertTrue(img.getSrc().isHttp());
 	}
-	
+
 	@Test
-	public void teset_image_in_link_remote(){
+	public void teset_image_in_link_remote() {
 		ZBlock p = p("[http://abc.com <http://a.com/a.gif>]");
 		ZEle img = p.ele(0);
-		assertEquals("http://abc.com",img.getHref().getPath());
+		assertEquals("http://abc.com", img.getHref().getPath());
 		assertEquals("http://a.com/a.gif", img.getSrc().getPath());
 		assertTrue(img.getSrc().isHttp());
 	}
@@ -162,5 +162,14 @@ public class BlockMakerTest {
 		assertTrue(p.ele(0).getStyle().getFont().isItalic());
 
 		assertEquals("B", p.ele(1).getText());
+	}
+
+	@Test
+	public void test_nest_var() {
+		ZBlock p = p("A{*`${X}`}B");
+		assertEquals("A", p.ele(0).getText());
+		assertEquals("${X}", p.ele(1).getText());
+		assertTrue(p.ele(1).getStyle().font().isBold());
+		assertEquals("B", p.ele(2).getText());
 	}
 }

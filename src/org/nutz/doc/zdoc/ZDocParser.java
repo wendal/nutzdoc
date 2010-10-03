@@ -8,13 +8,27 @@ import org.nutz.lang.Lang;
 
 public class ZDocParser implements DocParser {
 
+	/**
+	 * 一个 \t 相当于几个空格
+	 */
+	private int tabpar;
+
+	public ZDocParser() {
+		this(4);
+	}
+
+	public ZDocParser(int tabpar) {
+		this.tabpar = tabpar;
+	}
+
 	public ZDoc parse(CharSequence cs) {
 		BufferedReader br = new BufferedReader(Lang.inr(cs));
 		Parsing parsing = new Parsing(br);
-		ZDoc doc = parsing.parse();
+		ZDoc doc = parsing.parse(tabpar);
 		try {
 			br.close();
-		} catch (Exception e) {}
+		}
+		catch (Exception e) {}
 		return doc;
 	}
 

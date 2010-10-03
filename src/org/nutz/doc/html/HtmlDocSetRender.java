@@ -11,7 +11,7 @@ import org.nutz.doc.DocSetRender;
 import org.nutz.doc.RenderLogger;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZDocSet;
-import org.nutz.doc.meta.ZDocs;
+import org.nutz.doc.meta.ZD;
 import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.meta.ZIndex;
 import org.nutz.doc.meta.ZItem;
@@ -191,7 +191,7 @@ public class HtmlDocSetRender implements DocSetRender {
 					L.log4(" %s => %s", path, newPath);
 					if (link.getHref().hasInner())
 						newPath += "#" + link.getHref().getInner();
-					link.setHref(ZDocs.refer(newPath));
+					link.setHref(ZD.refer(newPath));
 				}
 		}
 		// Write HTML to file
@@ -215,7 +215,7 @@ public class HtmlDocSetRender implements DocSetRender {
 				File newImg = new File(newDocFile.getParent() + "/" + path);
 				L.log4("Copy: %s => %s", f, newImg);
 				Files.copyFile(f, newImg);
-				img.setSrc(ZDocs.refer(doc.getRelativePath(f.getAbsolutePath())));
+				img.setSrc(ZD.refer(doc.getRelativePath(f.getAbsolutePath())));
 				L.log4("update src to: %s", img.getSrc().toString());
 			}
 		}

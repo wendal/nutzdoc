@@ -2,7 +2,7 @@ package org.nutz.doc.meta;
 
 import org.nutz.lang.Maths;
 
-import static org.nutz.doc.meta.ZDocs.*;
+import static org.nutz.doc.meta.ZD.*;
 
 public class ZFont {
 

@@ -62,7 +62,7 @@ public class ZEle {
 
 	public ZStyle style() {
 		if (null == style)
-			style = ZDocs.style();
+			style = ZD.style();
 		return style;
 	}
 

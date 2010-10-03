@@ -1,6 +1,6 @@
 package org.nutz.doc.zdoc;
 
-import static org.nutz.doc.meta.ZDocs.*;
+import static org.nutz.doc.meta.ZD.*;
 
 import java.io.BufferedReader;
 import java.util.Iterator;
@@ -17,13 +17,13 @@ class Parsing {
 	private BufferedReader reader;
 
 	Parsing(BufferedReader reader) {
-		this.doc = new ZDoc();
 		this.reader = reader;
 	}
 
-	ZDoc parse() {
-		Line root = new Scanning().scan(reader);
-		transform(doc.root(), root);
+	ZDoc parse(int tabpar) {
+		ScanResult sr = new Scanning(tabpar).scan(reader);
+		doc = sr.doc();
+		transform(doc.root(), sr.root());
 		return doc;
 	}
 
@@ -35,21 +35,6 @@ class Parsing {
 		LinkedList<Line> stack = new LinkedList<Line>();
 		while (it.hasNext()) {
 			Line line = it.next();
-			// #title:
-			if (null != line.getTitle()) {
-				p.getDoc().setTitle(line.getTitle());
-				continue;
-			}
-			// #author:
-			if (null != line.getAuthor()) {
-				p.getDoc().addAuthor(line.getAuthor());
-				continue;
-			}
-			// #verifier:
-			if (null != line.getVerifier()) {
-				p.getDoc().addVerifier(line.getVerifier());
-				continue;
-			}
 			// #index:
 			if (null != line.getIndexRange()) {
 				p.add(range(line.getIndexRange()));
@@ -96,7 +81,7 @@ class Parsing {
 				}
 				// current line is blank, that's mean all items in stack
 				// should be a paragraph
-				// 
+				//
 				// In fact, when makeBlock() this function will be called again
 				// so it is a chain:
 				// transform() -> makeBlockAndClearStack() -> transform()
@@ -174,8 +159,11 @@ class Parsing {
 		else {
 			StringBuilder sb = new StringBuilder();
 			Iterator<Line> it = stack.iterator();
-			while (it.hasNext())
-				sb.append(it.next().getText()).append(' ');
+			while (it.hasNext()) {
+				Line line = it.next();
+				if (!line.isBlank())
+					sb.append(line.getText());
+			}
 			re = toBlock(sb.toString().toCharArray());
 			if (stack.getLast().hasChild())
 				transform(re, stack.getLast());

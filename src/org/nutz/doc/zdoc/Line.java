@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.nutz.doc.meta.Author;
 import org.nutz.doc.meta.ZBlock;
-import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZType;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.IntRange;
@@ -19,14 +17,7 @@ class Line {
 	private static final Pattern ROW = Pattern.compile("^[|][|].+[|][|]$");
 	private static final Pattern UL = Pattern.compile("^([*][ ])(.*)$");
 	private static final Pattern OL = Pattern.compile("^([#][ ])(.*)$");
-	private static final Pattern HR = Pattern.compile("^[-]{5,}$");
-	private static final Pattern VERIFIER = Pattern.compile("^([#]verifier:)(.*)$");
-	private static final Pattern AUTHOR = Pattern.compile("^([#]author:)(.*)$");
-	private static final Pattern INDEX_RANGE = Pattern.compile("^([#]index:)(([0-9]+)([,:][0-9]+)?)([ \t]*)$");
-
-	static Line make(String text) {
-		return new Line(text);
-	}
+	private static final Pattern HR = Pattern.compile("^([-]{5,})$");
 
 	ZType type;
 	private String codeType;
@@ -35,79 +26,68 @@ class Line {
 	private String text;
 	private List<Line> children;
 	private int depth;
-	private boolean endByEscape;
 	private IntRange indexRange;
-	private String title;
-	private Author author;
-	private Author verifier;
 
-	boolean endByEscape() {
-		return endByEscape;
+	/**
+	 * 构造文档根行
+	 * 
+	 * @param txt
+	 */
+	Line() {
+		children = new ArrayList<Line>();
 	}
 
-	private Line(String txt) {
-		this.text = null == txt ? "" : txt;
-		children = new ArrayList<Line>();
-		evalMode();
+	/**
+	 * 构造一般的行以及空行
+	 * 
+	 * @param txt
+	 */
+	Line(String txt) {
+		if (null != txt) {
+			this.text = null == txt ? "" : txt;
+			children = new ArrayList<Line>();
+			evalMode();
+		}
+	}
+
+	/**
+	 * 构造 IndexRange
+	 */
+	Line(IntRange range) {
+		this.indexRange = range;
+		text = range.toString();
 	}
 
 	private void evalMode() {
-		// End by escape
-		endByEscape = (text.length() > 0) && (text.charAt(text.length() - 1) == '\\');
-		if (endByEscape) {
-			text = text.substring(0, text.length() - 1);
-		}
+		String trim = Strings.trim(this.text);
 		// OL
-		Matcher m = OL.matcher(text);
+		Matcher m = OL.matcher(trim);
 		if (m.find()) {
 			type = ZType.OLI;
 			text = m.group(2);
 			return;
 		}
 		// UL
-		m = UL.matcher(text);
+		m = UL.matcher(trim);
 		if (m.find()) {
 			type = ZType.ULI;
 			text = m.group(2);
 			return;
 		}
 		// Row
-		m = ROW.matcher(text);
+		m = ROW.matcher(trim);
 		if (m.find()) {
 			type = ZType.ROW;
 			return;
 		}
-		// Tiltle
-		if (text.startsWith("#title:")) {
-			title = Strings.trim(text.substring(7));
-			return;
-		}
-		// Index Range
-		m = INDEX_RANGE.matcher(text);
-		if (m.find()) {
-			indexRange = IntRange.make(m.group(2));
-			return;
-		}
-		// Author
-		m = AUTHOR.matcher(text);
-		if (m.find()) {
-			author = ZDocs.author(m.group(2));
-			return;
-		}
-		// Verifier
-		m = VERIFIER.matcher(text);
-		if (m.find()) {
-			verifier = ZDocs.author(m.group(2));
-			return;
-		}
 		// HR
-		m = HR.matcher(text);
+		m = HR.matcher(trim);
 		if (m.find()) {
 			type = ZType.HR;
 			return;
 		}
 		// Code start
-		m = CODE_START.matcher(text);
+		m = CODE_START.matcher(trim);
 		if (m.find()) {
 			String s = m.group(3);
 			if (null == s) {
@@ -161,7 +141,7 @@ class Line {
 	}
 
 	boolean withoutChild() {
-		return children.isEmpty();
+		return null == children || children.isEmpty();
 	}
 
 	int depth() {
@@ -200,18 +180,6 @@ class Line {
 		return indexRange;
 	}
 
-	String getTitle() {
-		return title;
-	}
-
-	Author getAuthor() {
-		return author;
-	}
-
-	Author getVerifier() {
-		return verifier;
-	}
-
 	boolean isBlank() {
 		return Strings.isBlank(text);
 	}
@@ -235,7 +203,7 @@ class Line {
 		StringBuilder sb = new StringBuilder();
 		if (null != parent)
 			sb.append(Strings.dup('\t', depth));
-		sb.append(symbol()).append(text).append('\n');
+		sb.append(symbol()).append(text == null ? "" : text).append('\n');
 		sb.append(getChildrenString(depth));
 		return sb.toString();
 	}
@@ -258,6 +226,10 @@ class Line {
 		if (isULI())
 			return "* ";
 		return "";
+	}
+
+	public boolean isIndexRange() {
+		return null != this.indexRange;
 	}
 
 }

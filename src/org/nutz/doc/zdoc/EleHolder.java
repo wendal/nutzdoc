@@ -1,7 +1,7 @@
 package org.nutz.doc.zdoc;
 
 import org.nutz.doc.meta.ZBlock;
-import org.nutz.doc.meta.ZDocs;
+import org.nutz.doc.meta.ZD;
 import org.nutz.doc.meta.ZEle;
 
 class EleHolder {
@@ -20,7 +20,7 @@ class EleHolder {
 
 	private void reset() {
 		sb = new StringBuilder();
-		ele = ZDocs.ele(null);
+		ele = ZD.ele(null);
 	}
 
 	void save(ZBlock block) {

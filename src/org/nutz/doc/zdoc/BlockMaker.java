@@ -1,12 +1,12 @@
 package org.nutz.doc.zdoc;
 
-import static org.nutz.doc.meta.ZDocs.refer;
+import static org.nutz.doc.meta.ZD.refer;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.nutz.doc.meta.ZBlock;
-import org.nutz.doc.meta.ZDocs;
+import org.nutz.doc.meta.ZD;
 import org.nutz.doc.meta.ZFont;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.LinkedCharArray;
@@ -22,7 +22,7 @@ public class BlockMaker {
 	BlockMaker(char[] cs) {
 		this.cs = cs;
 		this.ep = new EleHolder();
-		this.block = ZDocs.p();
+		this.block = ZD.p();
 		this.endles = new LinkedCharArray();
 	}
 

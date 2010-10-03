@@ -80,7 +80,7 @@ public class ZDocSet {
 		if (zi instanceof ZDoc)
 			href = Disks.getRelativePath(rootDir.getAbsolutePath(), ((ZDoc) zi).getSource());
 
-		Node<ZIndex> re = Nodes.create(ZDocs.index(href, numbers.toArray(), text));
+		Node<ZIndex> re = Nodes.create(ZD.index(href, numbers.toArray(), text));
 
 		// Render Children Nodes
 		numbers.push(0);

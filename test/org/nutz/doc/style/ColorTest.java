@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.nutz.doc.meta.ZColor;
 
-import static org.nutz.doc.meta.ZDocs.*;
+import static org.nutz.doc.meta.ZD.*;
 
 public class ColorTest {
 

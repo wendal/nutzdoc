@@ -1,6 +1,7 @@
 package org.nutz.doc.pdf;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
 
 import org.nutz.lang.Files;
@@ -37,8 +38,13 @@ public class PdfFonts {
 	private Font codeFont;
 
 	public PdfFonts() throws DocumentException, IOException {
-		if (null != Files.findFile("pdf_font.ttf"))
+		File fontFile = Files.findFile("pdf_font.ttf");
+		if (null != fontFile)
 			baseFont = BaseFont.createFont(	"pdf_font.ttf",
+											BaseFont.IDENTITY_H,
+											BaseFont.NOT_EMBEDDED);
+		else if (null != (fontFile = Files.findFile("pdf_font.ttc")))
+			baseFont = BaseFont.createFont(	fontFile.getAbsolutePath() + ",1",
 											BaseFont.IDENTITY_H,
 											BaseFont.NOT_EMBEDDED);
 

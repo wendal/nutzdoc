@@ -3,7 +3,6 @@ package org.nutz.doc.zdoc;
 import java.io.File;
 
 import org.nutz.doc.meta.ZDocSet;
-import org.nutz.doc.meta.ZDocs;
 import org.nutz.doc.meta.ZFolder;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.lang.Files;
@@ -116,7 +115,7 @@ class IndexXmlSetParing {
 			if (!Strings.isBlank(authors)) {
 				String[] authorArray = Strings.splitIgnoreBlank(authors);
 				for (String au : authorArray) {
-					zi.addAuthor(ZDocs.author(au));
+					zi.addAuthor(au);
 				}
 			}
 			// 如果不是根元素，递归

@@ -2,7 +2,7 @@ package org.nutz.doc.meta;
 
 import org.nutz.lang.util.IntRange;
 
-public class ZDocs {
+public class ZD {
 
 	public static ZBlock p(String text) {
 		ZBlock p = p();

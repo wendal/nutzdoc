@@ -134,7 +134,7 @@ public class ZBlock {
 
 	public ZBlock setText(String text) {
 		eles.clear();
-		append(ZDocs.ele(text));
+		append(ZD.ele(text));
 		return this;
 	}
 
@@ -286,7 +286,7 @@ public class ZBlock {
 
 	public Node<ZIndex> buildIndex(IntRange range) {
 		LinkedIntArray nums = new LinkedIntArray(20);
-		Node<ZIndex> root = Nodes.create(ZDocs.index(null, null, doc.getTitle()));
+		Node<ZIndex> root = Nodes.create(ZD.index(null, null, doc.getTitle()));
 		nums.push(-1);
 		for (ZBlock chd : children) {
 			if (chd.isHeading()) {
@@ -304,7 +304,7 @@ public class ZBlock {
 		int lvl = me.depth() - 1;
 		int depth = nums.size();
 		if (range.inon(lvl)) {
-			Node<ZIndex> newNode = Nodes.create(ZDocs.index("#"
+			Node<ZIndex> newNode = Nodes.create(ZD.index(	"#"
 																	+ Funcs.evalAnchorName(me.getText()),
 															nums.toArray(),
 															me.getText()));
@@ -350,7 +350,4 @@ public class ZBlock {
 		return list;
 	}
 
-	public String getId() {
-		return "N" + doc.getId(this);
-	}
 }
