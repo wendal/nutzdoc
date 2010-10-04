@@ -139,8 +139,18 @@ class Line {
 		return children.size() > 0;
 	}
 
+	/**
+	 * 如果当前行的子全是空行或者没有子，返回 true
+	 * 
+	 * @return 是否没有有效子孙
+	 */
 	boolean withoutChild() {
-		return null == children || children.isEmpty();
+		if (null == children || children.isEmpty())
+			return true;
+		for (Line child : children)
+			if (!child.isBlank())
+				return false;
+		return true;
 	}
 
 	int depth() {

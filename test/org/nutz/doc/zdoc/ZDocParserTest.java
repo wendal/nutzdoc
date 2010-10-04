@@ -119,10 +119,8 @@ public class ZDocParserTest {
 		Iterator<ZBlock> it = root.iterator();
 		assertEquals("A", it.next().getText());
 		assertEquals("B", it.next().getText());
-		assertTrue(it.next().isBlank());
 		assertEquals("C", it.next().getText());
 		assertEquals("D", it.next().getText());
-		assertTrue(it.next().isBlank());
 		assertEquals("E", it.next().getText());
 		assertEquals("F", it.next().getText());
 		assertNull(it.next());
