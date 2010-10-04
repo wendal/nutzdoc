@@ -149,6 +149,6 @@ public class GoogleWikiDocSetRender implements DocSetRender {
 		int pos = name.lastIndexOf('.');
 		if (pos > 0)
 			name = name.substring(0, pos);
-		return name.replace('/', '_');
+		return name.replace('/', '_').replace('.', '_');
 	}
 }
