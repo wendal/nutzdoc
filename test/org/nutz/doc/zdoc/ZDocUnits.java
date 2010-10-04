@@ -2,6 +2,9 @@ package org.nutz.doc.zdoc;
 
 import java.io.BufferedReader;
 
+import org.nutz.doc.DocParser;
+import org.nutz.doc.meta.ZBlock;
+import org.nutz.doc.meta.ZDoc;
 import org.nutz.lang.Lang;
 
 public abstract class ZDocUnits {
@@ -20,6 +23,18 @@ public abstract class ZDocUnits {
 
 	public static Line scan2(String s) {
 		return sr2(s).root();
+	}
+
+	public static ZBlock root(String s) {
+		ZDoc doc = doc(s);
+		ZBlock root = doc.root();
+		return root;
+	}
+
+	public static ZDoc doc(String s) {
+		DocParser parser = new ZDocParser();
+		ZDoc doc = parser.parse(s);
+		return doc;
 	}
 
 }

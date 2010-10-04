@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
-import org.nutz.doc.DocParser;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
 import org.nutz.doc.meta.ZEle;
@@ -14,19 +13,9 @@ import org.nutz.doc.meta.ZIndex;
 import org.nutz.lang.util.IntRange;
 import org.nutz.lang.util.Node;
 
+import static org.nutz.doc.zdoc.ZDocUnits.*;
+
 public class ZDocParserTest {
-
-	private static ZBlock root(String s) {
-		ZDoc doc = doc(s);
-		ZBlock root = doc.root();
-		return root;
-	}
-
-	private static ZDoc doc(String s) {
-		DocParser parser = new ZDocParser();
-		ZDoc doc = parser.parse(s);
-		return doc;
-	}
 
 	@Test
 	public void test_doc_title() {

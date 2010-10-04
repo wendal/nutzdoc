@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZType;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.IntRange;
@@ -191,8 +190,8 @@ class Line {
 		}
 	}
 
-	ZBlock toBlock() {
-		return Parsing.toBlock(text.toCharArray());
+	char[] getCharArray() {
+		return text.toCharArray();
 	}
 
 	public String toString() {

@@ -3,26 +3,33 @@ package org.nutz.doc.zdoc;
 import static org.nutz.doc.meta.ZD.*;
 
 import java.io.BufferedReader;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
+import org.nutz.lang.Strings;
+import org.nutz.lang.util.Context;
 import org.nutz.lang.util.LinkedCharArray;
 
 class Parsing {
 
 	private ZDoc doc;
 	private BufferedReader reader;
+	private Context context;
 
 	Parsing(BufferedReader reader) {
 		this.reader = reader;
+		this.context = new Context().set("now", Calendar.getInstance());
 	}
 
 	ZDoc parse(int tabpar) {
 		ScanResult sr = new Scanning(tabpar).scan(reader);
 		doc = sr.doc();
+		if (!Strings.isBlank(doc.getTitle()))
+			context.set("title", doc.getTitle());
 		transform(doc.root(), sr.root());
 		return doc;
 	}
@@ -122,8 +129,8 @@ class Parsing {
 			p.add(makeBlockAndClearStack(stack));
 	}
 
-	static ZBlock toBlock(char[] cs) {
-		return new BlockMaker(cs).make();
+	private ZBlock toBlock(char[] cs) {
+		return new BlockMaker(context, cs).make();
 	}
 
 	private ZBlock makeBlockAndClearStack(LinkedList<Line> stack) {
@@ -135,7 +142,7 @@ class Parsing {
 			Iterator<Line> it = stack.iterator();
 			while (it.hasNext()) {
 				Line line = it.next();
-				ZBlock li = line.toBlock().setType(first.type);
+				ZBlock li = toBlock(line.getCharArray()).setType(first.type);
 				re.add(li);
 				transform(li, line);
 			}
