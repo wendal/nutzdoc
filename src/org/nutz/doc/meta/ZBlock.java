@@ -120,7 +120,7 @@ public class ZBlock {
 		return Strings.trim(sb);
 	}
 
-	public String getString() {
+	private String getString() {
 		if (isHr())
 			return Strings.dup('-', 10);
 		if (null != getIndexRange()) {
@@ -210,7 +210,7 @@ public class ZBlock {
 		return null == parent;
 	}
 
-	public boolean hasIndexRange() {
+	public boolean isIndexRange() {
 		return null != indexRange;
 	}
 

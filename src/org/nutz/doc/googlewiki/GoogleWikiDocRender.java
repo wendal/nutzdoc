@@ -80,7 +80,7 @@ public class GoogleWikiDocRender implements DocRender<StringBuilder> {
 			appendHr();
 		}
 		// #index:
-		else if (block.hasIndexRange()) {
+		else if (block.isIndexRange()) {
 			sb.append("<wiki:toc max_depth=\"");
 			sb.append(block.getIndexRange().getRight() + 1);
 			sb.append("\"/>\n");

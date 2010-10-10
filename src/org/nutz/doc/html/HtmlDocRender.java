@@ -111,7 +111,7 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 			parent.add(Tag.tag("div").attr("class", "hr"));
 		}
 		// #index:
-		else if (block.hasIndexRange()) {
+		else if (block.isIndexRange()) {
 			// parent.add(renderIndexTable(block.getDoc().buildIndex(block.getIndexRange())));
 			Node<ZIndex> indexRoot = block.getDoc().root().buildIndex(block.getIndexRange());
 			Tag indexTable = renderIndexTable(indexRoot);

@@ -167,7 +167,7 @@ public class PdfDocSetRender implements DocSetRender {
 		/*
 		 * 索引表
 		 */
-		if (block.hasIndexRange()) {}
+		if (block.isIndexRange()) {}
 		/*
 		 * 分隔线
 		 */
