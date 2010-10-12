@@ -14,7 +14,7 @@
 	<property name="SRC" value="${PROJECT_HOME}/src" />
 	<property name="TMP" value="${PROJECT_HOME}/temp" />
 
-	<property name="v" value="-1.10" />
+	<property name="v" value="-1.11" />
 
 	<path id="CLASSPATH">
 		<pathelement location="${NUTZ}" />
@@ -30,7 +30,6 @@
 
 	<target name="init" description="make dir">
 		<mkdir dir="${TMP}" />
-
 	</target>
 
 
@@ -42,18 +41,21 @@
 	</target>
 
 	<target name="copyhlp" depends="compile">
-		<copy file="${SRC}/org/nutz/doc/hlp.man" todir="${TMP}/org/nutz/doc"/>
+		<copy file="${PROJECT_HOME}/build/META-INF/MANIFEST.MF" todir="${TMP}/META-INF"/>
 	</target>
 
 	<target name="jar" depends="copyhlp" description="pacakge the classes to be a jar">
-		<jar destfile="${OUTPUT}/nutzdoc${v}.jar" basedir="${TMP}" />
+		<jar destfile="${OUTPUT}/nutzdoc${v}.jar" basedir="${TMP}">
+			<manifest>
+				<attribute name="Main-Class" value="org.nutz.doc.Doc"/>
+			</manifest>
+		</jar>
 		<jar destfile="${OUTPUT}/nutzdoc-source${v}.jar" basedir="${SRC}" />
 	</target>
 
 
 	<target name="go" depends="jar">
 		<delete dir="${TMP}" />
-
 	</target>
 
 </project>
