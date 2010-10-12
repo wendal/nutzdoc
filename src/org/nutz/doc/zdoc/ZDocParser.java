@@ -1,10 +1,11 @@
 package org.nutz.doc.zdoc;
 
 import java.io.BufferedReader;
+import java.io.Reader;
 
 import org.nutz.doc.DocParser;
 import org.nutz.doc.meta.ZDoc;
-import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 
 public class ZDocParser implements DocParser {
 
@@ -21,15 +22,17 @@ public class ZDocParser implements DocParser {
 		this.tabpar = tabpar;
 	}
 
-	public ZDoc parse(CharSequence cs) {
-		BufferedReader br = new BufferedReader(Lang.inr(cs));
+	public ZDoc parse(Reader reader) {
+		BufferedReader br = reader instanceof BufferedReader ? (BufferedReader) reader
+															: new BufferedReader(reader);
 		Parsing parsing = new Parsing(br);
-		ZDoc doc = parsing.parse(tabpar);
 		try {
-			br.close();
+			ZDoc doc = parsing.parse(tabpar);
+			return doc;
 		}
-		catch (Exception e) {}
-		return doc;
+		finally {
+			Streams.safeClose(br);
+		}
 	}
 
 }

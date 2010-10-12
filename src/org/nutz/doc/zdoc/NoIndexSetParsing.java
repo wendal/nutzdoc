@@ -6,7 +6,7 @@ import java.io.FilenameFilter;
 import org.nutz.doc.meta.ZDocSet;
 import org.nutz.doc.meta.ZFolder;
 import org.nutz.doc.meta.ZItem;
-import org.nutz.lang.Files;
+import org.nutz.lang.Streams;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Nodes;
 
@@ -61,7 +61,7 @@ public class NoIndexSetParsing {
 		}
 		// 文件
 		else if (f.isFile() && f.getName().toLowerCase().matches(regex)) {
-			re = docParser.parse(Files.read(f)).setSource(f.getAbsolutePath());
+			re = docParser.parse(Streams.fileInr(f)).setSource(f.getAbsolutePath());
 		}
 		return re;
 	}

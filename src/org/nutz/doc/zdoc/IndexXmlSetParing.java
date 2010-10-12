@@ -7,6 +7,7 @@ import org.nutz.doc.meta.ZFolder;
 import org.nutz.doc.meta.ZItem;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
+import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Nodes;
@@ -101,7 +102,7 @@ class IndexXmlSetParing {
 		}
 		// 这是文件，解析成 ZDoc
 		else {
-			zi = this.docParser.parse(Files.read(f)).setSource(f.getAbsolutePath());
+			zi = this.docParser.parse(Streams.fileInr(f)).setSource(f.getAbsolutePath());
 			appendAuthors(ele, zi);
 		}
 		return zi;
