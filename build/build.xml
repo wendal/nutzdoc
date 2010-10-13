@@ -14,7 +14,7 @@
 	<property name="SRC" value="${PROJECT_HOME}/src" />
 	<property name="TMP" value="${PROJECT_HOME}/temp" />
 
-	<property name="v" value="-1.11" />
+	<property name="v" value="-1.12" />
 
 	<path id="CLASSPATH">
 		<pathelement location="${NUTZ}" />
@@ -41,7 +41,7 @@
 	</target>
 
 	<target name="copyhlp" depends="compile">
-		<copy file="${PROJECT_HOME}/build/META-INF/MANIFEST.MF" todir="${TMP}/META-INF"/>
+		<copy file="${SRC}/org/nutz/doc/hlp.man" todir="${TMP}/org/nutz/doc"/>
 	</target>
 
 	<target name="jar" depends="copyhlp" description="pacakge the classes to be a jar">

@@ -33,7 +33,7 @@ public abstract class ZDocUnits {
 
 	public static ZDoc doc(String s) {
 		DocParser parser = new ZDocParser();
-		ZDoc doc = parser.parse(s);
+		ZDoc doc = parser.parse(Lang.inr(s));
 		return doc;
 	}
 

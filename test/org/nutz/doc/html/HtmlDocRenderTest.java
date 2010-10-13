@@ -19,7 +19,7 @@ public class HtmlDocRenderTest {
 
 	private static ZBlock root(String s) {
 		DocParser parser = new ZDocParser();
-		ZDoc doc = parser.parse(s);
+		ZDoc doc = parser.parse(Lang.inr(s));
 		ZBlock root = doc.root();
 		return root;
 	}
@@ -28,7 +28,7 @@ public class HtmlDocRenderTest {
 		File src = Files.findFile("org/nutz/doc/html/" + name + "/src.zdoc");
 		String s = Lang.readAll(Streams.fileInr(src));
 		ZDocParser parser = new ZDocParser();
-		ZDoc doc = parser.parse(s);
+		ZDoc doc = parser.parse(Lang.inr(s));
 		HtmlDocRender render = new HtmlDocRender();
 		return Strings.trim(render.render(doc).toString()).replace("\r", "");
 
