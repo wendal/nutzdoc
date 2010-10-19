@@ -84,7 +84,7 @@ public class PdfDocSetRender implements DocSetRender {
 			p.add(helper.chunk(set.root().get().getTitle(), font));
 			p.setAlignment(Paragraph.ALIGN_MIDDLE | Paragraph.ALIGN_CENTER);
 			doc.add(p);
-			doc.newPage();
+			nextPage(doc);
 
 			// 循环遍历所有的文档节点
 			int i = 1;
@@ -119,7 +119,7 @@ public class PdfDocSetRender implements DocSetRender {
 			renderToSection(section, child);
 		// 添加到 PDF 文档
 		pdfdoc.add(section);
-		pdfdoc.newPage();
+		nextPage(pdfdoc);
 	}
 
 	/**
@@ -423,4 +423,9 @@ public class PdfDocSetRender implements DocSetRender {
 		}
 
 	}
+	
+	protected void nextPage(Document doc) {
+		doc.newPage();
+	}
+	
 }

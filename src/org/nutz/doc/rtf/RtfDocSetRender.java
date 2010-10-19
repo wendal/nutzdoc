@@ -33,4 +33,8 @@ public class RtfDocSetRender extends PdfDocSetRender {
 			renderBlockToSection(docSection, block, depth);
 		}
 	}
+	
+	@Override
+	protected void nextPage(Document doc) {
+	}
 }
