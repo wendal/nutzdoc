@@ -7,6 +7,7 @@ import org.nutz.doc.googlewiki.GoogleWikiAdaptor;
 import org.nutz.doc.html.HtmlAdaptor;
 import org.nutz.doc.meta.ZDocSet;
 import org.nutz.doc.pdf.PdfAdaptor;
+import org.nutz.doc.rtf.RtfAdaptor;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
@@ -24,6 +25,7 @@ public class Doc {
 		map.put("html", new HtmlAdaptor());
 		map.put("gwiki", new GoogleWikiAdaptor());
 		map.put("pdf", new PdfAdaptor());
+		map.put("rtf", new RtfAdaptor());
 	}
 
 	public static void main(String[] args) throws Exception {

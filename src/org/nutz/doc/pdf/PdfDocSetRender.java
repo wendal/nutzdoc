@@ -56,6 +56,10 @@ public class PdfDocSetRender implements DocSetRender {
 		this.helper = new PdfHelper();
 		this.L = L;
 	}
+	
+	public void prepareDocument(String dest, Document document) throws DocumentException{
+		PdfWriter.getInstance(document, Streams.fileOut(dest));
+	}
 
 	@Override
 	public void render(String dest, ZDocSet set) throws IOException {
@@ -66,7 +70,7 @@ public class PdfDocSetRender implements DocSetRender {
 		try {
 			// 创建 PDF 文档
 			Document doc = new Document();
-			PdfWriter.getInstance(doc, Streams.fileOut(dest));
+			prepareDocument(dest, doc);
 			doc.open();
 			doc.addCreator("zDoc PDF render");
 			doc.addAuthor("zDoc PDF render");
