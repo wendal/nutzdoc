@@ -43,7 +43,7 @@ import com.lowagie.text.pdf.PdfWriter;
  */
 public class PdfDocSetRender implements DocSetRender {
 
-	private PdfHelper helper;
+	protected PdfHelper helper;
 
 	private int maxImgWidth;
 	private int maxImgHeight;
@@ -150,7 +150,7 @@ public class PdfDocSetRender implements DocSetRender {
 	 * @param depth
 	 *            当前的 ZDoc 在整个在 DocSet 的深度，每一个 ZBlock 可以计算自己在 ZDoc 中的深度
 	 */
-	private void renderToSection(Section section, ZDoc doc, int depth) {
+	protected void renderToSection(Section section, ZDoc doc, int depth) {
 		// 增加自己
 		Section docSection = helper.addSection(section, doc.getTitle(), depth, helper.anchor(doc, depth));
 		// 增加自己的字节点
@@ -167,7 +167,7 @@ public class PdfDocSetRender implements DocSetRender {
 	 * @param depth
 	 *            当前的 ZDoc 在整个在 DocSet 的深度，每一个 ZBlock 可以计算自己在 ZDoc 中的深度
 	 */
-	private void renderBlockToSection(Section section, ZBlock block, int depth) {
+	protected void renderBlockToSection(Section section, ZBlock block, int depth) {
 		/*
 		 * 索引表
 		 */

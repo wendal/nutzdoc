@@ -175,6 +175,7 @@ public class PdfHelper {
 			return "NUTZ"+code;
 		}
 		catch (IOException e) {
+			e.printStackTrace();
 			return ""+file.getAbsolutePath().hashCode();
 		}
 	}
