@@ -6,6 +6,7 @@ import org.nutz.doc.ConvertAdaptor;
 import org.nutz.doc.ConvertContext;
 import org.nutz.doc.Doc;
 import org.nutz.doc.ZDocException;
+import org.nutz.doc.meta.ZDocSet;
 import org.nutz.lang.Lang;
 
 public class ZDocTask {
@@ -32,6 +33,8 @@ public class ZDocTask {
 		if (indexXml != null)
 			cc.addArg(indexXml);
 		adaptor.adapt(cc);
+		ZDocSet set = cc.getParser().parse(cc.getSrc());
+		cc.getRender().render(cc.getDest(), set);
 	}
 
 	public void setSrc(String src) {
@@ -49,6 +52,4 @@ public class ZDocTask {
 	public void setIndexXml(String indexXml) {
 		this.indexXml = indexXml;
 	}
-
-	
 }
