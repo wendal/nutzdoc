@@ -27,6 +27,15 @@
 	 	For example:
 	 	{{{
 	 	zdoc pdf /home/peter/myDoc /home/peter/myPdf.pdf
+	 	}}}	
+	 	
+	 * If you want to convert zdoc directory to RTF(MS Word) file, plz run:
+	 	{{{
+	 	zdoc rtf [source dir] [target rtf path]
+	 	}}}
+	 	For example:
+	 	{{{
+	 	zdoc rtf /home/peter/myDoc /home/peter/myRtf.rtf
 	 	}}}
 	
 	>> More help, plz acccess [http://nutzdoc.googlecode.com]
@@ -63,4 +72,13 @@
 	 	zdoc pdf /home/peter/myDoc /home/peter/myPdf.pdf
 	 	}}}
 	 
+	* 如果你想要将 zDoc 目录转换为一个 RTF(MS Word) 文件，请运行
+	 	{{{
+	 	zdoc pdf [source dir] [target rtf path]
+	 	}}}
+	 	例如:
+	 	{{{
+	 	zdoc pdf /home/peter/myDoc /home/peter/myRtf.rtf
+	 	}}}
+	 	
 	 >> 更多帮助，请访问 [http://nutzdoc.googlecode.com]

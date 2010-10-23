@@ -37,15 +37,6 @@ public class ConvertContext {
 		args = new LinkedArray<String>(10);
 	}
 
-	public void verify() throws ZDocException {
-		if (null == src)
-			throw new ZDocException("Lack 'src'");
-		if (null == dest)
-			throw new ZDocException("Lack 'dest'");
-		if (null == indexml)
-			throw new ZDocException("Lack 'indexml'");
-	}
-
 	public String getSrc() {
 		return src;
 	}

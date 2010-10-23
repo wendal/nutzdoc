@@ -18,14 +18,14 @@ public class Doc {
 
 	private static final Log LOG = Logs.getLog(Doc.class);
 
-	private static Map<String, ConvertAdaptor> map;
+	public static Map<String, ConvertAdaptor> convertAdaptorMap;
 
 	static {
-		map = new HashMap<String, ConvertAdaptor>();
-		map.put("html", new HtmlAdaptor());
-		map.put("gwiki", new GoogleWikiAdaptor());
-		map.put("pdf", new PdfAdaptor());
-		map.put("rtf", new RtfAdaptor());
+		convertAdaptorMap = new HashMap<String, ConvertAdaptor>();
+		convertAdaptorMap.put("html", new HtmlAdaptor());
+		convertAdaptorMap.put("gwiki", new GoogleWikiAdaptor());
+		convertAdaptorMap.put("pdf", new PdfAdaptor());
+		convertAdaptorMap.put("rtf", new RtfAdaptor());
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -61,7 +61,7 @@ public class Doc {
 		}
 
 		// 获取 Adaptor
-		ConvertAdaptor adaptor = map.get(args[0]);
+		ConvertAdaptor adaptor = convertAdaptorMap.get(args[0]);
 		if (null == adaptor) {
 			LOG.warnf("Unknown type '%s' ", args[0]);
 			showHelp();
