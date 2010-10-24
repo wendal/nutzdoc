@@ -29,9 +29,9 @@ public class NoIndexSetParsing {
 		parseChildren(root, set.root());
 	}
 
-	public void parseChildren(File file, Node<ZItem> parentNode) {
+	public boolean parseChildren(File file, Node<ZItem> parentNode) {
 		if (file.isFile())
-			return;
+			return false;
 
 		File[] files = file.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
@@ -46,10 +46,18 @@ public class NoIndexSetParsing {
 			ZItem zi = parse(f);
 			if (null != zi) {
 				Node<ZItem> node = Nodes.create(zi);
-				parseChildren(f, node);
-				parentNode.add(node);
+				// 目录 - 如果是空目录，则忽略
+				if (zi instanceof ZFolder) {
+					if (parseChildren(f, node))
+						parentNode.add(node);
+				}
+				// zDoc 文档
+				else {
+					parentNode.add(node);
+				}
 			}
 		}
+		return parentNode.countChildren() > 0;
 	}
 
 	public ZItem parse(File f) {
