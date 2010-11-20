@@ -26,11 +26,15 @@ import org.nutz.lang.util.Node;
 import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
 import com.lowagie.text.Font;
+import com.lowagie.text.HeaderFooter;
 import com.lowagie.text.Image;
 import com.lowagie.text.List;
 import com.lowagie.text.ListItem;
 import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.Section;
 import com.lowagie.text.Table;
 import com.lowagie.text.TextElementArray;
@@ -72,7 +76,7 @@ public class PdfDocSetRender implements DocSetRender {
 			Document doc = new Document();
 			prepareDocument(dest, doc);
 			doc.open();
-			doc.addCreator("zDoc PDF render");
+			doc.addCreator("zDoc PDF render, http://nutzdoc.googlecode.com");
 			doc.addAuthor("zDoc PDF render");
 			doc.addTitle(set.root().get().getTitle());
 
@@ -85,6 +89,12 @@ public class PdfDocSetRender implements DocSetRender {
 			p.setAlignment(Paragraph.ALIGN_MIDDLE | Paragraph.ALIGN_CENTER);
 			doc.add(p);
 			nextPage(doc);
+			
+			//添加页脚的页码
+			HeaderFooter footer = new HeaderFooter(new Phrase("页码: ", helper.font()), true);  
+			footer.setBorder(Rectangle.NO_BORDER);  
+			footer.setAlignment(Element.ALIGN_CENTER);  
+			doc.setFooter(footer);  
 
 			// 循环遍历所有的文档节点
 			int i = 1;
