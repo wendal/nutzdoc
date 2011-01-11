@@ -29,9 +29,9 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 				String email = au.getEmailString();
 				ele.add(Tag.tag("b").add(Tag.text(au.getName())));
 				if (!Strings.isBlank(email))
-					ele.add(Tag.tag("a").attr("href", "mailto:" + email).add(Tag.text("<"
-																						+ email
-																						+ ">")));
+					ele.add(Tag.tag("a")
+								.attr("href", "mailto:" + email)
+								.add(Tag.text("<" + email + ">")));
 			}
 		}
 	}
@@ -108,7 +108,7 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 		// <Hr>
 		else if (block.isHr()) {
 			// parent.add(tag("hr"));
-			parent.add(Tag.tag("div").attr("class", "hr"));
+			parent.add(Tag.tag("div", ".hr").add(Tag.tag("b")));
 		}
 		// #index:
 		else if (block.isIndexRange()) {
@@ -257,7 +257,7 @@ public class HtmlDocRender implements DocRender<StringBuilder> {
 				tag = wrapFontColor(tag, font);
 			}
 		}
-		//  纯书签
+		// 纯书签
 		if (null == tag) {
 			if (ele.hasHref() && ele.getHref().isBookmark())
 				return tag("a").attr("name", ele.getHref().getValue());
