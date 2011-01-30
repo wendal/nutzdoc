@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="Nutz Doc Editor"
+            extensions="zdoc,man"
+            icon="icons/sample.gif"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            class="org.nutz.doc.eclipse.plugin.editors.NutzDocEditor"
+            id="org.nutz.doc.eclipse.plugin.editors.NutzDocEditor">
+      </editor>
+   </extension>
+
+</plugin>
