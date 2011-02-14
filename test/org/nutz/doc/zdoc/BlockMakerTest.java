@@ -9,7 +9,7 @@ import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZEle;
 import org.nutz.doc.meta.ZRefer;
 import org.nutz.json.Json;
-import org.nutz.lang.util.Context;
+import org.nutz.lang.Lang;
 
 public class BlockMakerTest {
 
@@ -20,7 +20,7 @@ public class BlockMakerTest {
 	@SuppressWarnings("unchecked")
 	private static ZBlock B(String context, String s) {
 		Map<String, Object> map = (Map<String, Object>) Json.fromJson("{" + context + "}");
-		return new BlockMaker(new Context().putAll(map), s.toCharArray()).make();
+		return new BlockMaker(Lang.context().putAll(map), s.toCharArray()).make();
 	}
 
 	@Test

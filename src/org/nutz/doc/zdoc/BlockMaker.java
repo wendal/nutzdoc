@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZD;
 import org.nutz.doc.meta.ZFont;
+import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.Context;
 import org.nutz.lang.util.LinkedCharArray;
@@ -22,7 +23,7 @@ public class BlockMaker {
 	private Context context;
 
 	BlockMaker(Context context, char[] cs) {
-		this.context = context == null ? new Context() : context;
+		this.context = context == null ? Lang.context() : context;
 		this.cs = cs;
 		this.ep = new EleHolder();
 		this.block = ZD.p();
