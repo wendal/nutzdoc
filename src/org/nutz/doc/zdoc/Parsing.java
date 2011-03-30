@@ -3,14 +3,12 @@ package org.nutz.doc.zdoc;
 import static org.nutz.doc.meta.ZD.*;
 
 import java.io.BufferedReader;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.nutz.doc.meta.ZBlock;
 import org.nutz.doc.meta.ZDoc;
-import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.Context;
 import org.nutz.lang.util.LinkedCharArray;
@@ -21,9 +19,9 @@ class Parsing {
 	private BufferedReader reader;
 	private Context context;
 
-	Parsing(BufferedReader reader) {
+	Parsing(BufferedReader reader, Context context) {
 		this.reader = reader;
-		this.context = Lang.context().set("now", Calendar.getInstance());
+		this.context = context;
 	}
 
 	ZDoc parse(int tabpar) {

@@ -10,6 +10,7 @@ import org.nutz.doc.meta.ZD;
 import org.nutz.doc.meta.ZFont;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
+import org.nutz.lang.segment.Segments;
 import org.nutz.lang.util.Context;
 import org.nutz.lang.util.LinkedCharArray;
 
@@ -20,11 +21,10 @@ public class BlockMaker {
 	private int i;
 	private ZBlock block;
 	private LinkedCharArray endles;
-	private Context context;
 
 	BlockMaker(Context context, char[] cs) {
-		this.context = context == null ? Lang.context() : context;
-		this.cs = cs;
+		this.cs = Segments.replace(new String(cs), context == null ? Lang.context() : context)
+							.toCharArray();
 		this.ep = new EleHolder();
 		this.block = ZD.p();
 		this.endles = new LinkedCharArray();
@@ -40,9 +40,6 @@ public class BlockMaker {
 		for (; i < cs.length; i++) {
 			char c = cs[i];
 			switch (c) {
-			case '$':
-				forVariable();
-				break;
 			case '{':
 				forStyle();
 				break;
@@ -63,31 +60,6 @@ public class BlockMaker {
 				ep.sb.append(c);
 			}
 		}
-	}
-
-	private void forVariable() {
-		// Current one must be '$' so, read next one, to see it is '{' or not
-		char c = cs[++i];
-		if (c != '{') {
-			ep.sb.append('$');
-			if (endles.last() == c)
-				endles.popLast();
-			else
-				ep.sb.append(c);
-			return;
-		}
-
-		// Then read until found the '}'
-		StringBuilder sb = new StringBuilder();
-		for (++i; i < cs.length; i++) {
-			c = cs[i];
-			if ('}' == c)
-				break;
-			sb.append(c);
-		}
-		// Get the value from context
-		String val = context.getString(sb.toString());
-		ep.sb.append(val);
 	}
 
 	private void forStyle() {

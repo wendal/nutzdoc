@@ -1,6 +1,7 @@
 package org.nutz.doc.zdoc;
 
 import java.io.File;
+import java.util.Calendar;
 
 import org.nutz.doc.meta.ZDocSet;
 import org.nutz.doc.meta.ZFolder;
@@ -9,6 +10,7 @@ import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
+import org.nutz.lang.util.Context;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Nodes;
 import org.w3c.dom.Element;
@@ -16,20 +18,29 @@ import org.w3c.dom.NodeList;
 
 class IndexXmlSetParing {
 
-	private File indexml;
+	private Element rootEle;
 	private File root;
 	private File workDir;
 	private ZDocParser docParser;
 
-	public IndexXmlSetParing(File indexml, File root) {
-		this.indexml = indexml;
+	public IndexXmlSetParing(File indexml, File root) throws Exception {
 		this.root = root;
-		this.docParser = new ZDocParser();
+		this.rootEle = Lang.xmls().parse(indexml).getDocumentElement();
+		// 搜集上下文对象
+		Context context = Lang.context().set("now", Calendar.getInstance());
+		NodeList eles = rootEle.getElementsByTagName("var");
+		for (int i = 0; i < eles.getLength(); i++) {
+			Element ele = (Element) eles.item(i);
+			String name = ele.getAttribute("name");
+			String value = ele.getTextContent();
+			context.set(name, value);
+		}
+		// 生成解析器
+		this.docParser = new ZDocParser(context);
 	}
 
-	public void doParse(ZDocSet set) throws Exception {
+	public void doParse(ZDocSet set) {
 		// 生成 XML
-		Element rootEle = Lang.xmls().parse(indexml).getDocumentElement();
 		set.root().get().setTitle(Strings.sNull(rootEle.getAttribute("title"), root.getName()));
 		workDir = root;
 

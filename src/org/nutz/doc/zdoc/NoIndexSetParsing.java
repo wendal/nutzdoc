@@ -2,10 +2,12 @@ package org.nutz.doc.zdoc;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Calendar;
 
 import org.nutz.doc.meta.ZDocSet;
 import org.nutz.doc.meta.ZFolder;
 import org.nutz.doc.meta.ZItem;
+import org.nutz.lang.Lang;
 import org.nutz.lang.Streams;
 import org.nutz.lang.util.Node;
 import org.nutz.lang.util.Nodes;
@@ -20,7 +22,7 @@ public class NoIndexSetParsing {
 
 	public NoIndexSetParsing(File root, String regex) {
 		this.root = root;
-		this.docParser = new ZDocParser();
+		this.docParser = new ZDocParser(Lang.context().set("now", Calendar.getInstance()));
 		this.regex = regex;
 	}
 
