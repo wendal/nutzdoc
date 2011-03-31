@@ -18,7 +18,7 @@ import org.nutz.lang.util.Tag;
 public class HtmlDocRenderTest {
 
 	private static ZBlock root(String s) {
-		DocParser parser = new ZDocParser();
+		DocParser parser = new ZDocParser(Lang.context());
 		ZDoc doc = parser.parse(Lang.inr(s));
 		ZBlock root = doc.root();
 		return root;
@@ -27,7 +27,7 @@ public class HtmlDocRenderTest {
 	private static String render(String name) {
 		File src = Files.findFile("org/nutz/doc/html/" + name + "/src.zdoc");
 		String s = Lang.readAll(Streams.fileInr(src));
-		ZDocParser parser = new ZDocParser();
+		ZDocParser parser = new ZDocParser(Lang.context());
 		ZDoc doc = parser.parse(Lang.inr(s));
 		HtmlDocRender render = new HtmlDocRender();
 		return Strings.trim(render.render(doc).toString()).replace("\r", "");

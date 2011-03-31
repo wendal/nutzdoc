@@ -32,7 +32,7 @@ public abstract class ZDocUnits {
 	}
 
 	public static ZDoc doc(String s) {
-		DocParser parser = new ZDocParser();
+		DocParser parser = new ZDocParser(Lang.context());
 		ZDoc doc = parser.parse(Lang.inr(s));
 		return doc;
 	}
