@@ -115,7 +115,7 @@ public class HtmlDocSetRender implements DocSetRender {
 		renderDocSet(dest, set, csss, jss);
 		renderIndexHtml(dest, set);
 		sw.stop();
-		L.log1("All finised in %s", sw.toString());
+		L.log1("All finished in %s", sw.toString());
 	}
 
 	private void renderIndexHtml(File dest, ZDocSet set) {
